@@ -1,0 +1,115 @@
+buildscript {
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+    }
+}
+
+plugins {
+    id "io.spring.dependency-management" version "1.0.4.RELEASE"
+    id "com.github.johnrengelman.shadow" version "2.0.2"
+    id "com.github.spotbugs" version "1.6.1"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'checkstyle'
+
+checkstyle {
+    toolVersion = "8.8"
+}
+spotbugs {
+    toolVersion = "3.1.2"
+}
+
+if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
+    sourceCompatibility = 9
+} else {
+    sourceCompatibility = 1.8
+}
+
+version = 1.0
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    // Jackson
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.4'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.4'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.4'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.4'
+
+    // Lombok
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+
+    // SpotBugs
+    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.2'
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.2'
+    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+
+    // PMD
+    compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: '6.1.0'
+    testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: '6.1.0'
+
+    // Spark
+    compile group: 'com.sparkjava', name: 'spark-core', version: '2.7.2'
+
+    // JPA + Hibernate
+    compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final'
+
+    // JUnit
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.1.0'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.1.0'
+    testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-parameters" << "-Xlint:all,-processing"
+    if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
+        options.compilerArgs << "--add-modules" << "java.xml.ws.annotation"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"
+        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+    }
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'br.gov.sp.prefeitura.smit.cgtic'
+            artifactId 'jaspasema'
+            version '1.0'
+
+            from components.java
+        }
+    }
+}
+
+jar {
+    duplicatesStrategy = 'exclude'
+}
