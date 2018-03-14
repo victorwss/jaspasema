@@ -47,6 +47,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.4'
 
     // Lombok
+    //annotationPocessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
 
@@ -67,6 +68,9 @@ dependencies {
 
     // JPA + Hibernate
     compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final'
+
+    // XJFunctions
+    compile group: 'com.xjfunctions', name: 'xjfunctions', version: '1.0'
 
     // JUnit
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.1.0'

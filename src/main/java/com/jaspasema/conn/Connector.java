@@ -1,10 +1,10 @@
 package br.gov.sp.prefeitura.smit.cgtic.jaspasema.conn;
 
-import br.gov.sp.prefeitura.smit.cgtic.jaspasema.function.XConsumer;
-import br.gov.sp.prefeitura.smit.cgtic.jaspasema.function.XFunction;
-import br.gov.sp.prefeitura.smit.cgtic.jaspasema.function.XLongFunction;
-import br.gov.sp.prefeitura.smit.cgtic.jaspasema.function.XRunnable;
-import br.gov.sp.prefeitura.smit.cgtic.jaspasema.function.XSupplier;
+import com.xjfunctions.XConsumer;
+import com.xjfunctions.XFunction;
+import com.xjfunctions.XLongFunction;
+import com.xjfunctions.XRunnable;
+import com.xjfunctions.XSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.LongFunction;
@@ -48,7 +48,7 @@ public class Connector implements AutoCloseable {
     }
 
     public <A, B> Function<A, B> transacionarFunction(@NonNull Function<A, B> trans) {
-        return transacionarXFunction(XFunction.wrap(trans)).suppress();
+        return transacionarXFunction(XFunction.wrap(trans)).unchecked();
     }
 
     public <A, B> XFunction<A, B> transacionarXFunction(@NonNull XFunction<A, B> trans) {
@@ -56,7 +56,7 @@ public class Connector implements AutoCloseable {
     }
 
     public <B> LongFunction<B> transacionarLongFunction(@NonNull LongFunction<B> trans) {
-        return transacionarXLongFunction(XLongFunction.wrap(trans)).suppress();
+        return transacionarXLongFunction(XLongFunction.wrap(trans)).unchecked();
     }
 
     public <B> XLongFunction<B> transacionarXLongFunction(@NonNull XLongFunction<B> trans) {
@@ -64,7 +64,7 @@ public class Connector implements AutoCloseable {
     }
 
     public <E> Consumer<E> transacionarConsumer(@NonNull Consumer<E> trans) {
-        return transacionarXConsumer(XConsumer.wrap(trans)).suppress();
+        return transacionarXConsumer(XConsumer.wrap(trans)).unchecked();
     }
 
     public <E> XConsumer<E> transacionarXConsumer(@NonNull XConsumer<E> trans) {
@@ -77,7 +77,7 @@ public class Connector implements AutoCloseable {
     }
 
     public Runnable transacionarRunnable(@NonNull Runnable trans) {
-        return transacionarXRunnable(XRunnable.wrap(trans)).suppress();
+        return transacionarXRunnable(XRunnable.wrap(trans)).unchecked();
     }
 
     public XRunnable transacionarXRunnable(@NonNull XRunnable trans) {
@@ -90,7 +90,7 @@ public class Connector implements AutoCloseable {
     }
 
     public <E> Supplier<E> transacionarSupplier(@NonNull Supplier<E> trans) {
-        return transacionarXSupplier(XSupplier.wrap(trans)).suppress();
+        return transacionarXSupplier(XSupplier.wrap(trans)).unchecked();
     }
 
     public <E> XSupplier<E> transacionarXSupplier(@NonNull XSupplier<E> trans) {
@@ -98,7 +98,7 @@ public class Connector implements AutoCloseable {
     }
 
     public Route transacionarRoute(@NonNull Route trans) {
-        return (rq, rp) -> transacionarXSupplier(() -> trans.handle(rq, rp)).suppress().get();
+        return (rq, rp) -> transacionarXSupplier(() -> trans.handle(rq, rp)).unchecked().get();
     }
 
     public <E> E executar(@NonNull XSupplier<E> trans) throws Throwable {
@@ -149,11 +149,5 @@ public class Connector implements AutoCloseable {
     @Override
     public void close() {
         emf.close();
-    }
-
-    @Override
-    @SuppressWarnings({"FinalizeDeclaration", "FinalizeDoesntCallSuperFinalize"})
-    protected void finalize() {
-        close();
     }
 }
