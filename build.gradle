@@ -48,8 +48,13 @@ dependencies {
 
     // Lombok
     //annotationPocessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    //compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
+    //testAnnotationPocessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    //testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
+    compileOnly files('libs/lombok-1.16.21-d.jar')
+    annotationPocessor files('libs/lombok-1.16.21-d.jar')
+    testCompileOnly files('libs/lombok-1.16.21-d.jar')
+    testAnnotationPocessor files('libs/lombok-1.16.21-d.jar')
 
     // SpotBugs
     compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
@@ -66,11 +71,8 @@ dependencies {
     // Spark
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.7.2'
 
-    // JPA + Hibernate
-    compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final'
-
     // XJFunctions
-    compile group: 'com.xjfunctions', name: 'xjfunctions', version: '1.0'
+    compile group: 'ninja.javahacker', name: 'xjfunctions', version: '1.0'
 
     // JUnit
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.1.0'
@@ -105,7 +107,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId 'br.gov.sp.prefeitura.smit.cgtic'
+            groupId 'ninja.javahacker'
             artifactId 'jaspasema'
             version '1.0'
 
