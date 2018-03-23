@@ -1,6 +1,7 @@
 buildscript {
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
     }
 }
 
@@ -10,6 +11,7 @@ plugins {
     id "com.github.spotbugs" version "1.6.1"
 }
 
+apply plugin: 'base'
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'checkstyle'
@@ -19,12 +21,6 @@ checkstyle {
 }
 spotbugs {
     toolVersion = "3.1.2"
-}
-
-if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
-    sourceCompatibility = 9
-} else {
-    sourceCompatibility = 1.8
 }
 
 version = 1.0
@@ -52,9 +48,9 @@ dependencies {
     //testAnnotationPocessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
     //testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
     compileOnly files('libs/lombok-1.16.21-d.jar')
-    annotationPocessor files('libs/lombok-1.16.21-d.jar')
+    //annotationPocessor files('libs/lombok-1.16.21-d.jar')
     testCompileOnly files('libs/lombok-1.16.21-d.jar')
-    testAnnotationPocessor files('libs/lombok-1.16.21-d.jar')
+    //testAnnotationPocessor files('libs/lombok-1.16.21-d.jar')
 
     // SpotBugs
     compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
