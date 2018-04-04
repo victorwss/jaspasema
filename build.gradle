@@ -7,9 +7,12 @@ buildscript {
 
 plugins {
     id "io.spring.dependency-management" version "1.0.4.RELEASE"
-    id "com.github.johnrengelman.shadow" version "2.0.2"
-    id "com.github.spotbugs" version "1.6.1"
+    id "com.github.johnrengelman.shadow" version "2.0.3"
+    //id "com.github.spotbugs" version "1.6.1"
 }
+
+version = "1.0.0"
+ext.moduleName = "ninja.javahacker.jaspasema"
 
 apply plugin: 'base'
 apply plugin: 'java'
@@ -18,12 +21,16 @@ apply plugin: 'checkstyle'
 
 checkstyle {
     toolVersion = "8.8"
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+    configProperties = [
+        "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
+    ]
+    ignoreFailures = true
+    showViolations = true
 }
-spotbugs {
+/*spotbugs {
     toolVersion = "3.1.2"
-}
-
-version = 1.0
+}*/
 
 repositories {
     flatDir {
@@ -36,29 +43,29 @@ repositories {
 
 dependencies {
     // Jackson
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.4'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.4'
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.4'
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.4'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.5'
 
     // Lombok
-    //annotationPocessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    //annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
     //compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
-    //testAnnotationPocessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    //testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
     //testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
     compileOnly files('libs/lombok-1.16.21-d.jar')
-    //annotationPocessor files('libs/lombok-1.16.21-d.jar')
+    annotationProcessor files('libs/lombok-1.16.21-d.jar')
     testCompileOnly files('libs/lombok-1.16.21-d.jar')
-    //testAnnotationPocessor files('libs/lombok-1.16.21-d.jar')
+    testAnnotationProcessor files('libs/lombok-1.16.21-d.jar')
 
     // SpotBugs
     compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
     compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.2'
-    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
     testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.2'
-    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
     // PMD
     compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: '6.1.0'
@@ -79,7 +86,7 @@ dependencies {
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.compilerArgs << "-parameters" << "-Xlint:all,-processing"
-    if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
+    if (JavaVersion.current().isJava9Compatible()) {
         options.compilerArgs << "--add-modules" << "java.xml.ws.annotation"
         options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
         options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
@@ -93,19 +100,19 @@ tasks.withType(JavaCompile) {
     }
 }
 
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
+/*tasks.withType(com.github.spotbugs.SpotBugsTask) {
     reports {
         xml.enabled = false
         html.enabled = true
     }
-}
+}*/
 
 publishing {
     publications {
         maven(MavenPublication) {
             groupId 'ninja.javahacker'
             artifactId 'jaspasema'
-            version '1.0'
+            version "${version}"
 
             from components.java
         }
@@ -113,5 +120,9 @@ publishing {
 }
 
 jar {
-    duplicatesStrategy = 'exclude'
+    duplicatesStrategy = "exclude"
+    inputs.property("moduleName", moduleName)
+    manifest {
+        attributes("Automatic-Module-Name": moduleName)
+    }
 }
