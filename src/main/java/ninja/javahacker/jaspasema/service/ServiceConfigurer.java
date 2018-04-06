@@ -1,10 +1,13 @@
 package ninja.javahacker.jaspasema.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.JaspasemaDiscoverableService;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import spark.Route;
 import spark.Service;
@@ -12,17 +15,26 @@ import spark.Service;
 /**
  * @author Victor Williams Stafusa da Silva
  */
-public class ServiceConfigurer {
+public final class ServiceConfigurer {
 
     @Getter
     @NonNull
     private final List<ServiceBuilder> serviceBuilders;
 
-    public ServiceConfigurer(@NonNull Object... instances) throws BadServiceMappingException {
-        this.serviceBuilders = new ArrayList<>(instances.length);
+    private ServiceConfigurer(@NonNull Iterable<?> instances) throws BadServiceMappingException {
+        this.serviceBuilders = new ArrayList<>();
         for (Object ins : instances) {
             serviceBuilders.add(new ServiceBuilder(ins));
         }
+    }
+
+    public static ServiceConfigurer forServices(@NonNull Object... instances) throws BadServiceMappingException {
+        return new ServiceConfigurer(Arrays.asList(instances));
+    }
+
+    public static ServiceConfigurer loadAll() throws BadServiceMappingException {
+        ServiceLoader<JaspasemaDiscoverableService> loader = ServiceLoader.load(JaspasemaDiscoverableService.class);
+        return new ServiceConfigurer(loader);
     }
 
     public void configure(
@@ -54,9 +66,5 @@ public class ServiceConfigurer {
             response.header("Access-Control-Request-Method", "HEAD, GET, POST, PUT, DELETE, PATCH");
             //response.header("Access-Control-Allow-Headers", headers);
         });
-    }
-
-    public Route createStub(@NonNull ApiTemplate api) {
-        return api.createStub(this);
     }
 }

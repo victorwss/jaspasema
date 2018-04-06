@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.test;
+package ninja.javahacker.test.jaspasema;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -26,7 +26,7 @@ import ninja.javahacker.jaspasema.ProducesPlain;
 import ninja.javahacker.jaspasema.QueryPart;
 import ninja.javahacker.jaspasema.SessionParam;
 import ninja.javahacker.jaspasema.UriPart;
-import ninja.javahacker.jaspasema.test.ApiTester.Header;
+import ninja.javahacker.test.jaspasema.ApiTester.Header;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

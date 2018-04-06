@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.test;
+package ninja.javahacker.test.jaspasema;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

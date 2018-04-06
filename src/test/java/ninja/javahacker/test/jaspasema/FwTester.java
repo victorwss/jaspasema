@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.test;
+package ninja.javahacker.test.jaspasema;
 
 import java.util.Collections;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
-import ninja.javahacker.jaspasema.test.ApiTester.Header;
+import ninja.javahacker.test.jaspasema.ApiTester.Header;
 import org.junit.jupiter.api.Assertions;
 import spark.Service;
 
@@ -64,7 +64,7 @@ public class FwTester {
         before = PORT_COUNTER.getAndIncrement();
         try {
             service.port(before);
-            new ServiceConfigurer(c).configure(service, r -> (rq, rp) -> {
+            ServiceConfigurer.forServices(c).configure(service, r -> (rq, rp) -> {
                 for (Map.Entry<String, Object> entry : session.entrySet()) {
                     rq.session(true).attribute(entry.getKey(), entry.getValue());
                 }

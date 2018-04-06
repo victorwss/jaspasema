@@ -2,6 +2,7 @@ package ninja.javahacker.jaspasema.processor;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,16 +77,7 @@ public class JsonTypesProcessor {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <E, X extends Throwable> String writeJson(
-            @NonNull Function<? super IOException, X> onError,
-            E value)
-            throws X
-    {
-        try {
-            return STRICT.writeValueAsString(value);
-        } catch (IOException e) {
-            throw onError.apply(e);
-        }
+    public static <E> String writeJson(E value) throws JsonProcessingException {
+        return STRICT.writeValueAsString(value);
     }
 }

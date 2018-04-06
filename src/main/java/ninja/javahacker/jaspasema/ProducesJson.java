@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,7 +30,15 @@ public @interface ProducesJson {
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
-            return new Stub<>(v -> JsonTypesProcessor.writeJson(RuntimeException::new, v), "json");
+            return new Stub<>(Processor::toJson, "json");
+        }
+
+        private static <E> String toJson(E someObject) {
+            try {
+                return JsonTypesProcessor.writeJson(someObject);
+            } catch (JsonProcessingException x) {
+                throw new RuntimeException(x);
+            }
         }
     }
 }

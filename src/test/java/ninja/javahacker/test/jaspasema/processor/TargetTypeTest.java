@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.test.processor;
+package ninja.javahacker.test.jaspasema.processor;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

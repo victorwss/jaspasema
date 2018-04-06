@@ -64,7 +64,7 @@ public class ServiceBuilder {
     }
 
     public void configure(@NonNull Service service, @NonNull Function<Route, Route> wrapper) {
-        methods.forEach((m) -> m.configure(service, wrapper));
+        methods.forEach(m -> m.configure(service, wrapper));
     }
 
     private static int compareMethods(Method m1, Method m2) {
