@@ -43,49 +43,50 @@ repositories {
 
 dependencies {
     // Jackson
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.5'
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "2.9.5"
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "2.9.5"
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "2.9.5"
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "2.9.5"
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "2.9.5"
 
     // Lombok
-    //annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
-    //compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
-    //testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
-    //testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.21'
-    compileOnly files('libs/lombok-1.16.21-d.jar')
-    annotationProcessor files('libs/lombok-1.16.21-d.jar')
-    testCompileOnly files('libs/lombok-1.16.21-d.jar')
-    testAnnotationProcessor files('libs/lombok-1.16.21-d.jar')
+    //annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "1.16.20"
+    //compileOnly group: 'org.projectlombok', name: 'lombok', version: "1.16.21"
+    //testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: "1.16.20"
+    //testCompileOnly group: 'org.projectlombok', name: 'lombok', version: "1.16.21"
+    compileOnly files("libs/lombok-1.16.21-d.jar")
+    annotationProcessor files("libs/lombok-1.16.21-d.jar")
+    testCompileOnly files("libs/lombok-1.16.21-d.jar")
+    testAnnotationProcessor files("libs/lombok-1.16.21-d.jar")
 
     // SpotBugs
-    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
-    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.2'
-    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
-    testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '3.1.2'
-    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: "1.0"
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "3.1.2"
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "3.0.2"
+    testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: "1.0"
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "3.1.2"
+    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "3.0.2"
 
     // PMD
-    compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: '6.1.0'
-    testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: '6.1.0'
+    compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "6.1.0"
+    testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "6.1.0"
 
     // Spark
-    compile group: 'com.sparkjava', name: 'spark-core', version: '2.7.2'
+    compile group: 'com.sparkjava', name: 'spark-core', version: "2.7.2"
 
     // XJFunctions
-    compile group: 'ninja.javahacker', name: 'xjfunctions', version: '1.0'
+    compile group: 'ninja.javahacker', name: 'xjfunctions', version: "1.0"
 
     // JUnit
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.1.0'
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.1.0'
-    testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "5.1.0"
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "5.1.0"
+    testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: "1.0.0"
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
-    options.compilerArgs << "-parameters" << "-Xlint:all,-processing"
+    options.debug = true
+    options.compilerArgs << "-parameters" << "-Xlint:all,-processing" // << "-Xdoclint:all"
     if (JavaVersion.current().isJava9Compatible()) {
         options.compilerArgs << "--add-modules" << "java.xml.ws.annotation"
         options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
@@ -110,8 +111,8 @@ tasks.withType(JavaCompile) {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId 'ninja.javahacker'
-            artifactId 'jaspasema'
+            groupId "ninja.javahacker"
+            artifactId "jaspasema"
             version "${version}"
 
             from components.java
