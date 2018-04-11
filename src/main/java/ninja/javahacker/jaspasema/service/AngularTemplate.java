@@ -34,7 +34,7 @@ public class AngularTemplate implements ApiTemplate {
             + "                  .then(function(response) {\n"
             + "                      return Promise.resolve(response.data);\n"
             + "                  }, function(response) {\n"
-            + "                      return Promise.reject({ msg: \"Erro api: \" + urlContinuation, status: response.status });\n"
+            + "                      return Promise.reject({ msg: \"API Error: \" + urlContinuation, status: response.status });\n"
             + "                  });\n"
             + "    };\n"
             + "\n"
@@ -76,8 +76,6 @@ public class AngularTemplate implements ApiTemplate {
     @NonNull
     private Supplier<String> varName;
 
-    private static String metodosList;
-
     @Override
     public Route createStub(@NonNull ServiceConfigurer sc) {
         return (rq, rp) -> {
@@ -103,17 +101,17 @@ public class AngularTemplate implements ApiTemplate {
     private static String forService(@NonNull ServiceBuilder sb) {
         String output = FACTORY_TEMPLATE
                 .replace("#SERVICE_NAME#", sb.getServiceName());
-        metodosList = "";   // inicia a string com a lista de metodos
-        String calls = sb.getMethods().stream().map(AngularTemplate::forMethod).collect(Collectors.joining());
-        metodosList += "\n";    // completa a lista de metodos
+        StringBuilder methodList = new StringBuilder(2048);
+        String calls = sb.getMethods().stream().map(smb -> forMethod(methodList, smb)).collect(Collectors.joining());
+        methodList.append("\n");
         return output.replace("#IMPL_SERVICES#", calls)
-                     .replace("#METHODS_LIST#", metodosList);
+                     .replace("#METHODS_LIST#", methodList);
     }
 
-    private static String forMethod(@NonNull ServiceMethodBuilder smb) {
-        String metodoName = smb.getCallName();
-        if (!metodosList.isEmpty()) metodosList += ",\n";
-        metodosList += "     " + metodoName + " : " + metodoName;
+    private static String forMethod(@NonNull StringBuilder methodList, @NonNull ServiceMethodBuilder<?> smb) {
+        String methodName = smb.getCallName();
+        if (methodList.length() != 0) methodList.append(",\n");
+        methodList.append("     ").append(methodName).append(" : ").append(methodName);
 
         String output = METHOD_TEMPLATE
                 //.replace("#SERVICE#", smb.getService().getServiceName())

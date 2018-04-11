@@ -13,13 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
+import lombok.experimental.UtilityClass;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@UtilityClass
 public class JsonTypesProcessor {
 
-    private static final TypeReference<HashMap<String, Object>> MAP_TYPE = new TypeReference<HashMap<String, Object>>() {};
+    private static final TypeReference<HashMap<String, Object>> MAP_TYPE = new TypeReference<>() {};
 
     private static final ObjectMapper LENIENT = new ObjectMapper()
             .findAndRegisterModules()
@@ -33,11 +35,7 @@ public class JsonTypesProcessor {
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
-    private JsonTypesProcessor() {
-        throw new UnsupportedOperationException();
-    }
-
-    public static <E> E convert(
+    public <E> E convert(
             boolean lenient,
             Object obj,
             @NonNull TargetType<E> target)
@@ -46,7 +44,7 @@ public class JsonTypesProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E, X extends Throwable> E readJson(
+    public <E, X extends Throwable> E readJson(
             boolean lenient,
             @NonNull Function<? super IOException, X> onError,
             @NonNull TargetType<E> jt,
@@ -63,7 +61,7 @@ public class JsonTypesProcessor {
         }
     }
 
-    public static Map<String, Object> readJsonMap(
+    public Map<String, Object> readJsonMap(
             @NonNull Parameter p,
             String data)
             throws MalformedParameterException
@@ -77,7 +75,11 @@ public class JsonTypesProcessor {
         }
     }
 
-    public static <E> String writeJson(E value) throws JsonProcessingException {
-        return STRICT.writeValueAsString(value);
+    public <E> String writeJson(E value) throws JsonProcessingException {
+        return writeJson(false, value);
+    }
+
+    public <E> String writeJson(boolean lenient, E value) throws JsonProcessingException {
+        return (lenient ? LENIENT : STRICT).writeValueAsString(value);
     }
 }

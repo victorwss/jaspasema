@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.function.BiFunction;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -23,13 +22,13 @@ public interface DateTimeFormatterFunction<E> {
         return (v, f) -> v == null ? null : func.apply(v, f);
     }
 
-    public static final Map<Class<?>, DateTimeFormatterFunction<?>> DT_MAP = ObjectUtils.makeMap(put -> {
-        put.accept(LocalDate.class, of(LocalDate::format));
-        put.accept(LocalDateTime.class, of(LocalDateTime::format));
-        put.accept(LocalTime.class, of(LocalTime::format));
-        put.accept(Year.class, of(Year::format));
-        put.accept(YearMonth.class, of(YearMonth::format));
-    });
+    public static final Map<Class<?>, DateTimeFormatterFunction<?>> DT_MAP = Map.ofEntries(
+            Map.entry(LocalDate.class, of(LocalDate::format)),
+            Map.entry(LocalDateTime.class, of(LocalDateTime::format)),
+            Map.entry(LocalTime.class, of(LocalTime::format)),
+            Map.entry(Year.class, of(Year::format)),
+            Map.entry(YearMonth.class, of(YearMonth::format))
+    );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
     public static <E> DateTimeFormatterFunction<E> formatterFor(@NonNull TargetType<E> target) {

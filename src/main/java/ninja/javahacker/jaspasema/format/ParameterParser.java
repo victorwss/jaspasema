@@ -13,10 +13,10 @@ import ninja.javahacker.jaspasema.processor.TargetType;
  * @author Victor Williams Stafusa da Silva
  */
 @FunctionalInterface
-public interface ObjectParser<E> {
+public interface ParameterParser<E> {
     public E make(String in) throws MalformedParameterException;
 
-    public static <E> ObjectParser<E> prepare(
+    public static <E> ParameterParser<E> prepare(
             @NonNull TargetType<E> target,
             @NonNull Class<? extends Annotation> annotationClass,
             @NonNull String format,

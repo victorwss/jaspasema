@@ -9,7 +9,7 @@ import java.util.Arrays;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ObjectListParser;
-import ninja.javahacker.jaspasema.format.ObjectParser;
+import ninja.javahacker.jaspasema.format.ParameterParser;
 import ninja.javahacker.jaspasema.format.SimpleParameterType;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
@@ -57,7 +57,7 @@ public @interface QueryPart {
                                     + "}"
                     );
                 case SINGULAR:
-                    ObjectParser<E> part = ObjectParser.prepare(target, annotation.getClass(), annotation.format(), p);
+                    ParameterParser<E> part = ParameterParser.prepare(target, annotation.getClass(), annotation.format(), p);
                     return new Stub<>(
                             (rq, rp) -> part.make(rq.queryParams(p.getName())),
                             js,

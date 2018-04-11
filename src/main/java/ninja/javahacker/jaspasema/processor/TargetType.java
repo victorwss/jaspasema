@@ -6,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import lombok.NonNull;
 
 /**
@@ -20,10 +21,10 @@ public class TargetType<X> {
         try {
             this.generic = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         } catch (ClassCastException | IndexOutOfBoundsException | NullPointerException e) {
-            throw new IllegalStateException("O tipo genérico não foi definido adequadamente.");
+            throw new IllegalStateException("The generic type is ill-defined.");
         }
         if (!(this.generic instanceof ParameterizedType) && !(this.generic instanceof Class)) {
-            throw new IllegalStateException("O tipo genérico deve ser instanciável.");
+            throw new IllegalStateException("The generic type should be instantiable.");
         }
         this.javaType = TypeFactory.defaultInstance().constructType(generic);
     }
@@ -31,7 +32,7 @@ public class TargetType<X> {
     public TargetType(Type type) {
         this.generic = type;
         if (!(this.generic instanceof ParameterizedType) && !(this.generic instanceof Class)) {
-            throw new IllegalStateException("O tipo genérico deve ser instanciável.");
+            throw new IllegalStateException("The generic type should be instantiable.");
         }
         this.javaType = TypeFactory.defaultInstance().constructType(generic);
     }
@@ -82,5 +83,16 @@ public class TargetType<X> {
     @Override
     public String toString() {
         return "TargetType[" + generic + "]";
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof TargetType)) return false;
+        return Objects.equals(generic, ((TargetType) other).generic);
+    }
+
+    @Override
+    public int hashCode() {
+        return generic.hashCode();
     }
 }

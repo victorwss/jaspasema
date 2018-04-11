@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -22,7 +21,7 @@ public interface DateTimeParseFunction<E> {
     public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s, DateTimeFormatter format) throws X;
 
     public static <E> DateTimeParseFunction<E> of(BiFunction<String, DateTimeFormatter, E> func) {
-        return new DateTimeParseFunction<E>() {
+        return new DateTimeParseFunction<>() {
             @Override
             public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s, DateTimeFormatter format) throws X {
                 if ("null".equals(s) || "".equals(s)) return null;
@@ -35,13 +34,13 @@ public interface DateTimeParseFunction<E> {
         };
     }
 
-    public static final Map<Class<?>, DateTimeParseFunction<?>> DT_MAP = ObjectUtils.makeMap(put -> {
-        put.accept(LocalDate.class, DateTimeParseFunction.of(LocalDate::parse));
-        put.accept(LocalDateTime.class, DateTimeParseFunction.of(LocalDateTime::parse));
-        put.accept(LocalTime.class, DateTimeParseFunction.of(LocalTime::parse));
-        put.accept(Year.class, DateTimeParseFunction.of(Year::parse));
-        put.accept(YearMonth.class, DateTimeParseFunction.of(YearMonth::parse));
-    });
+    public static final Map<Class<?>, DateTimeParseFunction<?>> DT_MAP = Map.ofEntries(
+            Map.entry(LocalDate.class, of(LocalDate::parse)),
+            Map.entry(LocalDateTime.class, of(LocalDateTime::parse)),
+            Map.entry(LocalTime.class, of(LocalTime::parse)),
+            Map.entry(Year.class, of(Year::parse)),
+            Map.entry(YearMonth.class, of(YearMonth::parse))
+    );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
     public static <E> DateTimeParseFunction<E> parserFor(@NonNull TargetType<E> target) {

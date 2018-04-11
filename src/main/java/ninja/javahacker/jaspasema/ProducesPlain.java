@@ -6,10 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.format.ObjectFormatter;
+import ninja.javahacker.jaspasema.format.ReturnValueFormatter;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -20,6 +21,8 @@ import ninja.javahacker.jaspasema.processor.TargetType;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesPlain {
     public String format() default "";
+    public String type() default "text/plain;charset=utf-8";
+    public Class<? extends Throwable> on() default ReturnedOk.class;
 
     public static class Processor implements ReturnProcessor<ProducesPlain> {
         @Override
@@ -29,8 +32,11 @@ public @interface ProducesPlain {
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
-            ObjectFormatter<E> parser = ObjectFormatter.prepare(target, annotation.annotationType(), annotation.format(), method);
-            return new Stub<>(v -> parser.make(v), "text");
+            ReturnValueFormatter<E> parser = ReturnValueFormatter.prepare(target, annotation.annotationType(), annotation.format(), method);
+            return new Stub<>((rq, rp, v) -> {
+                rp.body(parser.make(v));
+                rp.type(annotation.type());
+            }, "text");
         }
     }
 }

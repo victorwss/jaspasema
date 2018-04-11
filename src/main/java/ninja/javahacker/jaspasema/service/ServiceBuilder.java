@@ -7,12 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.Path;
 import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import spark.Route;
 import spark.Service;
 
 /**
@@ -30,10 +30,19 @@ public class ServiceBuilder {
 
     @Getter
     @NonNull
-    private final List<ServiceMethodBuilder> methods;
+    private final List<ServiceMethodBuilder<?>> methods;
 
-    public ServiceBuilder(@NonNull Object instance) throws BadServiceMappingException {
+    private ServiceBuilder(
+            @NonNull Object instance,
+            @NonNull String serviceName,
+            @NonNull List<ServiceMethodBuilder<?>> methods)
+    {
         this.instance = instance;
+        this.serviceName = serviceName;
+        this.methods = methods;
+    }
+
+    public static ServiceBuilder make(@NonNull Object instance) throws BadServiceMappingException {
         String className = instance.getClass().getSimpleName();
         if (className.isEmpty()) {
             className = instance.getClass().getName().replace(".", "_");
@@ -45,8 +54,8 @@ public class ServiceBuilder {
             }
         }
         String name = sn == null ? "" : sn.value();
-        serviceName = !name.isEmpty() ? name : className.substring(0, 1).toLowerCase(Locale.ROOT) + className.substring(1);
-        this.methods = new ArrayList<>();
+        String serviceName = !name.isEmpty() ? name : className.substring(0, 1).toLowerCase(Locale.ROOT) + className.substring(1);
+        List<ServiceMethodBuilder<?>> methods = new ArrayList<>();
         for (Class<?> c = instance.getClass(); c != null; c = c.getSuperclass()) {
             List<Method> mm = Arrays.asList(c.getDeclaredMethods());
             mm.sort(ServiceBuilder::compareMethods);
@@ -58,13 +67,19 @@ public class ServiceBuilder {
                 if (pt == null) {
                     continue;
                 }
-                methods.add(new ServiceMethodBuilder(this, m));
+                methods.add(ServiceMethodBuilder.make(serviceName, instance, m));
             }
         }
+
+        return new ServiceBuilder(instance, serviceName, methods);
     }
 
-    public void configure(@NonNull Service service, @NonNull Function<Route, Route> wrapper) {
-        methods.forEach(m -> m.configure(service, wrapper));
+    public ServiceBuilder wrap(@NonNull Function<? super JaspasemaRoute, ? extends JaspasemaRoute> wrapper) {
+        return new ServiceBuilder(instance, serviceName, methods.stream().map(m -> m.wrap(wrapper)).collect(Collectors.toList()));
+    }
+
+    public void configure(@NonNull Service service) {
+        methods.forEach(m -> m.configure(service));
     }
 
     private static int compareMethods(Method m1, Method m2) {

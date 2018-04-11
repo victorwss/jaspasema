@@ -12,14 +12,14 @@ import ninja.javahacker.jaspasema.processor.TargetType;
  * @author Victor Williams Stafusa da Silva
  */
 @FunctionalInterface
-public interface ObjectFormatter<E> {
+public interface ReturnValueFormatter<E> {
     public String make(E in);
 
-    public static <E> ObjectFormatter<E> prepare(
+    public static <E> ReturnValueFormatter<E> prepare(
             @NonNull TargetType<E> target,
             @NonNull Class<? extends Annotation> annotationClass,
             @NonNull String format,
-            @NonNull Method m)
+            @NonNull Method method)
             throws BadServiceMappingException
     {
         String annotationName = annotationClass.getSimpleName();
@@ -27,14 +27,14 @@ public interface ObjectFormatter<E> {
         DateTimeFormatterFunction<E> df = DateTimeFormatterFunction.formatterFor(target);
         if (pf == null && df == null) {
             throw new BadServiceMappingException(
-                    m,
+                    method,
                     "The @" + annotationName + " annotation must be used only on methods returning "
                             + "primitives, primitive wrappers, String or date/time types. The found type was " + target + ".");
         }
         if (pf != null) {
             if (!format.isEmpty()) {
                 throw new BadServiceMappingException(
-                        m,
+                        method,
                         "The @" + annotationName + " format must be specified only on date/time-returning methods. "
                                 + "The found type was " + target + ".");
             }
@@ -44,7 +44,7 @@ public interface ObjectFormatter<E> {
         try {
             dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
         } catch (IllegalArgumentException e) {
-            throw new BadServiceMappingException(m, "Invalid format at @" + annotationName + " annotation.");
+            throw new BadServiceMappingException(method, "Invalid format at @" + annotationName + " annotation.");
         }
         return body -> df.format(body, dtf);
     }

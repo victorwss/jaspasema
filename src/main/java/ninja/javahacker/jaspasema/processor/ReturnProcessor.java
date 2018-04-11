@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import lombok.NonNull;
 import lombok.Value;
+import spark.Request;
+import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -18,7 +20,7 @@ public interface ReturnProcessor<A extends Annotation> {
 
     @FunctionalInterface
     public interface Worker<E> {
-        public String run(E value) throws InvocationTargetException;
+        public void run(Request rq, Response rp, E value) throws MalformedReturnValueException;
     }
 
     @Value
@@ -42,7 +44,21 @@ public interface ReturnProcessor<A extends Annotation> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <A extends Annotation> Stub<?> forMethod(@NonNull Method m, @NonNull A interesting) throws BadServiceMappingException {
+    public static <A extends Annotation> Stub<?> forMethod(
+            @NonNull Method m,
+            @NonNull A interesting)
+            throws BadServiceMappingException
+    {
+        return forMethod(TargetType.forType(m.getGenericReturnType()), m, interesting);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, A extends Annotation> Stub<T> forMethod(
+            @NonNull TargetType<T> target,
+            @NonNull Method m,
+            @NonNull A interesting)
+            throws BadServiceMappingException
+    {
         ReturnProcessor<A> pp;
         try {
             pp = (ReturnProcessor<A>) interesting
@@ -54,8 +70,8 @@ public interface ReturnProcessor<A extends Annotation> {
         } catch (InvocationTargetException e) {
             throw new BadServiceMappingException(m, "Return processor could not be created.", e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw new BadServiceMappingException(m, "Unusable return processor.");
+            throw new BadServiceMappingException(m, "Unusable return processor.", e);
         }
-        return pp.prepare(TargetType.forType(m.getGenericReturnType()), interesting, m);
+        return pp.prepare(target, interesting, m);
     }
 }

@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.JaspasemaDiscoverableService;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import spark.Route;
 import spark.Service;
 
 /**
@@ -21,27 +21,33 @@ public final class ServiceConfigurer {
     @NonNull
     private final List<ServiceBuilder> serviceBuilders;
 
-    private ServiceConfigurer(@NonNull Iterable<?> instances) throws BadServiceMappingException {
-        this.serviceBuilders = new ArrayList<>();
+    private ServiceConfigurer(@NonNull List<ServiceBuilder> serviceBuilders) {
+        this.serviceBuilders = serviceBuilders;
+    }
+
+    public static ServiceConfigurer make(@NonNull Iterable<?> instances) throws BadServiceMappingException {
+        List<ServiceBuilder> serviceBuilders = new ArrayList<>();
         for (Object ins : instances) {
-            serviceBuilders.add(new ServiceBuilder(ins));
+            serviceBuilders.add(ServiceBuilder.make(ins));
         }
+        return new ServiceConfigurer(serviceBuilders);
     }
 
     public static ServiceConfigurer forServices(@NonNull Object... instances) throws BadServiceMappingException {
-        return new ServiceConfigurer(Arrays.asList(instances));
+        return ServiceConfigurer.make(Arrays.asList(instances));
     }
 
     public static ServiceConfigurer loadAll() throws BadServiceMappingException {
         ServiceLoader<JaspasemaDiscoverableService> loader = ServiceLoader.load(JaspasemaDiscoverableService.class);
-        return new ServiceConfigurer(loader);
+        return ServiceConfigurer.make(loader);
     }
 
-    public void configure(
-            @NonNull Service service,
-            @NonNull Function<Route, Route> wrapper)
-    {
-        serviceBuilders.forEach(sb -> sb.configure(service, wrapper));
+    public ServiceConfigurer wrap(@NonNull Function<? super JaspasemaRoute, ? extends JaspasemaRoute> wrapper) {
+        return new ServiceConfigurer(serviceBuilders.stream().map(m -> m.wrap(wrapper)).collect(Collectors.toList()));
+    }
+
+    public void configure(@NonNull Service service) {
+        serviceBuilders.forEach(sb -> sb.configure(service));
         configureCors(service);
     }
 

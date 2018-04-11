@@ -9,8 +9,10 @@ import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
+import ninja.javahacker.jaspasema.processor.MalformedReturnValueException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -21,6 +23,8 @@ import ninja.javahacker.jaspasema.processor.TargetType;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesJson {
     public boolean lenient() default false;
+    public String type() default "text/json;charset=utf-8";
+    public Class<? extends Throwable> on() default ReturnedOk.class;
 
     public static class Processor implements ReturnProcessor<ProducesJson> {
         @Override
@@ -30,14 +34,21 @@ public @interface ProducesJson {
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
-            return new Stub<>(Processor::toJson, "json");
+            return new Stub<>((rq, rp, v) -> {
+                rp.body(toJson(annotation.lenient(), method, v));
+                rp.type(annotation.type());
+            }, "json");
         }
 
-        private static <E> String toJson(E someObject) {
+        private static <E> String toJson(boolean lenient, Method method, E someObject) throws MalformedReturnValueException {
             try {
-                return JsonTypesProcessor.writeJson(someObject);
+                return JsonTypesProcessor.writeJson(lenient, someObject);
             } catch (JsonProcessingException x) {
-                throw new RuntimeException(x);
+                throw new MalformedReturnValueException(
+                        someObject,
+                        method,
+                        "Returned value couldn't be converted to JSON.",
+                        x);
             }
         }
     }

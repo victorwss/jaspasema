@@ -64,18 +64,18 @@ public class FwTester {
         before = PORT_COUNTER.getAndIncrement();
         try {
             service.port(before);
-            ServiceConfigurer.forServices(c).configure(service, r -> (rq, rp) -> {
+            ServiceConfigurer.forServices(c).wrap(r -> (rq, rp) -> {
                 for (Map.Entry<String, Object> entry : session.entrySet()) {
                     rq.session(true).attribute(entry.getKey(), entry.getValue());
                 }
                 try {
-                    return r.handle(rq, rp);
+                    r.handleIt(rq, rp);
                 } catch (Throwable x) {
                     x.printStackTrace();
                     xxx.set(x);
-                    return x;
+                    rp.body(x.toString());
                 }
-            });
+            }).configure(service);
         } catch (Throwable ex) {
             ex.printStackTrace();
             throw new AssertionError(ex);

@@ -94,9 +94,9 @@ public class JQueryTemplate implements ApiTemplate {
         return output.replace("#METHODS#", calls);
     }
 
-    private static String forMethod(@NonNull ServiceMethodBuilder smb) {
+    private static String forMethod(@NonNull ServiceMethodBuilder<?> smb) {
         String output = METHOD_TEMPLATE
-                .replace("#SERVICE#", smb.getService().getServiceName())
+                .replace("#SERVICE#", smb.getServiceName())
                 .replace("#METHOD#", smb.getCallName())
                 .replace("#HTTP_METHOD#", smb.getHttpMethod())
                 .replace("#TYPE#", smb.getReturnProcessor().getExpectedReturnType())

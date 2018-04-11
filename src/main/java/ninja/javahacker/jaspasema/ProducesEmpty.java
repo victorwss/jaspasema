@@ -9,6 +9,7 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -19,6 +20,8 @@ import ninja.javahacker.jaspasema.processor.TargetType;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesEmpty {
     public String format() default "";
+    public String type() default "text/html;charset=utf-8";
+    public Class<? extends Throwable> on() default ReturnedOk.class;
 
     public static class Processor implements ReturnProcessor<ProducesEmpty> {
         @Override
@@ -28,7 +31,10 @@ public @interface ProducesEmpty {
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
-            return new Stub<>(v -> "", "text");
+            return new Stub<>((rq, rp, v) -> {
+                rp.body("");
+                rp.type(annotation.type());
+            }, "text");
         }
     }
 }

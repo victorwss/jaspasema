@@ -3,7 +3,6 @@ package ninja.javahacker.jaspasema.format;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -17,23 +16,23 @@ public interface FormatterFunction<E> {
         return v -> v == null ? null : func.apply(v);
     }
 
-    public static final Map<Class<?>, FormatterFunction<?>> MAP = ObjectUtils.makeMap(put -> {
-        put.accept(boolean.class, of((Boolean b) -> b.toString()));
-        put.accept(Boolean.class, of((Boolean b) -> b.toString()));
-        put.accept(byte.class, of((Byte b) -> b.toString()));
-        put.accept(Byte.class, of((Byte b) -> b.toString()));
-        put.accept(short.class, of((Short b) -> b.toString()));
-        put.accept(Short.class, of((Short b) -> b.toString()));
-        put.accept(int.class, of((Integer b) -> b.toString()));
-        put.accept(Integer.class, of((Integer b) -> b.toString()));
-        put.accept(long.class, of((Long b) -> b.toString()));
-        put.accept(Long.class, of((Long b) -> b.toString()));
-        put.accept(float.class, of((Float b) -> b.toString()));
-        put.accept(Float.class, of((Float b) -> b.toString()));
-        put.accept(double.class, of((Double b) -> b.toString()));
-        put.accept(Double.class, of((Double b) -> b.toString()));
-        put.accept(String.class, (String s) -> s);
-    });
+    public static final Map<Class<?>, FormatterFunction<?>> MAP = Map.ofEntries(
+            Map.entry(boolean.class, of((Boolean b) -> b.toString())),
+            Map.entry(Boolean.class, of((Boolean b) -> b.toString())),
+            Map.entry(byte.class, of((Byte b) -> b.toString())),
+            Map.entry(Byte.class, of((Byte b) -> b.toString())),
+            Map.entry(short.class, of((Short b) -> b.toString())),
+            Map.entry(Short.class, of((Short b) -> b.toString())),
+            Map.entry(int.class, of((Integer b) -> b.toString())),
+            Map.entry(Integer.class, of((Integer b) -> b.toString())),
+            Map.entry(long.class, of((Long b) -> b.toString())),
+            Map.entry(Long.class, of((Long b) -> b.toString())),
+            Map.entry(float.class, of((Float b) -> b.toString())),
+            Map.entry(Float.class, of((Float b) -> b.toString())),
+            Map.entry(double.class, of((Double b) -> b.toString())),
+            Map.entry(Double.class, of((Double b) -> b.toString())),
+            Map.entry(String.class, of((String s) -> s))
+    );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
     public static <E> FormatterFunction<E> formatterFor(@NonNull TargetType<E> target) {

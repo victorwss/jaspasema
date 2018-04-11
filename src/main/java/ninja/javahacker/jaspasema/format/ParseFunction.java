@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.TargetType;
 
 /**
@@ -29,37 +28,38 @@ public interface ParseFunction<E> {
         };
     }
 
-    public static final Map<Class<?>, ParseFunction<?>> MAP = ObjectUtils.makeMap(put -> {
-        put.accept(boolean.class, ParseFunction.of(s -> {
-            switch (s) {
-                case "true": return true;
-                case "false": return false;
-                default: throw new IllegalArgumentException(s);
-            }
-        }));
-        put.accept(byte.class, ParseFunction.of(Byte::valueOf));
-        put.accept(Byte.class, ParseFunction.of(Byte::valueOf));
-        put.accept(short.class, ParseFunction.of(Short::valueOf));
-        put.accept(Short.class, ParseFunction.of(Short::valueOf));
-        put.accept(int.class, ParseFunction.of(Integer::valueOf));
-        put.accept(Integer.class, ParseFunction.of(Integer::valueOf));
-        put.accept(long.class, ParseFunction.of(Long::valueOf));
-        put.accept(Long.class, ParseFunction.of(Long::valueOf));
-        put.accept(float.class, ParseFunction.of(Float::valueOf));
-        put.accept(Float.class, ParseFunction.of(Float::valueOf));
-        put.accept(double.class, ParseFunction.of(Double::valueOf));
-        put.accept(Double.class, ParseFunction.of(Double::valueOf));
-        put.accept(boolean.class, ParseFunction.of(Boolean::valueOf));
-        put.accept(Boolean.class, ParseFunction.of(Boolean::valueOf));
-        put.accept(BigInteger.class, ParseFunction.of(BigInteger::new));
-        put.accept(BigDecimal.class, ParseFunction.of(BigDecimal::new));
-        put.accept(String.class, new ParseFunction<String>() {
-            @Override
-            public <X extends Throwable> String parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) {
-                return s;
-            }
-        });
-    });
+    private static boolean booleanParse(String s) {
+        switch (s) {
+            case "true": return true;
+            case "false": return false;
+            default: throw new IllegalArgumentException(s);
+        }
+    }
+
+    public static final Map<Class<?>, ParseFunction<?>> MAP = Map.ofEntries(
+            Map.entry(boolean.class, ParseFunction.of(ParseFunction::booleanParse)),
+            Map.entry(Boolean.class, ParseFunction.of(ParseFunction::booleanParse)),
+            Map.entry(byte.class, ParseFunction.of(Byte::valueOf)),
+            Map.entry(Byte.class, ParseFunction.of(Byte::valueOf)),
+            Map.entry(short.class, ParseFunction.of(Short::valueOf)),
+            Map.entry(Short.class, ParseFunction.of(Short::valueOf)),
+            Map.entry(int.class, ParseFunction.of(Integer::valueOf)),
+            Map.entry(Integer.class, ParseFunction.of(Integer::valueOf)),
+            Map.entry(long.class, ParseFunction.of(Long::valueOf)),
+            Map.entry(Long.class, ParseFunction.of(Long::valueOf)),
+            Map.entry(float.class, ParseFunction.of(Float::valueOf)),
+            Map.entry(Float.class, ParseFunction.of(Float::valueOf)),
+            Map.entry(double.class, ParseFunction.of(Double::valueOf)),
+            Map.entry(Double.class, ParseFunction.of(Double::valueOf)),
+            Map.entry(BigInteger.class, ParseFunction.of(BigInteger::new)),
+            Map.entry(BigDecimal.class, ParseFunction.of(BigDecimal::new)),
+            Map.entry(String.class, new ParseFunction<String>() {
+                @Override
+                public <X extends Throwable> String parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) {
+                    return s;
+                }
+            })
+    );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
     public static <E> ParseFunction<E> parserFor(@NonNull TargetType<E> target) {
