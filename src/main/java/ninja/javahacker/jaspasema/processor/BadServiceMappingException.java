@@ -18,7 +18,11 @@ public class BadServiceMappingException extends Exception {
 
     @NonNull
     @Getter
-    private final Method method;
+    private final Optional<Method> method;
+
+    @NonNull
+    @Getter
+    private final Class<?> declaringClass;
 
     public BadServiceMappingException(/*@NonNull*/ Parameter parameter, /*@NonNull*/ String message) {
         this(parameter, message, null);
@@ -27,7 +31,8 @@ public class BadServiceMappingException extends Exception {
     public BadServiceMappingException(/*@NonNull*/ Parameter parameter, /*@NonNull*/ String message, /*@NonNull*/ Throwable cause) {
         super("[" + parameter + "] " + message, cause);
         this.parameter = Optional.of(parameter);
-        this.method = (Method) parameter.getDeclaringExecutable();
+        this.method = Optional.of((Method) parameter.getDeclaringExecutable());
+        this.declaringClass = parameter.getDeclaringExecutable().getDeclaringClass();
     }
 
     public BadServiceMappingException(/*@NonNull*/ Method method, /*@NonNull*/ String message) {
@@ -37,6 +42,18 @@ public class BadServiceMappingException extends Exception {
     public BadServiceMappingException(/*@NonNull*/ Method method, /*@NonNull*/ String message, /*@NonNull*/ Throwable cause) {
         super("[" + method + "] " + message, cause);
         this.parameter = Optional.empty();
-        this.method = method;
+        this.method = Optional.of(method);
+        this.declaringClass = method.getDeclaringClass();
+    }
+
+    public BadServiceMappingException(/*@NonNull*/ Class<?> declaringClass, /*@NonNull*/ String message) {
+        this(declaringClass, message, null);
+    }
+
+    public BadServiceMappingException(/*@NonNull*/ Class<?> declaringClass, /*@NonNull*/ String message, /*@NonNull*/ Throwable cause) {
+        super("[" + declaringClass.getName() + "] " + message, cause);
+        this.parameter = Optional.empty();
+        this.method = Optional.empty();
+        this.declaringClass = declaringClass;
     }
 }

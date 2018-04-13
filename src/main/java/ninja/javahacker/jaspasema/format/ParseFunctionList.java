@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -17,10 +17,10 @@ public interface ParseFunctionList<E> {
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
     public static <E> ParseFunctionList<E> parserFor(
             @NonNull Parameter p,
-            @NonNull TargetType<List<E>> target)
+            @NonNull ReifiedGeneric<List<E>> target)
     {
-        if (!target.isListType()) return null;
-        ParseFunction<E> func = ParseFunction.parserFor(TargetType.getListGenericType(target));
+        if (!target.isAssignableFrom(List.class)) return null;
+        ParseFunction<E> func = ParseFunction.parserFor(ReifiedGeneric.unwrapIterableGenericType(target));
         return new ParseFunctionList<E>() {
             @Override
             public <X extends Throwable> List<E> parse(Function<? super Throwable, X> onError, List<String> list) throws X {

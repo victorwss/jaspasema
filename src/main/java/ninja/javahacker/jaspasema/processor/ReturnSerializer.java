@@ -12,4 +12,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface ReturnSerializer {
     public Class<? extends ReturnProcessor<?>> processor();
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface ExitDiscriminator {
+    }
 }

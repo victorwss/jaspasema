@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.List;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ObjectListParser;
@@ -14,7 +15,7 @@ import ninja.javahacker.jaspasema.format.SimpleParameterType;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -29,14 +30,21 @@ public @interface QueryPart {
 
     public static class Processor implements ParamProcessor<QueryPart> {
 
+        private static final String SINGULAR_JS_TEMPLATE = ""
+                + "targetUrl += '&$PARAM$=' + encodeURI($JS$);";
+
+        private static final String PLURAL_JS_TEMPLATE = ""
+                + "for (var elem in $JS$) {\n"
+                + "    targetUrl += '&$PARAM$=' + encodeURI($JS$[elem]);\n"
+                + "}";
+
         private static final String NOT_SIMPLE_ERROR_MESSAGE = ""
                 + "The @QueryPart annotation must be used only on parameters of primitives, "
                 + "primitive wrappers, String and date/time types and Lists of those.";
 
         @Override
-        @SuppressWarnings("unchecked")
         public <E> Stub<E> prepare(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull QueryPart annotation,
                 @NonNull Parameter p)
                 throws BadServiceMappingException
@@ -44,29 +52,36 @@ public @interface QueryPart {
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
-            switch (SimpleParameterType.plural(p, target)) {
+            SimpleParameterType spt = SimpleParameterType.plural(p, target);
+            switch (spt) {
                 case PLURAL:
-                    ObjectListParser<E> parts =
-                            ObjectListParser.prepare((TargetType) target, annotation.getClass(), annotation.format(), p);
                     return new Stub<>(
-                            (rq, rp) -> (E) parts.make(Arrays.asList(rq.queryParamsValues(p.getName()))),
+                            makePluralWork(target, annotation, p),
                             js,
-                            ""
-                                    + "for (var elem in " + js + ") {\n"
-                                    + "    targetUrl += '&" + paramName + "=' + encodeURI(" + js + "[elem]);\n"
-                                    + "}"
-                    );
+                            PLURAL_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", paramName));
                 case SINGULAR:
                     ParameterParser<E> part = ParameterParser.prepare(target, annotation.getClass(), annotation.format(), p);
                     return new Stub<>(
                             (rq, rp) -> part.make(rq.queryParams(p.getName())),
                             js,
-                            "targetUrl += '&" + paramName + "=' + encodeURI(" + js + ");");
+                            SINGULAR_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", paramName));
                 case NOT_SIMPLE:
                     throw new BadServiceMappingException(p, NOT_SIMPLE_ERROR_MESSAGE);
                 default:
-                    throw new AssertionError();
+                    throw new AssertionError(spt);
             }
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <E> Worker<E> makePluralWork(
+                ReifiedGeneric<E> target,
+                QueryPart annotation,
+                Parameter p)
+                throws BadServiceMappingException
+        {
+            ObjectListParser<E> parts =
+                    ObjectListParser.prepare((ReifiedGeneric<List<E>>) target, annotation.getClass(), annotation.format(), p);
+            return (rq, rp) -> (E) parts.make(Arrays.asList(rq.queryParamsValues(p.getName())));
         }
     }
 }

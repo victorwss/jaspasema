@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.io.IOException;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -35,19 +38,23 @@ public class JsonTypesProcessor {
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
+    private static JavaType of(@NonNull ReifiedGeneric<?> t) {
+        return TypeFactory.defaultInstance().constructType(t.getGeneric());
+    }
+
     public <E> E convert(
             boolean lenient,
             Object obj,
-            @NonNull TargetType<E> target)
+            @NonNull ReifiedGeneric<E> target)
     {
-        return obj == null ? null : (lenient ? LENIENT : STRICT).convertValue(obj, target.getJavaType());
+        return obj == null ? null : (lenient ? LENIENT : STRICT).convertValue(obj, of(target));
     }
 
     @SuppressWarnings("unchecked")
     public <E, X extends Throwable> E readJson(
             boolean lenient,
             @NonNull Function<? super IOException, X> onError,
-            @NonNull TargetType<E> jt,
+            @NonNull ReifiedGeneric<E> jt,
             String data)
             throws X
     {
@@ -55,7 +62,7 @@ public class JsonTypesProcessor {
         if (jt.getGeneric() == String.class) return (E) data;
 
         try {
-            return (lenient ? LENIENT : STRICT).readValue(data, jt.getJavaType());
+            return (lenient ? LENIENT : STRICT).readValue(data, of(jt));
         } catch (IOException e) {
             throw onError.apply(e);
         }

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -18,10 +18,10 @@ public interface DateTimeParseFunctionList<E> {
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
     public static <E> DateTimeParseFunctionList<E> parserFor(
             @NonNull Parameter p,
-            @NonNull TargetType<List<E>> target)
+            @NonNull ReifiedGeneric<List<E>> target)
     {
-        if (!target.isListType()) return null;
-        DateTimeParseFunction<E> func = DateTimeParseFunction.parserFor(TargetType.getListGenericType(target));
+        if (!target.isAssignableFrom(List.class)) return null;
+        DateTimeParseFunction<E> func = DateTimeParseFunction.parserFor(ReifiedGeneric.unwrapIterableGenericType(target));
         return new DateTimeParseFunctionList<E>() {
             @Override
             public <X extends Throwable> List<E> parse(

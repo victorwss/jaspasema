@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
 import lombok.Value;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
 
@@ -13,7 +14,7 @@ import spark.Response;
  */
 public interface ParamProcessor<A extends Annotation> {
     public <E> Stub<E> prepare(
-            @NonNull TargetType<E> target,
+            @NonNull ReifiedGeneric<E> target,
             @NonNull A annotation,
             @NonNull Parameter p)
             throws BadServiceMappingException;
@@ -38,7 +39,7 @@ public interface ParamProcessor<A extends Annotation> {
         private String instructionAdded;
     }
 
-    public static Stub<?> forParameter(Parameter p) throws BadServiceMappingException {
+    public static Stub<?> forParameter(Parameter p) throws BadServiceMappingException, MalformedParameterProcessorException {
         Annotation interesting = null;
         for (Annotation ann : p.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ParamSource.class)) continue;
@@ -50,7 +51,9 @@ public interface ParamProcessor<A extends Annotation> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <A extends Annotation> Stub<?> forParameter(Parameter p, A interesting) throws BadServiceMappingException {
+    public static <A extends Annotation> Stub<?> forParameter(Parameter p, A interesting)
+            throws BadServiceMappingException, MalformedParameterProcessorException
+    {
         ParamProcessor<A> pp;
         try {
             pp = (ParamProcessor<A>) interesting
@@ -60,10 +63,16 @@ public interface ParamProcessor<A extends Annotation> {
                     .getConstructor()
                     .newInstance();
         } catch (InvocationTargetException e) {
-            throw new BadServiceMappingException(p, "Parameter processor could not be created.", e.getCause());
+            throw new MalformedParameterProcessorException(
+                    interesting.annotationType(),
+                    "Parameter processor could not be created.",
+                    e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw new BadServiceMappingException(p, "Unusable parameter processor.");
+            throw new MalformedParameterProcessorException(
+                    interesting.annotationType(),
+                    "Unusable parameter processor.",
+                    e);
         }
-        return pp.prepare(TargetType.forType(p.getParameterizedType()), interesting, p);
+        return pp.prepare(ReifiedGeneric.forType(p.getParameterizedType()), interesting, p);
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.MalformedParameterException;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -18,7 +18,7 @@ public interface ObjectListParser<E> {
     public List<E> make(List<String> in) throws MalformedParameterException;
 
     public static <E> ObjectListParser<E> prepare(
-            @NonNull TargetType<List<E>> target,
+            @NonNull ReifiedGeneric<List<E>> target,
             @NonNull Class<? extends Annotation> annotationClass,
             @NonNull String format,
             @NonNull Parameter p)

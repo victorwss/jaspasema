@@ -9,7 +9,7 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
 import spark.Session;
@@ -25,13 +25,13 @@ public @interface RawHttp {
 
     public static class Processor implements ParamProcessor<RawHttp> {
 
-        private static final TargetType<Request> RQ = TargetType.forClass(Request.class);
-        private static final TargetType<Response> RP = TargetType.forClass(Response.class);
-        private static final TargetType<Session> SS = TargetType.forClass(Session.class);
+        private static final ReifiedGeneric<Request> RQ = ReifiedGeneric.forClass(Request.class);
+        private static final ReifiedGeneric<Response> RP = ReifiedGeneric.forClass(Response.class);
+        private static final ReifiedGeneric<Session> SS = ReifiedGeneric.forClass(Session.class);
 
         @Override
         public <E> Stub<E> prepare(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull RawHttp annotation,
                 @NonNull Parameter p)
                 throws BadServiceMappingException
@@ -41,7 +41,7 @@ public @interface RawHttp {
 
         @SuppressWarnings("unchecked")
         private <E> Worker<E> simple(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {

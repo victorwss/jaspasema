@@ -14,7 +14,7 @@ import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
 import ninja.javahacker.jaspasema.processor.MalformedParameterException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -32,17 +32,19 @@ public @interface QueryJsons {
         @Override
         @SuppressWarnings("unchecked")
         public <E> Stub<E> prepare(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull QueryJsons annotation,
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {
-            if (!target.isListType()) throw new BadServiceMappingException(p, "The @QueryJsons should be used only in List types.");
+            if (!target.raw().isAssignableFrom(List.class)) {
+                throw new BadServiceMappingException(p, "The @QueryJsons should be used only in List types.");
+            }
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
-                    prepareList((TargetType) target, annotation, p, paramName),
+                    prepareList((ReifiedGeneric) target, annotation, p, paramName),
                     js,
                     ""
                             + "for (var elem in " + js + ") {\n"
@@ -52,7 +54,7 @@ public @interface QueryJsons {
         }
 
         private <E> ParamProcessor.Worker<List<E>> prepareList(
-                @NonNull TargetType<List<E>> target,
+                @NonNull ReifiedGeneric<List<E>> target,
                 @NonNull QueryJsons annotation,
                 @NonNull Parameter p,
                 @NonNull String paramName)
@@ -63,7 +65,7 @@ public @interface QueryJsons {
                     E elem = JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             x -> new MalformedParameterException(p, "The @QueryJsons parameter has not a valid value.", x),
-                            TargetType.getListGenericType(target),
+                            ReifiedGeneric.unwrapIterableGenericType(target),
                             s);
                     elements.add(elem);
                 }

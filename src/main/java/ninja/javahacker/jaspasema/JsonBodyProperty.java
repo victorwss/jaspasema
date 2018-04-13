@@ -12,7 +12,7 @@ import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
 import ninja.javahacker.jaspasema.processor.MalformedParameterException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -29,7 +29,7 @@ public @interface JsonBodyProperty {
 
         @Override
         public <E> Stub<E> prepare(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull JsonBodyProperty annotation,
                 @NonNull Parameter p)
         {

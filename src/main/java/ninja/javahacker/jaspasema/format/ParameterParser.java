@@ -7,7 +7,7 @@ import java.time.format.ResolverStyle;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.MalformedParameterException;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -17,7 +17,7 @@ public interface ParameterParser<E> {
     public E make(String in) throws MalformedParameterException;
 
     public static <E> ParameterParser<E> prepare(
-            @NonNull TargetType<E> target,
+            @NonNull ReifiedGeneric<E> target,
             @NonNull Class<? extends Annotation> annotationClass,
             @NonNull String format,
             @NonNull Parameter p)
@@ -41,7 +41,7 @@ public interface ParameterParser<E> {
             return body ->
                     pf.parse(e ->
                             new MalformedParameterException(
-                                    p, "The value for @" + annotationName + " could not be parsed: \"" + body + "\"",
+                                    p, "The value for @" + annotationName + " could not be parsed: \"" + body + "\".",
                                     e),
                             body);
         }
@@ -56,7 +56,7 @@ public interface ParameterParser<E> {
                 df.parse(e ->
                         new MalformedParameterException(
                                 p,
-                                "The @" + annotationName + " could not be parsed: \"" + body + "\". Format: \"" + dtf + "\"",
+                                "The @" + annotationName + " could not be parsed: \"" + body + "\". Format: \"" + dtf + "\".",
                                 e),
                         body,
                         dtf);

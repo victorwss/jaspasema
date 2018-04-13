@@ -9,7 +9,7 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -25,7 +25,7 @@ public @interface SessionParam {
 
         @Override
         public <E> Stub<E> prepare(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull SessionParam annotation,
                 @NonNull Parameter p)
         {

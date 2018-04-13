@@ -2,7 +2,7 @@ package ninja.javahacker.jaspasema.format;
 
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -13,16 +13,16 @@ public enum SimpleParameterType {
     @SuppressWarnings("unchecked")
     public static SimpleParameterType plural(
             @NonNull Parameter p,
-            @NonNull TargetType<?> target)
+            @NonNull ReifiedGeneric<?> target)
     {
         ParseFunction<?> pf = ParseFunction.parserFor(target);
         DateTimeParseFunction<?> df = DateTimeParseFunction.parserFor(target);
 
         @SuppressWarnings("rawtypes")
-        ParseFunctionList<?> pfl = ParseFunctionList.parserFor(p, (TargetType) target);
+        ParseFunctionList<?> pfl = ParseFunctionList.parserFor(p, (ReifiedGeneric) target);
 
         @SuppressWarnings("rawtypes")
-        DateTimeParseFunctionList<?> dfl = DateTimeParseFunctionList.parserFor(p, (TargetType) target);
+        DateTimeParseFunctionList<?> dfl = DateTimeParseFunctionList.parserFor(p, (ReifiedGeneric) target);
 
         if (pf != null || df != null) return SINGULAR;
         if (pfl != null || dfl != null) return PLURAL;

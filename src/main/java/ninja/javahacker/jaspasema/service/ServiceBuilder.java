@@ -13,6 +13,8 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.Path;
 import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.processor.MalformedParameterProcessorException;
+import ninja.javahacker.jaspasema.processor.MalformedReturnProcessorException;
 import spark.Service;
 
 /**
@@ -42,7 +44,11 @@ public class ServiceBuilder {
         this.methods = methods;
     }
 
-    public static ServiceBuilder make(@NonNull Object instance) throws BadServiceMappingException {
+    public static ServiceBuilder make(@NonNull Object instance)
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException,
+            MalformedParameterProcessorException
+    {
         String className = instance.getClass().getSimpleName();
         if (className.isEmpty()) {
             className = instance.getClass().getName().replace(".", "_");

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -43,7 +43,7 @@ public interface DateTimeParseFunction<E> {
     );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
-    public static <E> DateTimeParseFunction<E> parserFor(@NonNull TargetType<E> target) {
+    public static <E> DateTimeParseFunction<E> parserFor(@NonNull ReifiedGeneric<E> target) {
         return (DateTimeParseFunction<E>) DT_MAP.get(target.getGeneric());
     }
 }

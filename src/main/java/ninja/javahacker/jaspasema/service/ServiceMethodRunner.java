@@ -1,7 +1,10 @@
 package ninja.javahacker.jaspasema.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -10,8 +13,7 @@ import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.MalformedParameterException;
 import ninja.javahacker.jaspasema.processor.MalformedReturnValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
 
@@ -20,9 +22,21 @@ import spark.Response;
  */
 public class ServiceMethodRunner<T> implements JaspasemaRoute {
 
+    private static final String PANIC = ""
+            + "<!DOCTYPE html>"
+            + "<html>"
+            + "  <head>"
+            + "    <title>SERIOUS ERROR 500</title>"
+            + "  </head>"
+            + "  <body>"
+            + "    <p>A very serious error happened when trying to handle another error. Sorry.</p>"
+            + "    <pre>$ERROR$</pre>"
+            + "  </body>"
+            + "</html>";
+
     @Getter
     @NonNull
-    private final TargetType<T> target;
+    private final ReifiedGeneric<T> target;
 
     @Getter
     @NonNull
@@ -34,18 +48,18 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     @Getter
     @NonNull
-    private final ReturnProcessor.Stub<T> returnProcessor;
+    private final ReturnMapper.ReturnMap<T> returnProcessor;
 
     @Getter
     @NonNull
     private final Object instance;
 
     public ServiceMethodRunner(
-            @NonNull TargetType<T> target,
+            @NonNull ReifiedGeneric<T> target,
             @NonNull Object instance,
             @NonNull Method method,
             @NonNull List<ParamProcessor.Stub<?>> parameterProcessors,
-            @NonNull ReturnProcessor.Stub<T> returnProcessor)
+            @NonNull ReturnMapper.ReturnMap<T> returnProcessor)
             throws BadServiceMappingException
     {
         this.target = target;
@@ -58,20 +72,39 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
     }
 
     @Override
-    public void handleIt(
-            @NonNull Request rq,
-            @NonNull Response rp)
-            throws InvocationTargetException,
-            MalformedParameterException,
-            MalformedReturnValueException
-    {
+    public void handleIt(@NonNull Request rq, @NonNull Response rp) throws InvocationTargetException {
         // Can't use streams here due to MalformedParameterException that run(rq, rp) might throw.
         List<Object> parameters = new ArrayList<>(parameterProcessors.size());
-        for (ParamProcessor.Stub<?> ppw : parameterProcessors) {
-            parameters.add(ppw.getWorker().run(rq, rp));
-        }
+        Throwable badThing = null;
+        try {
+            try {
+                for (ParamProcessor.Stub<?> ppw : parameterProcessors) {
+                    parameters.add(ppw.getWorker().run(rq, rp));
+                }
+            } catch (MalformedParameterException e) {
+                badThing = e;
+                returnProcessor.onException(e).getWorker().run(rq, rp, e);
+            }
 
-        returnProcessor.getWorker().run(rq, rp, invoke(parameters));
+            try {
+                returnProcessor.onReturn().getWorker().run(rq, rp, invoke(parameters));
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                returnProcessor.onException(cause).getWorker().run(rq, rp, cause);
+                throw e;
+            } catch (MalformedReturnValueException e) {
+                badThing = e;
+                returnProcessor.onException(e).getWorker().run(rq, rp, e);
+            }
+        } catch (MalformedReturnValueException e) {
+            e.addSuppressed(badThing);
+            rp.status(500);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream pw = new PrintStream(baos);
+            e.printStackTrace(pw);
+            rp.body(PANIC.replace("$ERROR$", baos.toString(StandardCharsets.UTF_8)));
+            rp.type("text/html;charset=utf-8");
+        }
     }
 
     @SuppressWarnings("unchecked")

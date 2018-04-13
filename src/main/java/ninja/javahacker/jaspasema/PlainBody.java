@@ -11,7 +11,7 @@ import ninja.javahacker.jaspasema.format.ParameterParser;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -28,7 +28,7 @@ public @interface PlainBody {
 
         @Override
         public <E> Stub<E> prepare(
-                @NonNull TargetType<E> target,
+                @NonNull ReifiedGeneric<E> target,
                 @NonNull PlainBody annotation,
                 @NonNull Parameter p)
                 throws BadServiceMappingException

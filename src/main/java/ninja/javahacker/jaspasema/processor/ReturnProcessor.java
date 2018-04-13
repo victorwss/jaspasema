@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import lombok.NonNull;
 import lombok.Value;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
 
@@ -13,7 +14,7 @@ import spark.Response;
  */
 public interface ReturnProcessor<A extends Annotation> {
     public <E> Stub<E> prepare(
-            @NonNull TargetType<E> target,
+            @NonNull ReifiedGeneric<E> target,
             @NonNull A annotation,
             @NonNull Method method)
             throws BadServiceMappingException;
@@ -23,8 +24,20 @@ public interface ReturnProcessor<A extends Annotation> {
         public void run(Request rq, Response rp, E value) throws MalformedReturnValueException;
     }
 
+    @FunctionalInterface
+    public interface ProcessorConfiguration {
+        public <E> Stub<E> config(
+                @NonNull ReifiedGeneric<E> target,
+                @NonNull Method method)
+                throws BadServiceMappingException;
+
+        public default Stub<?> config(@NonNull Method method) throws BadServiceMappingException {
+            return config(ReifiedGeneric.forType(method.getGenericReturnType()), method);
+        }
+    }
+
     @Value
-    public class Stub<E> {
+    public static class Stub<E> {
         @NonNull
         private Worker<E> worker;
 
@@ -32,7 +45,11 @@ public interface ReturnProcessor<A extends Annotation> {
         private String expectedReturnType;
     }
 
-    public static Stub<?> forMethod(@NonNull Method m) throws BadServiceMappingException {
+    public static Stub<?> forMethod(
+            @NonNull Method m)
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException
+    {
         Annotation interesting = null;
         for (Annotation ann : m.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ReturnSerializer.class)) continue;
@@ -45,19 +62,29 @@ public interface ReturnProcessor<A extends Annotation> {
 
     @SuppressWarnings("unchecked")
     public static <A extends Annotation> Stub<?> forMethod(
-            @NonNull Method m,
+            @NonNull Method method,
             @NonNull A interesting)
-            throws BadServiceMappingException
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException
     {
-        return forMethod(TargetType.forType(m.getGenericReturnType()), m, interesting);
+        return prepareConfig(interesting).config(ReifiedGeneric.forType(method.getGenericReturnType()), method);
+    }
+
+    public static <T, A extends Annotation> Stub<T> forMethod(
+            @NonNull ReifiedGeneric<T> target,
+            @NonNull A interesting,
+            @NonNull Method method)
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException
+    {
+        return prepareConfig(interesting).config(target, method);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, A extends Annotation> Stub<T> forMethod(
-            @NonNull TargetType<T> target,
-            @NonNull Method m,
+    public static <A extends Annotation> ProcessorConfiguration prepareConfig(
             @NonNull A interesting)
-            throws BadServiceMappingException
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException
     {
         ReturnProcessor<A> pp;
         try {
@@ -68,10 +95,33 @@ public interface ReturnProcessor<A extends Annotation> {
                     .getConstructor()
                     .newInstance();
         } catch (InvocationTargetException e) {
-            throw new BadServiceMappingException(m, "Return processor could not be created.", e.getCause());
+            throw new MalformedReturnProcessorException(
+                    interesting.annotationType(),
+                    "Return processor could not be created.",
+                    e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw new BadServiceMappingException(m, "Unusable return processor.", e);
+            throw new MalformedReturnProcessorException(
+                    interesting.annotationType(),
+                    "Unusable return processor.",
+                    e);
         }
-        return pp.prepare(target, interesting, m);
+        return new ProcessorConfiguration() {
+            @Override
+            public <E> Stub<E> config(ReifiedGeneric<E> target, Method method) throws BadServiceMappingException {
+                return pp.prepare(target, interesting, method);
+            }
+        };
+    }
+
+    public static void rejectForVoid(
+            @NonNull Method method,
+            @NonNull Class<? extends Annotation> a)
+            throws BadServiceMappingException
+    {
+        if (method.getReturnType() == void.class || method.getReturnType() == Void.class) {
+            throw new BadServiceMappingException(
+                    method,
+                    "Methods returning void should not feature @" + a.getSimpleName() + "-annotated annotations.");
+        }
     }
 }

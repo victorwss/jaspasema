@@ -99,7 +99,7 @@ public class JQueryTemplate implements ApiTemplate {
                 .replace("#SERVICE#", smb.getServiceName())
                 .replace("#METHOD#", smb.getCallName())
                 .replace("#HTTP_METHOD#", smb.getHttpMethod())
-                .replace("#TYPE#", smb.getReturnProcessor().getExpectedReturnType())
+                .replace("#TYPE#", smb.getReturnMapper().onReturn().getExpectedReturnType())
                 .replace("#PATH#", smb.getPath());
 
         StringJoiner def = new StringJoiner(", ");

@@ -17,17 +17,15 @@ import ninja.javahacker.jaspasema.Get;
 import ninja.javahacker.jaspasema.Patch;
 import ninja.javahacker.jaspasema.Path;
 import ninja.javahacker.jaspasema.Post;
-import ninja.javahacker.jaspasema.ProducesEmpty;
 import ninja.javahacker.jaspasema.Put;
 import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.HttpMethod;
+import ninja.javahacker.jaspasema.processor.MalformedParameterProcessorException;
+import ninja.javahacker.jaspasema.processor.MalformedReturnProcessorException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnSerializer;
-import ninja.javahacker.jaspasema.processor.ReturnedOk;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Route;
 import spark.Service;
 
@@ -52,7 +50,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
 
     @Getter
     @NonNull
-    private final TargetType<T> target;
+    private final ReifiedGeneric<T> target;
 
     @Getter
     @NonNull
@@ -93,14 +91,16 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
 
     @Getter
     @NonNull
-    private final ReturnProcessor.Stub<T> returnProcessor;
+    private final ReturnMapper.ReturnMap<T> returnMapper;
 
     private ServiceMethodBuilder(
             @NonNull String serviceName,
-            @NonNull TargetType<T> target,
+            @NonNull ReifiedGeneric<T> target,
             @NonNull Object instance,
             @NonNull Method method)
-            throws BadServiceMappingException
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException,
+            MalformedParameterProcessorException
     {
         this.serviceName = serviceName;
         this.target = target;
@@ -133,51 +133,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
         ServiceName sn = method.getAnnotation(ServiceName.class);
         this.callName = ObjectUtils.choose(sn == null ? "" : sn.value(), method.getName());
 
-        boolean isVoid = method.getReturnType() == void.class || method.getReturnType() == Void.class;
-        Annotation produces = null;
-
-        for (Annotation a : method.getAnnotations()) {
-            if (a.annotationType().isAnnotationPresent(ReturnSerializer.class)) {
-                if (isVoid) {
-                    throw new BadServiceMappingException(
-                            method,
-                            "Methods returning void should not feature @ReturnSerializer-annotated annotations.");
-                }
-                if (produces != null) {
-                    throw new BadServiceMappingException(method, "Multiple @HttpMethod-annotated annotations on method.");
-                }
-                produces = a;
-            }
-        }
-        if (!isVoid && produces == null) {
-            throw new BadServiceMappingException(method, "No @ReturnSerializer-annotated annotations on method.");
-        }
-
-        if (produces == null) {
-            produces = new ProducesEmpty() {
-                @Override
-                public String format() {
-                    return "";
-                }
-
-                @Override
-                public String type() {
-                    return "text/html;charset=utf-8";
-                }
-
-                @Override
-                public Class<? extends Annotation> annotationType() {
-                    return ProducesEmpty.class;
-                }
-
-                @Override
-                public Class<? extends Throwable> on() {
-                    return ReturnedOk.class;
-                }
-            };
-        }
-
-        this.returnProcessor = ReturnProcessor.forMethod(target, method, produces);
+        this.returnMapper = ReturnMapper.forMethod(target, method);
 
         // Can't use streams here due to BadServiceMappingException that ParamProcessor.forParameter(p) might throw.
         Parameter[] params = method.getParameters();
@@ -186,7 +142,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             parameterProcessors.add(ParamProcessor.forParameter(p));
         }
 
-        this.call = new ServiceMethodRunner<>(target, instance, method, parameterProcessors, returnProcessor);
+        this.call = new ServiceMethodRunner<>(target, instance, method, parameterProcessors, returnMapper);
     }
 
     private ServiceMethodBuilder(ServiceMethodBuilder<T> original, JaspasemaRoute call) {
@@ -197,7 +153,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.method = original.method;
         this.httpMethod = original.httpMethod;
         this.parameterProcessors = original.parameterProcessors;
-        this.returnProcessor = original.returnProcessor;
+        this.returnMapper = original.returnMapper;
         this.routeConfig = original.routeConfig;
         this.serviceName = original.serviceName;
         this.call = call;
@@ -207,29 +163,36 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             @NonNull String serviceName,
             @NonNull Object instance,
             @NonNull Method method)
-            throws BadServiceMappingException
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException,
+            MalformedParameterProcessorException
     {
-        TargetType<?> target = TargetType.forType(method.getGenericReturnType());
+        ReifiedGeneric<?> target = ReifiedGeneric.forType(method.getGenericReturnType());
         return make(serviceName, target, instance, method);
     }
 
     public static <T> ServiceMethodBuilder<T> make(
             @NonNull String serviceName,
-            @NonNull TargetType<T> target,
+            @NonNull ReifiedGeneric<T> target,
             @NonNull Object instance,
             @NonNull Method method)
-            throws BadServiceMappingException
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException,
+            MalformedParameterProcessorException
     {
-        TargetType<?> target2 = TargetType.forType(method.getGenericReturnType());
+        ReifiedGeneric<?> target2 = ReifiedGeneric.forType(method.getGenericReturnType());
         if (!Objects.equals(target2, target)) throw new IllegalArgumentException();
         return new ServiceMethodBuilder<>(serviceName, target, instance, method);
     }
 
     public ServiceMethodBuilder<T> wrap(@NonNull Function<? super JaspasemaRoute, ? extends JaspasemaRoute> wrapper) {
-        return new ServiceMethodBuilder<>(this, (rq, rp) -> wrapper.apply(call).handle(rq, rp));
+        return new ServiceMethodBuilder<>(this, (rq, rp) -> wrapper.apply(call).handleIt(rq, rp));
     }
 
     public void configure(@NonNull Service service) {
-        routeConfig.route(service, path, call);
+        routeConfig.route(service, path, (rq, rp) -> {
+            call.handleIt(rq, rp);
+            return rp.body();
+        });
     }
 }

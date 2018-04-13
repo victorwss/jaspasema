@@ -3,7 +3,7 @@ package ninja.javahacker.jaspasema.format;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -35,7 +35,7 @@ public interface FormatterFunction<E> {
     );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
-    public static <E> FormatterFunction<E> formatterFor(@NonNull TargetType<E> target) {
+    public static <E> FormatterFunction<E> formatterFor(@NonNull ReifiedGeneric<E> target) {
         return (FormatterFunction<E>) MAP.get(target.getGeneric());
     }
 }

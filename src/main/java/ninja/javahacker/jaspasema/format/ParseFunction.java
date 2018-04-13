@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -62,7 +62,7 @@ public interface ParseFunction<E> {
     );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
-    public static <E> ParseFunction<E> parserFor(@NonNull TargetType<E> target) {
+    public static <E> ParseFunction<E> parserFor(@NonNull ReifiedGeneric<E> target) {
         return (ParseFunction<E>) MAP.get(target.getGeneric());
     }
 }

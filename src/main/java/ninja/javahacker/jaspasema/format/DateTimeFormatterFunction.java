@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.function.BiFunction;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.TargetType;
+import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -31,7 +31,7 @@ public interface DateTimeFormatterFunction<E> {
     );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
-    public static <E> DateTimeFormatterFunction<E> formatterFor(@NonNull TargetType<E> target) {
+    public static <E> DateTimeFormatterFunction<E> formatterFor(@NonNull ReifiedGeneric<E> target) {
         return (DateTimeFormatterFunction<E>) DT_MAP.get(target.getGeneric());
     }
 }
