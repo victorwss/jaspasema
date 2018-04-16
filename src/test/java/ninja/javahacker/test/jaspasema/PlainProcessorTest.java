@@ -209,7 +209,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(33, c);
                 FwTester.confirm();
             }
-        }).post("/go", "", 200, "", Arrays.asList(new Header("Cookie", "a=123; b=Laranja; c=33")));
+        }).post("/go", "", 200, ReturnMapper., Arrays.asList(new Header("Cookie", "a=123; b=Laranja; c=33")));
     }
 
     @Test

@@ -2,9 +2,9 @@ package ninja.javahacker.jaspasema.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -102,7 +102,11 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream pw = new PrintStream(baos);
             e.printStackTrace(pw);
-            rp.body(PANIC.replace("$ERROR$", baos.toString(StandardCharsets.UTF_8)));
+            try {
+                rp.body(PANIC.replace("$ERROR$", baos.toString("UTF-8")));
+            } catch (UnsupportedEncodingException x) {
+                throw new AssertionError(x);
+            }
             rp.type("text/html;charset=utf-8");
         }
     }

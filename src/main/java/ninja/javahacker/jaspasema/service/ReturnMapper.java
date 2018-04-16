@@ -31,7 +31,7 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  */
 public class ReturnMapper {
 
-    private static final String DEFAULT_HTML_200 = ""
+    public static final String DEFAULT_HTML_200 = ""
             + "<!DOCTYPE html>"
             + "<html>"
             + "  <head>"
@@ -42,7 +42,7 @@ public class ReturnMapper {
             + "  </body>"
             + "</html>";
 
-    private static final String DEFAULT_HTML_ERROR_500 = ""
+    public static final String DEFAULT_HTML_ERROR_500 = ""
             + "<!DOCTYPE html>"
             + "<html>"
             + "  <head>"
@@ -53,7 +53,7 @@ public class ReturnMapper {
             + "  </body>"
             + "</html>";
 
-    private static final String DEFAULT_HTML_ERROR_400 = ""
+    public static final String DEFAULT_HTML_ERROR_400 = ""
             + "<!DOCTYPE html>"
             + "<html>"
             + "  <head>"
