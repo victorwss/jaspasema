@@ -116,7 +116,9 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
         try {
             return (T) method.invoke(instance, parameters.toArray());
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            throw new AssertionError(e);
+            AssertionError a = new AssertionError(method + " " + parameters);
+            a.initCause(e);
+            throw a;
         }
     }
 }

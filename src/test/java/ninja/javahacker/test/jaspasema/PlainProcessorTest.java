@@ -1,6 +1,8 @@
 package ninja.javahacker.test.jaspasema;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ import ninja.javahacker.jaspasema.ProducesPlain;
 import ninja.javahacker.jaspasema.QueryPart;
 import ninja.javahacker.jaspasema.SessionParam;
 import ninja.javahacker.jaspasema.UriPart;
+import ninja.javahacker.jaspasema.service.ReturnMapper;
 import ninja.javahacker.test.jaspasema.ApiTester.Header;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,6 +49,19 @@ public class PlainProcessorTest {
         public static class Nested {
             private int d;
             private long e;
+
+            @JsonCreator
+            public Nested(@JsonProperty("d") int d, @JsonProperty("e") int e) {
+                this.d = d;
+                this.e = e;
+            }
+        }
+
+        @JsonCreator
+        public TestValue(@JsonProperty("a") int a, @JsonProperty("b") String b, @JsonProperty("c") Nested c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
         }
     }
 
@@ -59,6 +75,13 @@ public class PlainProcessorTest {
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         private LocalDateTime c;
+
+        @JsonCreator
+        public DateSet(@JsonProperty("a") LocalDate a, @JsonProperty("b") LocalDate b, @JsonProperty("c") LocalDateTime c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
     }
 
     @Test
@@ -70,7 +93,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals("Teste", a);
                 FwTester.confirm();
             }
-        }).post("/go", "Teste", 200, "", Collections.emptyList());
+        }).post("/go", "Teste", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -97,7 +120,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals("Teste", b);
                 FwTester.confirm();
             }
-        }).post("/go", "Teste", 200, "", Collections.emptyList());
+        }).post("/go", "Teste", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -111,7 +134,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(123, c);
                 FwTester.confirm();
             }
-        }).post("/go", "123", 200, "", Collections.emptyList());
+        }).post("/go", "123", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -126,7 +149,10 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(2233L, x.getC().getE());
                 FwTester.confirm();
             }
-        }).post("/go", "{\"a\": 123, \"b\": \"Verde\", \"c\": { \"d\": 321, \"e\": 2233}}", 200, "", Collections.emptyList());
+        }).post("/go", "{\"a\": 123, \"b\": \"Verde\", \"c\": { \"d\": 321, \"e\": 2233}}",
+                200,
+                ReturnMapper.DEFAULT_HTML_200,
+                Collections.emptyList());
     }
 
     @Test
@@ -154,7 +180,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(33, c);
                 FwTester.confirm();
             }
-        }).post("/go/123/xxx/33/yyy/zzz/Laranja/qqqq", "", 200, "", Collections.emptyList());
+        }).post("/go/123/xxx/33/yyy/zzz/Laranja/qqqq", "", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -177,7 +203,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(Arrays.asList(7777L, 44444L, 987654321L), id);
                 FwTester.confirm();
             }
-        }).post(url, "", 200, "", Collections.emptyList());
+        }).post(url, "", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -195,7 +221,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals("Azul", b);
                 FwTester.confirm();
             }
-        }).post("/go", json, 200, "", Collections.emptyList());
+        }).post("/go", json, 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -209,11 +235,12 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(33, c);
                 FwTester.confirm();
             }
-        }).post("/go", "", 200, ReturnMapper., Arrays.asList(new Header("Cookie", "a=123; b=Laranja; c=33")));
+        }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(new Header("Cookie", "a=123; b=Laranja; c=33")));
     }
 
     @Test
     public void testHeaderParams() throws Throwable {
+        List<Header> headers = Arrays.asList(new Header("a", "123"), new Header("b", "Laranja"), new Header("c", "33"));
         FwTester.reflect(new Object() {
             @Get
             @Path("/go")
@@ -223,7 +250,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(33, c);
                 FwTester.confirm();
             }
-        }).get("/go", 200, "", Arrays.asList(new Header("a", "123"), new Header("b", "Laranja"), new Header("c", "33")));
+        }).get("/go", 200, ReturnMapper.DEFAULT_HTML_200, headers);
     }
 
     @Test
@@ -242,7 +269,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(9999L, yellow.getE());
                 FwTester.confirm();
             }
-        }).post("/go", "", 200, "", Arrays.asList(h1, h2));
+        }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(h1, h2));
     }
 
     @Test
@@ -260,7 +287,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(sessionObjectB, b);
                 FwTester.confirm();
             }
-        }, session).post("/go", "", 200, "", Collections.emptyList());
+        }, session).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 
     @Test
@@ -303,7 +330,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(9999L, header2.getE());
                 FwTester.confirm();
             }
-        }, session).post("/go/abacaxi?test=ABC", json, 200, "", Arrays.asList(h1, h2));
+        }, session).post("/go/abacaxi?test=ABC", json, 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(h1, h2));
     }
 
     @Test
@@ -313,6 +340,7 @@ public class PlainProcessorTest {
         Header h3 = new Header("h3", "23/06/2017 17:01");
         Header h4 = new Header("h4", "2017-06-23-17-01-22");
         Header h5 = new Header("Cookie", "c1=23/06/2017;c2=2017-06-23;c3=23/06/2017.17:01;c4=2017-06-23-17-01-22");
+        List<Header> headers = Arrays.asList(h1, h2, h3, h4, h5);
         FwTester.reflect(new Object() {
             @Post
             @Path("/go/:u1/:u2")
@@ -345,7 +373,7 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(d2, body);
                 FwTester.confirm();
             }
-        }).post("/go/2017-06-23-17-01-22/2017-06-23", "06/23/2017 17:01:22", 200, "", Arrays.asList(h1, h2, h3, h4, h5));
+        }).post("/go/2017-06-23-17-01-22/2017-06-23", "06/23/2017 17:01:22", 200, ReturnMapper.DEFAULT_HTML_200, headers);
     }
 
     @Test
@@ -386,6 +414,6 @@ public class PlainProcessorTest {
                 Assertions.assertEquals(1234, b);
                 FwTester.confirm();
             }
-        }).post("/go", "{\"a\": \"23/06/2017\", \"b\": 1234}", 200, "", Collections.emptyList());
+        }).post("/go", "{\"a\": \"23/06/2017\", \"b\": 1234}", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
     }
 }
