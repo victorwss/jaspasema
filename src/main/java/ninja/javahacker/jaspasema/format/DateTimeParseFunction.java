@@ -24,7 +24,7 @@ public interface DateTimeParseFunction<E> {
         return new DateTimeParseFunction<>() {
             @Override
             public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s, DateTimeFormatter format) throws X {
-                if ("null".equals(s) || "".equals(s)) return null;
+                if ("null".equals(s) || s.isEmpty()) return null;
                 try {
                     return func.apply(s, format);
                 } catch (DateTimeException e) {

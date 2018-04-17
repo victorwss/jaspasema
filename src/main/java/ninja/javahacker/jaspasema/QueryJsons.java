@@ -15,6 +15,7 @@ import ninja.javahacker.jaspasema.processor.MalformedParameterException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
+import ninja.javahacker.reifiedgeneric.Wrappers;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -65,7 +66,7 @@ public @interface QueryJsons {
                     E elem = JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             x -> new MalformedParameterException(p, "The @QueryJsons parameter has not a valid value.", x),
-                            ReifiedGeneric.unwrapIterableGenericType(target),
+                            Wrappers.unwrapIterable(target),
                             s);
                     elements.add(elem);
                 }

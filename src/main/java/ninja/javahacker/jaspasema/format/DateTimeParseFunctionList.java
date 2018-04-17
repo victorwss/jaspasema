@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 import lombok.NonNull;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
+import ninja.javahacker.reifiedgeneric.Wrappers;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -21,7 +22,7 @@ public interface DateTimeParseFunctionList<E> {
             @NonNull ReifiedGeneric<List<E>> target)
     {
         if (!target.isAssignableFrom(List.class)) return null;
-        DateTimeParseFunction<E> func = DateTimeParseFunction.parserFor(ReifiedGeneric.unwrapIterableGenericType(target));
+        DateTimeParseFunction<E> func = DateTimeParseFunction.parserFor(Wrappers.unwrapIterable(target));
         return new DateTimeParseFunctionList<E>() {
             @Override
             public <X extends Throwable> List<E> parse(

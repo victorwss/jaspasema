@@ -18,7 +18,7 @@ public interface ParseFunction<E> {
         return new ParseFunction<E>() {
             @Override
                 public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
-                if ("null".equals(s) || "".equals(s)) return null;
+                if ("null".equals(s) || s.isEmpty()) return null;
                 try {
                     return func.apply(s);
                 } catch (Exception e) {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import lombok.NonNull;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
+import ninja.javahacker.reifiedgeneric.Wrappers;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -20,7 +21,7 @@ public interface ParseFunctionList<E> {
             @NonNull ReifiedGeneric<List<E>> target)
     {
         if (!target.isAssignableFrom(List.class)) return null;
-        ParseFunction<E> func = ParseFunction.parserFor(ReifiedGeneric.unwrapIterableGenericType(target));
+        ParseFunction<E> func = ParseFunction.parserFor(Wrappers.unwrapIterable(target));
         return new ParseFunctionList<E>() {
             @Override
             public <X extends Throwable> List<E> parse(Function<? super Throwable, X> onError, List<String> list) throws X {
