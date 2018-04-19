@@ -3,6 +3,9 @@ package ninja.javahacker.jaspasema.processor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -28,6 +31,7 @@ public interface ParamProcessor<A extends Annotation> {
     }
 
     @Value
+    @AllArgsConstructor
     public class Stub<E> {
         @NonNull
         private Worker<E> worker;
@@ -37,6 +41,18 @@ public interface ParamProcessor<A extends Annotation> {
 
         @NonNull
         private String instructionAdded;
+
+        @NonNull
+        private List<String> preSendInstructionAdded;
+
+        public Stub(
+                @NonNull Worker<E> worker,
+                @NonNull String parameterAdded,
+                @NonNull String instructionAdded,
+                @NonNull String... preSendInstructionAdded)
+        {
+            this(worker, parameterAdded, instructionAdded, Arrays.asList(preSendInstructionAdded));
+        }
     }
 
     public static Stub<?> forParameter(Parameter p) throws BadServiceMappingException, MalformedParameterProcessorException {

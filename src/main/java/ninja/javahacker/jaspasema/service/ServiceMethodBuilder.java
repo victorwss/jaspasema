@@ -108,17 +108,13 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.method = method;
         this.path = method.getAnnotation(Path.class).value();
         Class<? extends Annotation> annotation = null;
-        String httpMethodName = null;
 
         for (Annotation a : method.getAnnotations()) {
-            HttpMethod hm = a.annotationType().getAnnotation(HttpMethod.class);
-            if (hm == null) continue;
+            if (!a.annotationType().isAnnotationPresent(HttpMethod.class)) continue;
             if (annotation != null) {
                 throw new BadServiceMappingException(method, "Multiple @HttpMethod-annotated annotations on method.");
             }
             annotation = a.annotationType();
-            httpMethodName = hm.value();
-            if (httpMethodName.isEmpty()) httpMethodName = annotation.getSimpleName().toUpperCase(Locale.ROOT);
         }
 
         if (annotation == null) {
@@ -129,6 +125,9 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             throw new BadServiceMappingException(method, "Don't know how to handle @" + annotation.getSimpleName() + ".");
         }
 
+        HttpMethod hm = annotation.getAnnotation(HttpMethod.class);
+        String httpMethodName = hm.value();
+        if (httpMethodName.isEmpty()) httpMethodName = annotation.getSimpleName().toUpperCase(Locale.ROOT);
         this.httpMethod = httpMethodName;
         ServiceName sn = method.getAnnotation(ServiceName.class);
         this.callName = ObjectUtils.choose(sn == null ? "" : sn.value(), method.getName());

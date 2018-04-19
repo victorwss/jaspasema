@@ -17,10 +17,12 @@ public class JQueryTemplate implements ApiTemplate {
     private static final String METHOD_TEMPLATE = ""
             + "    services.#SERVICE#.#METHOD# = function(#DEFINE_PARAMETERS#) {\n"
             + "        var data = {};\n"
+            + "        var requestType = 'text/plain; charset=utf-8';\n"
             + "        var customHeaders = [];\n"
             + "        var targetUrl = \"#PATH#\";\n"
             + "#RECEIVE_PARAMETERS#"
-            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", targetUrl, data, customHeaders);\n"
+            + "#PRE_SEND_INSTRUCTIONS#"
+            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", targetUrl, data, customHeaders, requestType);\n"
             + "    };\n"
             + "\n";
 
@@ -39,13 +41,14 @@ public class JQueryTemplate implements ApiTemplate {
             + "    var services = {};\n"
             + "    services.targetUrl = \"#URL#\";\n"
             + "\n"
-            + "    var jsonCall = function(type, method, urlContinuation, data, customHeaders) {\n"
+            + "    var jsonCall = function(type, method, urlContinuation, data, customHeaders, requestType) {\n"
             + "        return $.ajax({\n"
             + "            dataType: type,\n"
             + "            url: services.targetUrl + urlContinuation,\n"
             + "            crossDomain: true,\n"
             + "            data: data,\n"
             + "            method: method,\n"
+            + "            contentType: requestType,\n"
             + "            xhrFields: {\n"
             + "                withCredentials: true\n"
             + "            },\n"
@@ -104,6 +107,7 @@ public class JQueryTemplate implements ApiTemplate {
 
         StringJoiner def = new StringJoiner(", ");
         StringJoiner rec = new StringJoiner("");
+        StringJoiner extras = new StringJoiner("");
         for (ParamProcessor.Stub<?> pps : smb.getParameterProcessors()) {
             String pa = pps.getParameterAdded();
             if (!pa.isEmpty()) {
@@ -113,10 +117,14 @@ public class JQueryTemplate implements ApiTemplate {
             if (!ia.isEmpty()) {
                 rec.add("        " + ia + "\n");
             }
+            for (String extra : pps.getPreSendInstructionAdded()) {
+                extras.add("        " + extra + "\n");
+            }
         }
 
         return output
                 .replace("#DEFINE_PARAMETERS#", def.toString())
-                .replace("#RECEIVE_PARAMETERS#", rec.toString());
+                .replace("#RECEIVE_PARAMETERS#", rec.toString())
+                .replace("#PRE_SEND_INSTRUCTIONS#", extras.toString());
     }
 }

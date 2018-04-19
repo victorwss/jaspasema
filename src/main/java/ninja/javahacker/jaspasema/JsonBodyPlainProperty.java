@@ -29,6 +29,12 @@ public @interface JsonBodyPlainProperty {
 
     public static class Processor implements ParamProcessor<JsonBodyPlainProperty> {
 
+        private static final String INSTRUCTION_TEMPLATE = "data.#VAR# = #VAR#;";
+
+        private static final String REQUEST_TYPE = "requestType = 'application/json; charset=utf-8';";
+
+        private static final String JSONIFY = "data = JSON.stringify(data);";
+
         @Override
         public <E> Stub<E> prepare(
                 @NonNull ReifiedGeneric<E> target,
@@ -50,7 +56,9 @@ public @interface JsonBodyPlainProperty {
                         return part.make(obj.toString());
                     },
                     js,
-                    "data." + js + " = " + js + ";");
+                    INSTRUCTION_TEMPLATE.replace("#VAR#", js),
+                    REQUEST_TYPE,
+                    JSONIFY);
         }
     }
 }

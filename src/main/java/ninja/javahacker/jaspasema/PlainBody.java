@@ -26,6 +26,8 @@ public @interface PlainBody {
 
     public static class Processor implements ParamProcessor<PlainBody> {
 
+        private static final String INSTRUCTION_TEMPLATE = "data = #VAR#;";
+
         @Override
         public <E> Stub<E> prepare(
                 @NonNull ReifiedGeneric<E> target,
@@ -42,7 +44,7 @@ public @interface PlainBody {
             return new Stub<>(
                     (rq, rp) -> part.make(rq.body()),
                     annotation.implicit() ? "" : js,
-                    annotation.implicit() ? "" : "data = " + js + ";");
+                    annotation.implicit() ? "" : INSTRUCTION_TEMPLATE.replace("#VAR#", js));
         }
     }
 }

@@ -72,7 +72,9 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
     }
 
     @Override
-    public void handleIt(@NonNull Request rq, @NonNull Response rp) throws InvocationTargetException {
+    public void handleIt(@NonNull Request rq, @NonNull Response rp)
+            throws InvocationTargetException, MalformedParameterException, MalformedReturnValueException
+    {
         // Can't use streams here due to MalformedParameterException that run(rq, rp) might throw.
         List<Object> parameters = new ArrayList<>(parameterProcessors.size());
         Throwable badThing = null;
@@ -84,10 +86,12 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
             } catch (MalformedParameterException e) {
                 badThing = e;
                 returnProcessor.onException(e).getWorker().run(rq, rp, e);
+                throw e;
             }
 
             try {
-                returnProcessor.onReturn().getWorker().run(rq, rp, invoke(parameters));
+                T result = invoke(parameters);
+                returnProcessor.onReturn().getWorker().run(rq, rp, result);
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
                 returnProcessor.onException(cause).getWorker().run(rq, rp, cause);
@@ -95,8 +99,10 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
             } catch (MalformedReturnValueException e) {
                 badThing = e;
                 returnProcessor.onException(e).getWorker().run(rq, rp, e);
+                throw e;
             }
         } catch (MalformedReturnValueException e) {
+            if (badThing == null) throw e;
             e.addSuppressed(badThing);
             rp.status(500);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -108,6 +114,7 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
                 throw new AssertionError(x);
             }
             rp.type("text/html;charset=utf-8");
+            throw e;
         }
     }
 

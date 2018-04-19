@@ -82,8 +82,13 @@ public final class ServiceConfigurer {
         });
 
         service.before((request, response) -> {
-            response.header("Access-Control-Allow-Origin", "*");
+            String origin = request.headers("Origin");
+            if (origin == null || origin.isEmpty()) origin = "*";
+            if ("null".equals(origin)) origin = "file://";
+            response.header("Access-Control-Allow-Origin", origin);
+            response.header("Access-Control-Allow-Credentials", "true");
             response.header("Access-Control-Request-Method", "HEAD, GET, POST, PUT, DELETE, PATCH");
+            response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             //response.header("Access-Control-Allow-Headers", headers);
         });
     }
