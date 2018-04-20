@@ -46,10 +46,10 @@ public interface ParamProcessor<A extends Annotation> {
         private List<String> preSendInstructionAdded;
 
         public Stub(
-                @NonNull Worker<E> worker,
-                @NonNull String parameterAdded,
-                @NonNull String instructionAdded,
-                @NonNull String... preSendInstructionAdded)
+                /*@NonNull*/ Worker<E> worker,
+                /*@NonNull*/ String parameterAdded,
+                /*@NonNull*/ String instructionAdded,
+                /*@NonNull*/ String... preSendInstructionAdded)
         {
             this(worker, parameterAdded, instructionAdded, Arrays.asList(preSendInstructionAdded));
         }

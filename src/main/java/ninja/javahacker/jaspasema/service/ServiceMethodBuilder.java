@@ -32,6 +32,7 @@ import spark.Service;
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@Getter
 public class ServiceMethodBuilder<T> implements JaspasemaRoute {
 
     @FunctionalInterface
@@ -48,48 +49,37 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
     private static final Map<Class<? extends Annotation>, RouteConfig> CONFIGS =
             Map.of(Get.class, GET, Post.class, POST, Put.class, PUT, Delete.class, DELETE, Patch.class, PATCH);
 
-    @Getter
     @NonNull
     private final ReifiedGeneric<T> target;
 
-    @Getter
     @NonNull
     private final Method method;
 
-    @Getter
     @NonNull
     private final String httpMethod;
 
-    @Getter
     @NonNull
     private final String path;
 
-    @Getter
     @NonNull
     private final RouteConfig routeConfig;
 
-    @Getter
     @NonNull
     private final String serviceName;
 
-    @Getter
     @NonNull
     private final String callName;
 
-    @Getter
     @NonNull
     private final Object instance;
 
-    @Getter
     @NonNull
     @Delegate(types = JaspasemaRoute.class)
     private final JaspasemaRoute call;
 
-    @Getter
     @NonNull
     private final List<ParamProcessor.Stub<?>> parameterProcessors;
 
-    @Getter
     @NonNull
     private final ReturnMapper.ReturnMap<T> returnMapper;
 

@@ -20,17 +20,15 @@ import spark.Service;
 /**
  * @author Victor Williams Stafusa da Silva
  */
-public class ServiceBuilder {
+@Getter
+public final class ServiceBuilder {
 
-    @Getter
     @NonNull
     private final Object instance;
 
-    @Getter
     @NonNull
     private final String serviceName;
 
-    @Getter
     @NonNull
     private final List<ServiceMethodBuilder<?>> methods;
 

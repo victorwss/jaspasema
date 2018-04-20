@@ -126,7 +126,7 @@ public class ReturnMapper {
         }
 
         returnConfig = rt.or(() -> parent.map(ReturnMapper::getReturnConfig)).orElseThrow(AssertionError::new);
-        exceptionsConfig = new HashMap<>();
+        exceptionsConfig = new HashMap<>(20);
         parent.ifPresent(p -> exceptionsConfig.putAll(p.exceptionsConfig));
         exceptionsConfig.putAll(sketch);
     }

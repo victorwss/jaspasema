@@ -78,7 +78,7 @@ public class JQueryTemplate implements ApiTemplate {
         };
     }
 
-    public String createJavascriptStub(@NonNull ServiceConfigurer sc) {
+    private String createJavascriptStub(@NonNull ServiceConfigurer sc) {
         String output = API_TEMPLATE
                 .replace("#VAR_NAME#", varName.get())
                 .replace("#URL#", url.get());

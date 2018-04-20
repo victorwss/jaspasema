@@ -20,6 +20,7 @@ import spark.Response;
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@Getter
 public class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     private static final String PANIC = ""
@@ -34,23 +35,18 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
             + "  </body>"
             + "</html>";
 
-    @Getter
     @NonNull
     private final ReifiedGeneric<T> target;
 
-    @Getter
     @NonNull
     private final Method method;
 
-    @Getter
     @NonNull
     private final List<ParamProcessor.Stub<?>> parameterProcessors;
 
-    @Getter
     @NonNull
     private final ReturnMapper.ReturnMap<T> returnProcessor;
 
-    @Getter
     @NonNull
     private final Object instance;
 
@@ -106,9 +102,10 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
             e.addSuppressed(badThing);
             rp.status(500);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream pw = new PrintStream(baos);
-            e.printStackTrace(pw);
             try {
+                // Java 10: replaces "UTF-8" with StandardCharsets.UTF_8 and get rid of the UnsupportedEncodingException.
+                PrintStream pw = new PrintStream(baos, true, "UTF-8");
+                e.printStackTrace(pw);
                 rp.body(PANIC.replace("$ERROR$", baos.toString("UTF-8")));
             } catch (UnsupportedEncodingException x) {
                 throw new AssertionError(x);
