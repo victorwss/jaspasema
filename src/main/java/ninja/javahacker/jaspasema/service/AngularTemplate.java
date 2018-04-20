@@ -14,56 +14,61 @@ import spark.Route;
 @Value
 public class AngularTemplate implements ApiTemplate {
 
-    private static final String PREFIX = ""
+    private static final String API_TEMPLATE = ""
             + "(function() {\n"
-            + "  'use strict';\n\n";
-
-    private static final String SUFFIX = ""
-            + "    var jsonCall = function(type, method, urlContinuation, data, customHeaders, $http) {\n"
+            + "\n"
+            + "    'use strict';\n"
+            + "    var targetUrl = \"#URL#\";\n"
+            + "\n"
+            + "    var jsonCall = function(type, method, urlContinuation, data, customHeaders, requestType, $http) {\n"
             + "        var headers = {};\n"
+            + "        headers['ContentType'] = requestType;\n"
             + "        for (var ch in customHeaders) {\n"
             + "            headers[customHeaders[ch].name] = customHeaders[ch].value;\n"
             + "        }\n"
-            + "        var config= {\n"
+            + "        var config = {\n"
             + "            method: method,\n"
-            + "            url: \"#URL#\" + urlContinuation,\n"
+            + "            url: targetUrl + urlContinuation,\n"
             + "            data: data,\n"
             + "            headers: headers\n"
             + "        };\n"
             + "        return $http(config)\n"
-            + "                  .then(function(response) {\n"
-            + "                      return Promise.resolve(response.data);\n"
-            + "                  }, function(response) {\n"
-            + "                      return Promise.reject({ msg: \"API Error: \" + urlContinuation, status: response.status });\n"
-            + "                  });\n"
+            + "                .then(function(response) {\n"
+            + "                    return Promise.resolve(response.data);\n"
+            + "                }, function(response) {\n"
+            + "                    return Promise.reject({ msg: \"API Error: \" + urlContinuation, status: response.status });\n"
+            + "                });\n"
             + "    };\n"
             + "\n"
+            + "#SERVICES#"
             + "})();";
 
     private static final String FACTORY_TEMPLATE = ""
-            + "  angular\n"
-            + "    .module('#MODULE#')\n"
-            + "    .factory('#SERVICE_NAME#Service',#SERVICE_NAME#Service);\n"
+            + "    angular\n"
+            + "        .module('#MODULE#')\n"
+            + "        .factory('#SERVICE_NAME#Service',#SERVICE_NAME#Service);\n"
             + "\n"
-            + "  #SERVICE_NAME#Service.$inject = ['$http'];\n"
+            + "    #SERVICE_NAME#Service.$inject = ['$http'];\n"
             + "\n"
-            + "  function #SERVICE_NAME#Service($http){ \n"
-            + "    var service = {\n"
+            + "    function #SERVICE_NAME#Service($http){ \n"
+            + "        var service = {\n"
             + "#METHODS_LIST#"
-            + "    };\n"
-            + "    return service;\n"
+            + "        };\n"
+            + "        return service;\n"
             + "\n"
             + "#IMPL_SERVICES#"
-            + "  }\n"
+            + "    }\n"
             + "\n";
 
     private static final String METHOD_TEMPLATE = ""
             + "    function #METHOD#(#DEFINE_PARAMETERS#) {\n"
             + "        var data = {};\n"
+            + "        var requestType = 'text/plain; charset=utf-8';\n"
             + "        var customHeaders = [];\n"
             + "        var targetUrl = \"#PATH#\";\n"
             + "#RECEIVE_PARAMETERS#"
-            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", targetUrl, data, customHeaders, $http);\n"
+            + "#PRE_SEND_INSTRUCTIONS#"
+            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", targetUrl, data, customHeaders, requestType, $http);\n"
             + "    }\n"
             + "\n";
 
@@ -79,33 +84,29 @@ public class AngularTemplate implements ApiTemplate {
     @Override
     public Route createStub(@NonNull ServiceConfigurer sc) {
         return (rq, rp) -> {
-            String v = varName.get();
-            Supplier<String> pv = () -> v;
             rp.type("text/javascript");
-            // String s = SUFFIX.replace("#VAR_NAME#", v).replace("#MODULE#", moduleName.get());
-            // return new JQueryTemplate(url, pv).createJavascriptStub(sc) + s;
-            return PREFIX + createAngularStub(sc) + SUFFIX.replace("#URL#", url.get());
+            return createAngularStub(sc);
         };
     }
 
-    public String createAngularStub(@NonNull ServiceConfigurer sc) {
+    private String createAngularStub(@NonNull ServiceConfigurer sc) {
         String api = sc.getServiceBuilders()
                 .stream()
                 .map(AngularTemplate::forService)
-                .collect(Collectors.joining());
+                .collect(Collectors.joining())
+                .replace("#VAR_NAME#", varName.get())
+                .replace("#MODULE#", moduleName.get())
+                .replace("#URL#", url.get());
 
-        return api.replace("#VAR_NAME#", varName.get())
-                  .replace("#MODULE#", moduleName.get());
+        return API_TEMPLATE.replace("#SERVICES#", api);
     }
 
     private static String forService(@NonNull ServiceBuilder sb) {
-        String output = FACTORY_TEMPLATE
-                .replace("#SERVICE_NAME#", sb.getServiceName());
+        String output = FACTORY_TEMPLATE.replace("#SERVICE_NAME#", sb.getServiceName());
         StringBuilder methodList = new StringBuilder(2048);
         String calls = sb.getMethods().stream().map(smb -> forMethod(methodList, smb)).collect(Collectors.joining());
         methodList.append("\n");
-        return output.replace("#IMPL_SERVICES#", calls)
-                     .replace("#METHODS_LIST#", methodList);
+        return output.replace("#IMPL_SERVICES#", calls).replace("#METHODS_LIST#", methodList);
     }
 
     private static String forMethod(@NonNull StringBuilder methodList, @NonNull ServiceMethodBuilder<?> smb) {
@@ -122,6 +123,7 @@ public class AngularTemplate implements ApiTemplate {
 
         StringJoiner def = new StringJoiner(", ");
         StringJoiner rec = new StringJoiner("");
+        StringJoiner extras = new StringJoiner("");
         for (ParamProcessor.Stub<?> pps : smb.getParameterProcessors()) {
             String pa = pps.getParameterAdded();
             if (!pa.isEmpty()) {
@@ -131,11 +133,15 @@ public class AngularTemplate implements ApiTemplate {
             if (!ia.isEmpty()) {
                 rec.add("        " + ia + "\n");
             }
+            for (String extra : pps.getPreSendInstructionAdded()) {
+                extras.add("        " + extra + "\n");
+            }
         }
 
         return output
                 .replace("#DEFINE_PARAMETERS#", def.toString())
-                .replace("#RECEIVE_PARAMETERS#", rec.toString());
+                .replace("#RECEIVE_PARAMETERS#", rec.toString())
+                .replace("#PRE_SEND_INSTRUCTIONS#", extras.toString());
     }
 
 }
