@@ -1,7 +1,6 @@
 buildscript {
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
     }
 }
 
@@ -11,8 +10,27 @@ plugins {
     id "com.github.spotbugs" version "1.6.1"
 }
 
-version = "1.1.0"
+group = "ninja.javahacker"
+String mavenArtifactId = "jaspasema"
+version = "0.3.0"
 ext.moduleName = "ninja.javahacker.jaspasema"
+
+ext.versionApiguardian = "1.0.0"
+ext.versionCheckstyle = "8.8"
+ext.versionFindSecBugs = "1.7.1"
+ext.versionJackson = "2.9.5"
+ext.versionJcip = "1.0"
+ext.versionJpa = "2.2"
+ext.versionJpaSimpleTransactions = "0.3.0"
+ext.versionJunit = "5.2.0-M1"
+ext.versionJsr305 = "3.0.2"
+ext.versionLombok = "1.16.22"
+ext.versionPmd = "6.2.0"
+ext.versionReifiedGenerics = "0.3.0"
+ext.versionSpark = "2.7.2"
+ext.versionSpotBugs = "3.1.3"
+ext.versionXJFunctions = "0.3.0"
+ext.lombokEdge = true
 
 apply plugin: 'base'
 apply plugin: 'java'
@@ -20,7 +38,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'checkstyle'
 
 checkstyle {
-    toolVersion = "8.8"
+    toolVersion = "${versionCheckstyle}"
     configFile = rootProject.file("config/checkstyle/checkstyle.xml")
     configProperties = [
         "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
@@ -28,8 +46,9 @@ checkstyle {
     ignoreFailures = true
     showViolations = true
 }
+
 spotbugs {
-    toolVersion = "3.1.3"
+    toolVersion = "${versionSpotBugs}"
 }
 
 repositories {
@@ -42,50 +61,60 @@ repositories {
 }
 
 dependencies {
+
+    // Find Security Bugs
+    compile group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: "${versionFindSecBugs}"
+
     // Jackson
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "2.9.5"
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "2.9.5"
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "2.9.5"
-    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: "2.9.5"
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "2.9.5"
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "2.9.5"
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${versionJackson}"
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${versionJackson}"
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${versionJackson}"
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: "${versionJackson}"
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${versionJackson}"
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "${versionJackson}"
 
-    // Lombok
-    //annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "1.16.22"
-    //compileOnly group: 'org.projectlombok', name: 'lombok', version: "1.16.22"
-    //testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: "1.16.22"
-    //testCompileOnly group: 'org.projectlombok', name: 'lombok', version: "1.16.22"
-    compileOnly files("libs/lombok-edge.jar")
-    annotationProcessor files("libs/lombok-edge.jar")
-    testCompileOnly files("libs/lombok-edge.jar")
-    testAnnotationProcessor files("libs/lombok-edge.jar")
-
-    // SpotBugs
-    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: "1.0"
-    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "3.1.3"
-    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "3.0.2"
-    testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: "1.0"
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "3.1.3"
-    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "3.0.2"
-
-    // PMD
-    compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "6.1.0"
-    testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "6.1.0"
-
-    // Spark
-    compile group: 'com.sparkjava', name: 'spark-core', version: "2.7.2"
-
-    // XJFunctions
-    compile group: 'ninja.javahacker', name: 'xjfunctions', version: "1.0"
-
-    // Reified-Generics
-    compile group: 'ninja.javahacker', name: 'reified-generic', version: "1.0.0"
+    // JPA
+    compile group: 'javax.persistence', name: 'javax.persistence-api', version: "${versionJpa}"
 
     // JUnit
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "5.2.0-M1"
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "5.2.0-M1"
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "5.2.0-M1"
-    testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: "1.0.0"
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "${versionJunit}"
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "${versionJunit}"
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "${versionJunit}"
+    testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: "${versionApiguardian}"
+
+    // Lombok
+    if (!lombokEdge) {
+        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
+        testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
+        testCompileOnly group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
+    } else {
+        annotationProcessor files("libs/lombok-edge.jar")
+        compileOnly files("libs/lombok-edge.jar")
+        testAnnotationProcessor files("libs/lombok-edge.jar")
+        testCompileOnly files("libs/lombok-edge.jar")
+    }
+
+    // PMD
+    compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "${versionPmd}"
+    testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "${versionPmd}"
+
+    // Reified-Generics
+    compile group: 'ninja.javahacker', name: 'reified-generic', version: "${versionReifiedGenerics}"
+
+    // Spark
+    compile group: 'com.sparkjava', name: 'spark-core', version: "${versionSpark}"
+
+    // SpotBugs
+    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: "${versionJcip}"
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${versionSpotBugs}"
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "${versionJsr305}"
+    testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: "${versionJcip}"
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${versionSpotBugs}"
+    testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "${versionJsr305}"
+
+    // XJFunctions
+    compile group: 'ninja.javahacker', name: 'xjfunctions', version: "${versionXJFunctions}"
 }
 
 tasks.withType(JavaCompile) {
@@ -113,14 +142,20 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
     }
 }
 
+task sourceJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier "sources"
+}
+
 publishing {
     publications {
-        maven(MavenPublication) {
-            groupId "ninja.javahacker"
-            artifactId "jaspasema"
-            version "${version}"
+        mavenJava(MavenPublication) {
+           artifactId "jaspasema"
+           from components.java
 
-            from components.java
+            artifact sourceJar {
+                classifier "sources"
+            }
         }
     }
 }
