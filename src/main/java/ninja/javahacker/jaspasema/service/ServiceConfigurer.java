@@ -10,8 +10,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.JaspasemaDiscoverableService;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.MalformedParameterProcessorException;
-import ninja.javahacker.jaspasema.processor.MalformedReturnProcessorException;
+import ninja.javahacker.jaspasema.processor.MalformedProcessorException;
 import spark.Service;
 
 /**
@@ -29,8 +28,7 @@ public final class ServiceConfigurer {
 
     public static ServiceConfigurer make(@NonNull Iterable<?> instances)
             throws BadServiceMappingException,
-            MalformedReturnProcessorException,
-            MalformedParameterProcessorException
+            MalformedProcessorException
     {
         List<ServiceBuilder> serviceBuilders = new ArrayList<>();
         for (Object ins : instances) {
@@ -41,16 +39,14 @@ public final class ServiceConfigurer {
 
     public static ServiceConfigurer forServices(@NonNull Object... instances)
             throws BadServiceMappingException,
-            MalformedReturnProcessorException,
-            MalformedParameterProcessorException
+            MalformedProcessorException
     {
         return ServiceConfigurer.make(Arrays.asList(instances));
     }
 
     public static ServiceConfigurer loadAll()
             throws BadServiceMappingException,
-            MalformedReturnProcessorException,
-            MalformedParameterProcessorException
+            MalformedProcessorException
     {
         ServiceLoader<JaspasemaDiscoverableService> loader = ServiceLoader.load(JaspasemaDiscoverableService.class);
         return ServiceConfigurer.make(loader);

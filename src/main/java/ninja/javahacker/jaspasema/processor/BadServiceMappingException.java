@@ -9,19 +9,17 @@ import lombok.NonNull;
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@Getter
 public class BadServiceMappingException extends Exception {
     private static final long serialVersionUID = 1L;
 
     @NonNull
-    @Getter
     private final Optional<Parameter> parameter;
 
     @NonNull
-    @Getter
     private final Optional<Method> method;
 
     @NonNull
-    @Getter
     private final Class<?> declaringClass;
 
     public BadServiceMappingException(/*@NonNull*/ Parameter parameter, /*@NonNull*/ String message) {

@@ -7,14 +7,13 @@ import lombok.NonNull;
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@Getter
 public class MalformedReturnValueException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    @Getter
     @NonNull
     private final Object returnedValue;
 
-    @Getter
     @NonNull
     private final Method method;
 

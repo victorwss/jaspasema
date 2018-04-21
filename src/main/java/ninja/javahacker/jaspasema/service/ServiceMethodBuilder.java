@@ -22,8 +22,7 @@ import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.HttpMethod;
-import ninja.javahacker.jaspasema.processor.MalformedParameterProcessorException;
-import ninja.javahacker.jaspasema.processor.MalformedReturnProcessorException;
+import ninja.javahacker.jaspasema.processor.MalformedProcessorException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Route;
@@ -89,8 +88,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             @NonNull Object instance,
             @NonNull Method method)
             throws BadServiceMappingException,
-            MalformedReturnProcessorException,
-            MalformedParameterProcessorException
+            MalformedProcessorException
     {
         this.serviceName = serviceName;
         this.target = target;
@@ -153,8 +151,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             @NonNull Object instance,
             @NonNull Method method)
             throws BadServiceMappingException,
-            MalformedReturnProcessorException,
-            MalformedParameterProcessorException
+            MalformedProcessorException
     {
         ReifiedGeneric<?> target = ReifiedGeneric.forType(method.getGenericReturnType());
         return make(serviceName, target, instance, method);
@@ -166,8 +163,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             @NonNull Object instance,
             @NonNull Method method)
             throws BadServiceMappingException,
-            MalformedReturnProcessorException,
-            MalformedParameterProcessorException
+            MalformedProcessorException
     {
         ReifiedGeneric<?> target2 = ReifiedGeneric.forType(method.getGenericReturnType());
         if (!Objects.equals(target2, target)) throw new IllegalArgumentException();
