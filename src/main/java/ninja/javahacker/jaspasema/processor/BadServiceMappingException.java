@@ -27,7 +27,7 @@ public class BadServiceMappingException extends Exception {
     }
 
     public BadServiceMappingException(/*@NonNull*/ Parameter parameter, /*@NonNull*/ String message, /*@NonNull*/ Throwable cause) {
-        super("[" + parameter + "] " + message, cause);
+        super("[" + parameter.getDeclaringExecutable() + "|" + parameter + "] " + message, cause);
         this.parameter = Optional.of(parameter);
         this.method = Optional.of((Method) parameter.getDeclaringExecutable());
         this.declaringClass = parameter.getDeclaringExecutable().getDeclaringClass();

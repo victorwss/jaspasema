@@ -94,7 +94,11 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.target = target;
         this.instance = instance;
         this.method = method;
-        this.path = method.getAnnotation(Path.class).value();
+        Path pt = method.getAnnotation(Path.class);
+        if (pt == null) {
+            throw new BadServiceMappingException(method, "Missing mandatory @Path annotation.");
+        }
+        this.path = pt.value();
         Class<? extends Annotation> annotation = null;
 
         for (Annotation a : method.getAnnotations()) {

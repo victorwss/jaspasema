@@ -19,7 +19,7 @@ public class MalformedParameterException extends Exception {
     }
 
     public MalformedParameterException(/*@NonNull*/ Parameter parameter, /*@NonNull*/ String message, /*@NonNull*/ Throwable cause) {
-        super("[" + parameter + "] " + message, cause);
+        super("[" + parameter + "|" + parameter.getDeclaringExecutable() + "] " + message, cause);
         this.parameter = parameter;
     }
 }

@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ParameterParser;
@@ -34,6 +35,10 @@ public @interface UriPart {
                 throws BadServiceMappingException
         {
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
+            Path path = p.getDeclaringExecutable().getAnnotation(Path.class);
+            if (path == null || !containsPart(path.value(), paramName)) {
+                throw new BadServiceMappingException(p, "Parameter value do not matches anything in method's @Path value.");
+            }
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
@@ -41,6 +46,11 @@ public @interface UriPart {
                     (rq, rp) -> part.make(rq.params(paramName)),
                     js,
                     "targetUrl = targetUrl.replace(':" + paramName + "', encodeURI(" + js + "));");
+        }
+
+        private boolean containsPart(String parts, String part) {
+            String z = ":" + part;
+            return Stream.of(parts.split("/")).anyMatch(z::equals);
         }
     }
 }
