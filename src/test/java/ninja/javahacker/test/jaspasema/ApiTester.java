@@ -45,6 +45,7 @@ public class ApiTester {
         int rc = connection.getResponseCode();
         try (InputStream is = rc >= 400 ? connection.getErrorStream() : connection.getInputStream()) {
             String response = read(is);
+            //String response = new String(is.readAllBytes(), StandardCharsets.UTF_8); // For Java 9
             return new TestResponse(connection.getResponseCode(), response);
         }
     }

@@ -1,13 +1,13 @@
 buildscript {
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE"
     }
 }
 
 plugins {
-    id "io.spring.dependency-management" version "1.0.4.RELEASE"
-    id "com.github.johnrengelman.shadow" version "2.0.3"
-    id "com.github.spotbugs" version "1.6.1"
+    id "io.spring.dependency-management" version "1.0.5.RELEASE"
+    id "com.github.johnrengelman.shadow" version "2.0.4"
+    id "com.github.spotbugs" version "1.6.2"
 }
 
 group = "ninja.javahacker"
@@ -16,20 +16,20 @@ version = "0.3.0"
 ext.moduleName = "ninja.javahacker.jaspasema"
 
 ext.versionApiguardian = "1.0.0"
-ext.versionCheckstyle = "8.8"
+ext.versionCheckstyle = "8.10.1"
 ext.versionFindSecBugs = "1.7.1"
 ext.versionJackson = "2.9.5"
 ext.versionJcip = "1.0"
 ext.versionJpa = "2.2"
 ext.versionJpaSimpleTransactions = "0.3.0"
-ext.versionJunit = "5.2.0-M1"
+ext.versionJunit = "5.2.0"
 ext.versionJsr305 = "3.0.2"
-ext.versionLombok = "1.16.22"
-ext.versionPmd = "6.2.0"
+ext.versionLombok = "1.18.0"
+ext.versionPmd = "6.4.0"
 ext.versionReifiedGenerics = "0.3.0"
 ext.versionSpark = "2.7.2"
 ext.versionSpotBugs = "3.1.3"
-ext.lombokEdge = true
+ext.lombokEdge = false
 
 apply plugin: 'base'
 apply plugin: 'java'
