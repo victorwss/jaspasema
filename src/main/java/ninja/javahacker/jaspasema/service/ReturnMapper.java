@@ -14,13 +14,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ProducesFixed;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
-import ninja.javahacker.jaspasema.processor.MalformedReturnProcessorException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.MalformedReturnProcessorException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
@@ -66,7 +67,7 @@ public class ReturnMapper {
 
     @ProducesFixed(DEFAULT_HTML_200)
     @ProducesFixed(on = Throwable.class, value = DEFAULT_HTML_ERROR_500, status = 500)
-    @ProducesFixed(on = MalformedParameterException.class, value = DEFAULT_HTML_ERROR_400, status = 400)
+    @ProducesFixed(on = ParameterValueException.class, value = DEFAULT_HTML_ERROR_400, status = 400)
     private static void dummy() {}
 
     private static final ReturnMapper ROOT;
@@ -74,7 +75,7 @@ public class ReturnMapper {
     static {
         try {
             Annotation[] base = ReturnMapper.class.getDeclaredMethod("dummy").getAnnotations();
-            ROOT = new ReturnMapper(Optional.empty(), base, s -> null);
+            ROOT = new ReturnMapper(Optional.empty(), base, () -> null, t -> null);
         } catch (NoSuchMethodException | BadServiceMappingException | MalformedReturnProcessorException e) {
             throw new AssertionError(e);
         }
@@ -84,12 +85,6 @@ public class ReturnMapper {
     private final ReturnProcessor.ProcessorConfiguration returnConfig;
 
     private final Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> exceptionsConfig;
-
-    private static final String CONFLICTING_ANNOTATIONS_RETURN =
-            "Conflicting @ReturnSerializer-annotated annotations on method for return type.";
-
-    private static final String CONFLICTING_ANNOTATIONS_THROW =
-            "Conflicting @ReturnSerializer-annotated annotations on method for exception $XXX$.";
 
     private static final String MORE_THAN_ONE_EXIT =
             "The annotation @$XXX$ should not have more than one @ExitDiscriminator method.";
@@ -103,7 +98,8 @@ public class ReturnMapper {
     private ReturnMapper(
             @NonNull Optional<ReturnMapper> parent,
             @NonNull Annotation[] anotations,
-            @NonNull Function<String, BadServiceMappingException> errorThrow)
+            @NonNull Supplier<BadServiceMappingException> confictingAnnotationsErrorThrow,
+            @NonNull Function<Class<? extends Throwable>, ? extends BadServiceMappingException> errorThrow)
             throws BadServiceMappingException,
             MalformedReturnProcessorException
     {
@@ -116,10 +112,10 @@ public class ReturnMapper {
         for (Annotation a : appliedAnnotations) {
             Class<? extends Throwable> ct = getOn(a);
             if (ct == ReturnedOk.class) {
-                if (rt.isPresent()) throw errorThrow.apply(CONFLICTING_ANNOTATIONS_RETURN);
+                if (rt.isPresent()) throw confictingAnnotationsErrorThrow.get();
                 rt = Optional.of(ReturnProcessor.prepareConfig(a));
             } else if (sketch.containsKey(ct)) {
-                throw errorThrow.apply(CONFLICTING_ANNOTATIONS_THROW.replace("$XXX$", ct.getSimpleName()));
+                throw errorThrow.apply(ct);
             } else {
                 sketch.put(ct, ReturnProcessor.prepareConfig(a));
             }
@@ -139,7 +135,8 @@ public class ReturnMapper {
         return new ReturnMapper(
                 Optional.of(ROOT),
                 targetClass.getAnnotations(),
-                s -> new BadServiceMappingException(targetClass, s));
+                () -> ConflictingAnnotationsReturnException.create(targetClass),
+                t -> ConflictingAnnotationsThrowsException.create(targetClass, t));
     }
 
     public static ReturnMap<?> forMethod(
@@ -150,7 +147,8 @@ public class ReturnMapper {
         return new ReturnMapper(
                 Optional.of(forClass(method.getDeclaringClass())),
                 method.getAnnotations(),
-                s -> new BadServiceMappingException(method, s)
+                () -> ConflictingAnnotationsReturnException.create(method),
+                t -> ConflictingAnnotationsThrowsException.create(method, t)
         ).makeMap(method);
     }
 
@@ -163,7 +161,8 @@ public class ReturnMapper {
         return new ReturnMapper(
                 Optional.of(forClass(method.getDeclaringClass())),
                 method.getAnnotations(),
-                s -> new BadServiceMappingException(method, s)
+                () -> ConflictingAnnotationsReturnException.create(method),
+                t -> ConflictingAnnotationsThrowsException.create(method, t)
         ).makeMap(target, method);
     }
 
@@ -286,6 +285,71 @@ public class ReturnMapper {
                 if (p != null) return (ReturnProcessor.Stub<X>) p;
             }
             throw new AssertionError();
+        }
+    }
+
+    @Getter
+    public static class ConflictingAnnotationsReturnException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        private static final String MESSAGE_TEMPLATE =
+                "Conflicting @ReturnSerializer-annotated annotations on method for return type.";
+
+        protected ConflictingAnnotationsReturnException(/*@NonNull*/ Class<?> targetClass) {
+            super(targetClass, MESSAGE_TEMPLATE);
+        }
+
+        protected ConflictingAnnotationsReturnException(/*@NonNull*/ Method method) {
+            super(method, MESSAGE_TEMPLATE);
+        }
+
+        public static ConflictingAnnotationsReturnException create(@NonNull Class<?> targetClass) {
+            return new ConflictingAnnotationsReturnException(targetClass);
+        }
+
+        public static ConflictingAnnotationsReturnException create(@NonNull Method method) {
+            return new ConflictingAnnotationsReturnException(method);
+        }
+    }
+
+    @Getter
+    public static class ConflictingAnnotationsThrowsException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        private static final String MESSAGE_TEMPLATE =
+                "Conflicting @ReturnSerializer-annotated annotations on method for exception $X$.";
+
+        @NonNull
+        private final Class<? extends Throwable> type;
+
+        protected ConflictingAnnotationsThrowsException(
+                /*@NonNull*/ Class<?> targetClass,
+                /*@NonNull*/ Class<? extends Throwable> type)
+        {
+            super(targetClass, MESSAGE_TEMPLATE.replace("$X$", type.getSimpleName()));
+            this.type = type;
+        }
+
+        protected ConflictingAnnotationsThrowsException(
+                /*@NonNull*/ Method method,
+                /*@NonNull*/ Class<? extends Throwable> type)
+        {
+            super(method, MESSAGE_TEMPLATE.replace("$X$", type.getSimpleName()));
+            this.type = type;
+        }
+
+        public static ConflictingAnnotationsThrowsException create(
+                @NonNull Class<?> targetClass,
+                @NonNull Class<? extends Throwable> type)
+        {
+            return new ConflictingAnnotationsThrowsException(targetClass, type);
+        }
+
+        public static ConflictingAnnotationsThrowsException create(
+                @NonNull Method method,
+                @NonNull Class<? extends Throwable> type)
+        {
+            return new ConflictingAnnotationsThrowsException(method, type);
         }
     }
 }

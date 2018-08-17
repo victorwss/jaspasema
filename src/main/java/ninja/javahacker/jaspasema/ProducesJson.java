@@ -8,9 +8,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.MalformedReturnValueException;
+import ninja.javahacker.jaspasema.exceptions.MalformedReturnValueException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
@@ -51,11 +51,7 @@ public @interface ProducesJson {
             try {
                 return JsonTypesProcessor.writeJson(lenient, someObject);
             } catch (JsonProcessingException x) {
-                throw new MalformedReturnValueException(
-                        someObject,
-                        method,
-                        "Returned value couldn't be converted to JSON.",
-                        x);
+                throw MalformedReturnValueException.create(someObject, method, x);
             }
         }
     }

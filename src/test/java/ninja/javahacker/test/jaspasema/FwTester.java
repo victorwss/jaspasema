@@ -36,9 +36,11 @@ public class FwTester {
             ApiTester.TestResponse tresult = ApiTester.builder().port(before).method(method).path(qs).body(body).headers(headers).build();
             //System.out.println(tresult);
             if (xxx.get() != null) throw xxx.get();
-            Assertions.assertEquals(expectedStatus, tresult.getStatus());
-            Assertions.assertEquals(resultBody, tresult.getBody());
-            Assertions.assertEquals(before, after);
+            Assertions.assertAll(
+                    () -> Assertions.assertEquals(expectedStatus, tresult.getStatus()),
+                    () -> Assertions.assertEquals(resultBody, tresult.getBody()),
+                    () -> Assertions.assertEquals(before, after)
+            );
         } finally {
             service.stop();
         }

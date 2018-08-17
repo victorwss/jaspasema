@@ -1,8 +1,12 @@
 package ninja.javahacker.jaspasema.processor;
 
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.MalformedReturnValueException;
+import ninja.javahacker.jaspasema.exceptions.MalformedReturnProcessorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -53,10 +57,10 @@ public interface ReturnProcessor<A extends Annotation> {
         Annotation interesting = null;
         for (Annotation ann : m.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ReturnSerializer.class)) continue;
-            if (interesting != null) throw new BadServiceMappingException(m, "Conflicting mapping on return type.");
+            if (interesting != null) throw ConflictingMappingOnReturnTypeException.create(m);
             interesting = ann;
         }
-        if (interesting == null) throw new BadServiceMappingException(m, "No mapping for return type.");
+        if (interesting == null) throw NoMappingOnReturnTypeException.create(m);
         return forMethod(m, interesting);
     }
 
@@ -119,9 +123,54 @@ public interface ReturnProcessor<A extends Annotation> {
             throws BadServiceMappingException
     {
         if (method.getReturnType() == void.class || method.getReturnType() == Void.class) {
-            throw new BadServiceMappingException(
-                    method,
-                    "Methods returning void should not feature @" + a.getSimpleName() + "-annotated annotations.");
+            throw ValuedVoidReturnTypeException.create(method, a);
+        }
+    }
+
+    public static class ConflictingMappingOnReturnTypeException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "Conflicting mapping on return type.";
+
+        protected ConflictingMappingOnReturnTypeException(/*@NonNull*/ Method method) {
+            super(method, MESSAGE_TEMPLATE);
+        }
+
+        public static ConflictingMappingOnReturnTypeException create(@NonNull Method method) {
+            return new ConflictingMappingOnReturnTypeException(method);
+        }
+    }
+
+    public static class NoMappingOnReturnTypeException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "No mapping on return type.";
+
+        protected NoMappingOnReturnTypeException(/*@NonNull*/ Method method) {
+            super(method, MESSAGE_TEMPLATE);
+        }
+
+        public static NoMappingOnReturnTypeException create(@NonNull Method method) {
+            return new NoMappingOnReturnTypeException(method);
+        }
+    }
+
+    @Getter
+    public static class ValuedVoidReturnTypeException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "Methods returning void should not feature @$A$-annotated annotations.";
+
+        @NonNull
+        private final Class<? extends Annotation> annotation;
+
+        protected ValuedVoidReturnTypeException(/*@NonNull*/ Method method, /*@NonNull*/ Class<? extends Annotation> annotation) {
+            super(method, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+            this.annotation = annotation;
+        }
+
+        public static ValuedVoidReturnTypeException create(@NonNull Method method, @NonNull Class<? extends Annotation> annotation) {
+            return new ValuedVoidReturnTypeException(method, annotation);
         }
     }
 }

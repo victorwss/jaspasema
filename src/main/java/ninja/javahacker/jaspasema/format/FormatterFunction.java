@@ -1,6 +1,7 @@
 package ninja.javahacker.jaspasema.format;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import lombok.NonNull;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -35,7 +36,7 @@ public interface FormatterFunction<E> {
     );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
-    public static <E> FormatterFunction<E> formatterFor(@NonNull ReifiedGeneric<E> target) {
-        return (FormatterFunction<E>) MAP.get(target.getGeneric());
+    public static <E> Optional<FormatterFunction<E>> formatterFor(@NonNull ReifiedGeneric<E> target) {
+        return Optional.ofNullable((FormatterFunction<E>) MAP.get(target.getGeneric()));
     }
 }

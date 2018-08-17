@@ -8,7 +8,7 @@ import java.lang.reflect.Parameter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -36,11 +36,14 @@ public @interface QueryJson {
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
-                    (rq, rp) -> JsonTypesProcessor.readJson(
+                    (rq, rp) -> {
+                        String s = rq.queryParams(paramName);
+                        return JsonTypesProcessor.readJson(
                             annotation.lenient(),
-                            x -> new MalformedParameterException(p, "The @QueryJson parameter has not a valid value.", x),
                             target,
-                            rq.queryParams(paramName)),
+                            s,
+                            x -> ParameterValueException.MalformedParameterException.create(p, QueryJson.class, s, x));
+                    },
                     js,
                     "targetUrl += '&" + paramName + "=' + encodeURI(JSON.stringify(" + js + "));");
         }

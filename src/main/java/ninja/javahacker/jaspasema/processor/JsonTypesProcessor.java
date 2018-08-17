@@ -30,12 +30,16 @@ public class JsonTypesProcessor {
             .findAndRegisterModules()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private static final ObjectMapper STRICT = new ObjectMapper()
             .findAndRegisterModules()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
     private static JavaType of(@NonNull ReifiedGeneric<?> t) {
@@ -53,9 +57,9 @@ public class JsonTypesProcessor {
     @SuppressWarnings("unchecked")
     public <E, X extends Throwable> E readJson(
             boolean lenient,
-            @NonNull Function<? super IOException, X> onError,
             @NonNull ReifiedGeneric<E> jt,
-            String data)
+            /*@Nullable*/ String data,
+            @NonNull Function<? super IOException, X> onError)
             throws X
     {
         if (data == null || data.isEmpty()) return null;
@@ -68,17 +72,18 @@ public class JsonTypesProcessor {
         }
     }
 
-    public Map<String, Object> readJsonMap(
+    public <X extends Throwable> Map<String, Object> readJsonMap(
             @NonNull Parameter p,
-            String data)
-            throws MalformedParameterException
+            /*@Nullable*/ String data,
+            @NonNull Function<? super IOException, X> onError)
+            throws X
     {
         if (data == null || data.isEmpty()) return Collections.emptyMap();
 
         try {
             return STRICT.readValue(data, MAP_TYPE);
         } catch (IOException e) {
-            throw new MalformedParameterException(p, "The body request data failed to be parseable as JSON.", e);
+            throw onError.apply(e);
         }
     }
 

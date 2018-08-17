@@ -20,9 +20,9 @@ import ninja.javahacker.jaspasema.Post;
 import ninja.javahacker.jaspasema.Put;
 import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.HttpMethod;
-import ninja.javahacker.jaspasema.processor.MalformedProcessorException;
+import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Route;
@@ -96,7 +96,7 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.method = method;
         Path pt = method.getAnnotation(Path.class);
         if (pt == null) {
-            throw new BadServiceMappingException(method, "Missing mandatory @Path annotation.");
+            throw MissingPathException.create(method);
         }
         this.path = pt.value();
         Class<? extends Annotation> annotation = null;
@@ -104,17 +104,17 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
         for (Annotation a : method.getAnnotations()) {
             if (!a.annotationType().isAnnotationPresent(HttpMethod.class)) continue;
             if (annotation != null) {
-                throw new BadServiceMappingException(method, "Multiple @HttpMethod-annotated annotations on method.");
+                throw MultipleHttpMethodAnnotationsException.create(method);
             }
             annotation = a.annotationType();
         }
 
         if (annotation == null) {
-            throw new BadServiceMappingException(method, "No @HttpMethod-annotated annotations on method.");
+            throw NoHttpMethodAnnotationsException.create(method);
         }
         this.routeConfig = CONFIGS.get(annotation);
         if (routeConfig == null) {
-            throw new BadServiceMappingException(method, "Don't know how to handle @" + annotation.getSimpleName() + ".");
+            throw DontKnowHowToHandleAnnotationException.create(method, annotation);
         }
 
         HttpMethod hm = annotation.getAnnotation(HttpMethod.class);
@@ -183,5 +183,70 @@ public class ServiceMethodBuilder<T> implements JaspasemaRoute {
             call.handleIt(rq, rp);
             return rp.body();
         });
+    }
+
+    public static class MissingPathException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        protected MissingPathException(/*@NonNull*/ Method method) {
+            super(method, "Missing mandatory @Path annotation.");
+        }
+
+        public static MissingPathException create(@NonNull Method method) {
+            return new MissingPathException(method);
+        }
+    }
+
+    public static class MultipleHttpMethodAnnotationsException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "Multiple @HttpMethod-annotated annotations on method.";
+
+        protected MultipleHttpMethodAnnotationsException(/*@NonNull*/ Method method) {
+            super(method, MESSAGE_TEMPLATE);
+        }
+
+        public static MultipleHttpMethodAnnotationsException create(@NonNull Method method) {
+            return new MultipleHttpMethodAnnotationsException(method);
+        }
+    }
+
+    public static class NoHttpMethodAnnotationsException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "No @HttpMethod-annotated annotations on method.";
+
+        protected NoHttpMethodAnnotationsException(/*@NonNull*/ Method method) {
+            super(method, MESSAGE_TEMPLATE);
+        }
+
+        public static NoHttpMethodAnnotationsException create(@NonNull Method method) {
+            return new NoHttpMethodAnnotationsException(method);
+        }
+    }
+
+    @Getter
+    public static class DontKnowHowToHandleAnnotationException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "Don't know how to handle @$A$.";
+
+        @NonNull
+        private final Class<? extends Annotation> annotation;
+
+        protected DontKnowHowToHandleAnnotationException(
+                /*@NonNull*/ Method method,
+                /*@NonNull*/ Class<? extends Annotation> annotation)
+        {
+            super(method, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+            this.annotation = annotation;
+        }
+
+        public static DontKnowHowToHandleAnnotationException create(
+                @NonNull Method method,
+                @NonNull Class<? extends Annotation> annotation)
+        {
+            return new DontKnowHowToHandleAnnotationException(method, annotation);
+        }
     }
 }

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.format.ReturnValueFormatter;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;

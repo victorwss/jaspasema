@@ -7,9 +7,10 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.ImplicitWithJsVarException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -41,16 +42,19 @@ public @interface JsonBody {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw new BadServiceMappingException(p, "The @JsonBody shouldn't have jsVar not empty and be implicit.");
+                throw ImplicitWithJsVarException.create(p, JsonBody.class);
             }
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
-                    (rq, rp) -> JsonTypesProcessor.readJson(
+                    (rq, rp) -> {
+                        String s = rq.body();
+                        return JsonTypesProcessor.readJson(
                             annotation.lenient(),
-                            x -> new MalformedParameterException(p, "The @JsonBody parameter has not a valid value.", x),
                             target,
-                            rq.body()),
+                            s,
+                            x -> ParameterValueException.MalformedParameterException.create(p, JsonBody.class, s, x));
+                    },
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : INSTRUCTION_TEMPLATE.replace("#VAR#", js),
                     REQUEST_TYPE,

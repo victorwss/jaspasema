@@ -5,9 +5,12 @@ import java.lang.reflect.Parameter;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.List;
+import lombok.Getter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.InvalidDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -15,7 +18,7 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  */
 @FunctionalInterface
 public interface ObjectListParser<E> {
-    public List<E> make(List<String> in) throws MalformedParameterException;
+    public List<E> make(List<String> in) throws ParameterValueException;
 
     public static <E> ObjectListParser<E> prepare(
             @NonNull ReifiedGeneric<List<E>> target,
@@ -24,37 +27,37 @@ public interface ObjectListParser<E> {
             @NonNull Parameter p)
             throws BadServiceMappingException
     {
-        String annotationName = annotationClass.getSimpleName();
         ParseFunctionList<E> pf = ParseFunctionList.parserFor(p, target);
         DateTimeParseFunctionList<E> df = DateTimeParseFunctionList.parserFor(p, target);
         if (pf == null && df == null) {
-            throw new BadServiceMappingException(
+            throw TypeRestrictionViolationException.create(
                     p,
-                    "The @" + annotationName + " annotation must be used only on parameters of "
-                            + "Lists of primitive wrappers, Strings or date/time types.");
+                    annotationClass,
+                    TypeRestrictionViolationException.AllowedTypes.SIMPLE_LIST,
+                    target);
         }
         if (pf != null) {
             if (!format.isEmpty()) {
-                throw new BadServiceMappingException(
+                throw TypeRestrictionViolationException.create(
                         p,
-                        "The @" + annotationName + " format must be specified only on Lists of date/time parameters.");
+                        annotationClass,
+                        TypeRestrictionViolationException.AllowedTypes.DATE_TIME_LIST,
+                        target);
             }
-            return x ->
-                    pf.parse(a ->
-                            new MalformedParameterException(p, "Invalid value for @" + annotationName + ": \"" + x + "\".", a), x);
+            return list ->
+                    pf.parse(
+                            a -> ParameterValueException.MalformedParameterException.create(p, annotationClass, String.valueOf(list), a),
+                            list);
         }
         DateTimeFormatter dtf;
         try {
             dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
         } catch (IllegalArgumentException e) {
-            throw new BadServiceMappingException(p, "Invalid format at @" + annotationName + " annotation.");
+            throw InvalidDateFormatException.create(p, annotationClass, format);
         }
         return list ->
-                df.parse(a ->
-                        new MalformedParameterException(
-                                p,
-                                "Invalid values for @" + annotationName + ": " + list + ".",
-                                a),
+                df.parse(
+                        a -> ParameterValueException.MalformedParameterException.create(p, annotationClass, String.valueOf(list), a),
                         list,
                         dtf);
     }

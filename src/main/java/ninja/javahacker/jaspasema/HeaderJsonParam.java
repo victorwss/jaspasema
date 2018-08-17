@@ -7,9 +7,10 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.ImplicitWithJsVarException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -36,17 +37,20 @@ public @interface HeaderJsonParam {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw new BadServiceMappingException(p, "The @HeaderJsonParam shouldn't have jsVar not empty and be implicit.");
+                throw ImplicitWithJsVarException.create(p, HeaderJsonParam.class);
             }
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
-                    (rq, rp) -> JsonTypesProcessor.readJson(
+                    (rq, rp) -> {
+                        String s = rq.headers(paramName);
+                        return JsonTypesProcessor.readJson(
                             annotation.lenient(),
-                            x -> new MalformedParameterException(p, "The @HeaderJsonJson parameter has not a valid value.", x),
                             target,
-                            rq.headers(paramName)),
+                            s,
+                            x -> ParameterValueException.MalformedParameterException.create(p, HeaderJsonParam.class, s, x));
+                    },
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : "customHeaders.push({name: '" + paramName + "', value: " + js + ");");
         }

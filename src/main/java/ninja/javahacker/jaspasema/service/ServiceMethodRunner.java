@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
-import ninja.javahacker.jaspasema.processor.MalformedReturnValueException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.MalformedReturnValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
@@ -69,7 +69,7 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     @Override
     public void handleIt(@NonNull Request rq, @NonNull Response rp)
-            throws InvocationTargetException, MalformedParameterException, MalformedReturnValueException
+            throws InvocationTargetException, ParameterValueException, MalformedReturnValueException
     {
         // Can't use streams here due to MalformedParameterException that run(rq, rp) might throw.
         List<Object> parameters = new ArrayList<>(parameterProcessors.size());
@@ -79,7 +79,7 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
                 for (ParamProcessor.Stub<?> ppw : parameterProcessors) {
                     parameters.add(ppw.getWorker().run(rq, rp));
                 }
-            } catch (MalformedParameterException e) {
+            } catch (ParameterValueException e) {
                 badThing = e;
                 returnProcessor.onException(e).getWorker().run(rq, rp, e);
                 throw e;

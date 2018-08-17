@@ -116,8 +116,10 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@PlainBody String a, @PlainBody String b) {
-                Assertions.assertEquals("Teste", a);
-                Assertions.assertEquals("Teste", b);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals("Teste", a),
+                        () -> Assertions.assertEquals("Teste", b)
+                );
                 FwTester.confirm();
             }
         }).post("/go", "Teste", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
@@ -129,9 +131,11 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@PlainBody int a, @PlainBody Integer b, @PlainBody byte c) {
-                Assertions.assertEquals(123, a);
-                Assertions.assertEquals(Integer.valueOf(123), b);
-                Assertions.assertEquals(123, c);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, a),
+                        () -> Assertions.assertEquals(Integer.valueOf(123), b),
+                        () -> Assertions.assertEquals(123, c)
+                );
                 FwTester.confirm();
             }
         }).post("/go", "123", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
@@ -143,10 +147,12 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@JsonBody TestValue x) {
-                Assertions.assertEquals(123, x.getA());
-                Assertions.assertEquals("Verde", x.getB());
-                Assertions.assertEquals(321, x.getC().getD());
-                Assertions.assertEquals(2233L, x.getC().getE());
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, x.getA()),
+                        () -> Assertions.assertEquals("Verde", x.getB()),
+                        () -> Assertions.assertEquals(321, x.getC().getD()),
+                        () -> Assertions.assertEquals(2233L, x.getC().getE())
+                );
                 FwTester.confirm();
             }
         }).post("/go", "{\"a\": 123, \"b\": \"Verde\", \"c\": { \"d\": 321, \"e\": 2233}}",
@@ -175,9 +181,11 @@ public class PlainProcessorTest {
             @Post
             @Path("/go/:a/xxx/:c/yyy/zzz/:b/qqqq")
             public void blah(@UriPart int a, @UriPart String b, @UriPart byte c) {
-                Assertions.assertEquals(123, a);
-                Assertions.assertEquals("Laranja", b);
-                Assertions.assertEquals(33, c);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, a),
+                        () -> Assertions.assertEquals("Laranja", b),
+                        () -> Assertions.assertEquals(33, c)
+                );
                 FwTester.confirm();
             }
         }).post("/go/123/xxx/33/yyy/zzz/Laranja/qqqq", "", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
@@ -196,11 +204,13 @@ public class PlainProcessorTest {
                     @QueryPart List<String> item,
                     @QueryPart List<Long> id)
             {
-                Assertions.assertEquals(123, a);
-                Assertions.assertEquals("Laranja", b);
-                Assertions.assertEquals(33, c);
-                Assertions.assertEquals(Arrays.asList("banana", "abacaxi", "uva"), item);
-                Assertions.assertEquals(Arrays.asList(7777L, 44444L, 987654321L), id);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, a),
+                        () -> Assertions.assertEquals("Laranja", b),
+                        () -> Assertions.assertEquals(33, c),
+                        () -> Assertions.assertEquals(Arrays.asList("banana", "abacaxi", "uva"), item),
+                        () -> Assertions.assertEquals(Arrays.asList(7777L, 44444L, 987654321L), id)
+                );
                 FwTester.confirm();
             }
         }).post(url, "", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
@@ -213,12 +223,14 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@JsonBodyProperty int a, @JsonBodyProperty String b, @JsonBodyProperty TestValue x) {
-                Assertions.assertEquals(123, x.getA());
-                Assertions.assertEquals("Verde", x.getB());
-                Assertions.assertEquals(321, x.getC().getD());
-                Assertions.assertEquals(2233L, x.getC().getE());
-                Assertions.assertEquals(999, a);
-                Assertions.assertEquals("Azul", b);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, x.getA()),
+                        () -> Assertions.assertEquals("Verde", x.getB()),
+                        () -> Assertions.assertEquals(321, x.getC().getD()),
+                        () -> Assertions.assertEquals(2233L, x.getC().getE()),
+                        () -> Assertions.assertEquals(999, a),
+                        () -> Assertions.assertEquals("Azul", b)
+                );
                 FwTester.confirm();
             }
         }).post("/go", json, 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
@@ -230,9 +242,11 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@CookieParam int a, @CookieParam String b, @CookieParam byte c) {
-                Assertions.assertEquals(123, a);
-                Assertions.assertEquals("Laranja", b);
-                Assertions.assertEquals(33, c);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, a),
+                        () -> Assertions.assertEquals("Laranja", b),
+                        () -> Assertions.assertEquals(33, c)
+                );
                 FwTester.confirm();
             }
         }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(new Header("Cookie", "a=123; b=Laranja; c=33")));
@@ -245,9 +259,11 @@ public class PlainProcessorTest {
             @Get
             @Path("/go")
             public void blah(@HeaderParam int a, @HeaderParam String b, @HeaderParam byte c) {
-                Assertions.assertEquals(123, a);
-                Assertions.assertEquals("Laranja", b);
-                Assertions.assertEquals(33, c);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(123, a),
+                        () -> Assertions.assertEquals("Laranja", b),
+                        () -> Assertions.assertEquals(33, c)
+                );
                 FwTester.confirm();
             }
         }).get("/go", 200, ReturnMapper.DEFAULT_HTML_200, headers);
@@ -261,12 +277,14 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@HeaderJsonParam TestValue blue, @HeaderJsonParam TestValue.Nested yellow) {
-                Assertions.assertEquals(444, blue.getA());
-                Assertions.assertEquals("Azul", blue.getB());
-                Assertions.assertEquals(555, blue.getC().getD());
-                Assertions.assertEquals(7777L, blue.getC().getE());
-                Assertions.assertEquals(888, yellow.getD());
-                Assertions.assertEquals(9999L, yellow.getE());
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(444, blue.getA()),
+                        () -> Assertions.assertEquals("Azul", blue.getB()),
+                        () -> Assertions.assertEquals(555, blue.getC().getD()),
+                        () -> Assertions.assertEquals(7777L, blue.getC().getE()),
+                        () -> Assertions.assertEquals(888, yellow.getD()),
+                        () -> Assertions.assertEquals(9999L, yellow.getE())
+                );
                 FwTester.confirm();
             }
         }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(h1, h2));
@@ -283,8 +301,10 @@ public class PlainProcessorTest {
             @Post
             @Path("/go")
             public void blah(@SessionParam Object a, @SessionParam Object b) {
-                Assertions.assertEquals(sessionObjectA, a);
-                Assertions.assertEquals(sessionObjectB, b);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(sessionObjectA, a),
+                        () -> Assertions.assertEquals(sessionObjectB, b)
+                );
                 FwTester.confirm();
             }
         }, session).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());
@@ -314,20 +334,22 @@ public class PlainProcessorTest {
                     @QueryPart String test,
                     @UriPart String xxx)
             {
-                Assertions.assertEquals(sessionObjectA, sessionA);
-                Assertions.assertEquals(sessionObjectB, sessionB);
-                Assertions.assertEquals("Homer", header1);
-                Assertions.assertEquals(123, x.getA());
-                Assertions.assertEquals("Verde", x.getB());
-                Assertions.assertEquals(321, x.getC().getD());
-                Assertions.assertEquals(2233L, x.getC().getE());
-                Assertions.assertEquals(321, c.getD());
-                Assertions.assertEquals(2233L, c.getE());
-                Assertions.assertEquals("{\"a\": 123, \"b\": \"Verde\", \"c\": {\"d\": 321, \"e\": 2233}}", json);
-                Assertions.assertEquals("abacaxi", xxx);
-                Assertions.assertEquals("ABC", test);
-                Assertions.assertEquals(888, header2.getD());
-                Assertions.assertEquals(9999L, header2.getE());
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(sessionObjectA, sessionA),
+                        () -> Assertions.assertEquals(sessionObjectB, sessionB),
+                        () -> Assertions.assertEquals("Homer", header1),
+                        () -> Assertions.assertEquals(123, x.getA()),
+                        () -> Assertions.assertEquals("Verde", x.getB()),
+                        () -> Assertions.assertEquals(321, x.getC().getD()),
+                        () -> Assertions.assertEquals(2233L, x.getC().getE()),
+                        () -> Assertions.assertEquals(321, c.getD()),
+                        () -> Assertions.assertEquals(2233L, c.getE()),
+                        () -> Assertions.assertEquals("{\"a\": 123, \"b\": \"Verde\", \"c\": {\"d\": 321, \"e\": 2233}}", json),
+                        () -> Assertions.assertEquals("abacaxi", xxx),
+                        () -> Assertions.assertEquals("ABC", test),
+                        () -> Assertions.assertEquals(888, header2.getD()),
+                        () -> Assertions.assertEquals(9999L, header2.getE())
+                );
                 FwTester.confirm();
             }
         }, session).post("/go/abacaxi?test=ABC", json, 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(h1, h2));
@@ -360,17 +382,19 @@ public class PlainProcessorTest {
                 LocalDate d1 = LocalDate.of(2017, Month.JUNE, 23);
                 LocalDateTime d2 = LocalDateTime.of(2017, Month.JUNE, 23, 17, 01, 22);
                 LocalDateTime d3 = LocalDateTime.of(2017, Month.JUNE, 23, 17, 01);
-                Assertions.assertEquals(d1, h1);
-                Assertions.assertEquals(d1, h2);
-                Assertions.assertEquals(d3, h3);
-                Assertions.assertEquals(d2, h4);
-                Assertions.assertEquals(d1, c1);
-                Assertions.assertEquals(d1, c2);
-                Assertions.assertEquals(d3, c3);
-                Assertions.assertEquals(d2, c4);
-                Assertions.assertEquals(d1, u2);
-                Assertions.assertEquals(d2, u1);
-                Assertions.assertEquals(d2, body);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(d1, h1),
+                        () -> Assertions.assertEquals(d1, h2),
+                        () -> Assertions.assertEquals(d3, h3),
+                        () -> Assertions.assertEquals(d2, h4),
+                        () -> Assertions.assertEquals(d1, c1),
+                        () -> Assertions.assertEquals(d1, c2),
+                        () -> Assertions.assertEquals(d3, c3),
+                        () -> Assertions.assertEquals(d2, c4),
+                        () -> Assertions.assertEquals(d1, u2),
+                        () -> Assertions.assertEquals(d2, u1),
+                        () -> Assertions.assertEquals(d2, body)
+                );
                 FwTester.confirm();
             }
         }).post("/go/2017-06-23-17-01-22/2017-06-23", "06/23/2017 17:01:22", 200, ReturnMapper.DEFAULT_HTML_200, headers);
@@ -388,9 +412,11 @@ public class PlainProcessorTest {
                 LocalDate d1 = LocalDate.of(2017, Month.JUNE, 23);
                 LocalDate d2 = LocalDate.of(2017, Month.JUNE, 22);
                 LocalDateTime d3 = LocalDateTime.of(2017, Month.JUNE, 23, 17, 39);
-                Assertions.assertEquals(d1, in.getA());
-                Assertions.assertEquals(d2, in.getB());
-                Assertions.assertEquals(d3, in.getC());
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(d1, in.getA()),
+                        () -> Assertions.assertEquals(d2, in.getB()),
+                        () -> Assertions.assertEquals(d3, in.getC())
+                );
                 FwTester.confirm();
                 return new DateSet(
                         LocalDate.of(2018, Month.FEBRUARY, 12),
@@ -410,8 +436,10 @@ public class PlainProcessorTest {
                     @JsonBodyPlainProperty() int b)
             {
                 LocalDate d1 = LocalDate.of(2017, Month.JUNE, 23);
-                Assertions.assertEquals(d1, a);
-                Assertions.assertEquals(1234, b);
+                Assertions.assertAll(
+                        () -> Assertions.assertEquals(d1, a),
+                        () -> Assertions.assertEquals(1234, b)
+                );
                 FwTester.confirm();
             }
         }).post("/go", "{\"a\": \"23/06/2017\", \"b\": 1234}", 200, ReturnMapper.DEFAULT_HTML_200, Collections.emptyList());

@@ -1,29 +1,22 @@
-package ninja.javahacker.jaspasema.processor;
+package ninja.javahacker.jaspasema.exceptions;
 
 import java.lang.annotation.Annotation;
-import lombok.Getter;
-import lombok.NonNull;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
-@Getter
-public class MalformedProcessorException extends Exception {
+public class MalformedReturnProcessorException extends MalformedProcessorException {
     private static final long serialVersionUID = 1L;
 
-    @NonNull
-    private final Class<? extends Annotation> badAnnotation;
-
-    public MalformedProcessorException(
+    public MalformedReturnProcessorException(
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
             /*@NonNull*/ String message,
             /*@NonNull*/ Throwable cause)
     {
-        super(message, cause);
-        this.badAnnotation = badAnnotation;
+        super(badAnnotation, message, cause);
     }
 
-    public MalformedProcessorException(
+    public MalformedReturnProcessorException(
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
             /*@NonNull*/ String message)
     {

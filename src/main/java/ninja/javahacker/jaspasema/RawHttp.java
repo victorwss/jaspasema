@@ -6,9 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
+import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
@@ -48,8 +49,12 @@ public @interface RawHttp {
             if (target.isSameOf(RQ)) return (rq, rp) -> (E) rq;
             if (target.isSameOf(RP)) return (rq, rp) -> (E) rp;
             if (target.isSameOf(SS)) return (rq, rp) -> (E) rq.session(false);
-            throw new BadServiceMappingException(p,
-                    "The @RawHttp annotation should be used only in Request, Response or Session parameters.");
+
+            throw TypeRestrictionViolationException.create(
+                    p,
+                    RawHttp.class,
+                    TypeRestrictionViolationException.AllowedTypes.HTTP,
+                    target);
         }
     }
 }

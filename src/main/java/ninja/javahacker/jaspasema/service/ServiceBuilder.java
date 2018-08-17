@@ -12,8 +12,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.Path;
 import ninja.javahacker.jaspasema.ServiceName;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.MalformedProcessorException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import spark.Service;
 
 /**

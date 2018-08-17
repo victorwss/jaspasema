@@ -8,7 +8,8 @@ import java.lang.reflect.Parameter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ParameterParser;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.ImplicitWithJsVarException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -35,7 +36,7 @@ public @interface HeaderParam {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw new BadServiceMappingException(p, "The @HeaderParam shouldn't have jsVar not empty and be implicit.");
+                throw ImplicitWithJsVarException.create(p, HeaderParam.class);
             }
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());

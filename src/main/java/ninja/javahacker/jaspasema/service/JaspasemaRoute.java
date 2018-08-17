@@ -1,8 +1,8 @@
 package ninja.javahacker.jaspasema.service;
 
 import java.lang.reflect.InvocationTargetException;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
-import ninja.javahacker.jaspasema.processor.MalformedReturnValueException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.MalformedReturnValueException;
 import spark.Request;
 import spark.Response;
 
@@ -12,5 +12,5 @@ import spark.Response;
 @FunctionalInterface
 public interface JaspasemaRoute {
     public void handleIt(Request rq, Response rp)
-            throws InvocationTargetException, MalformedParameterException, MalformedReturnValueException;
+            throws InvocationTargetException, ParameterValueException, MalformedReturnValueException;
 }

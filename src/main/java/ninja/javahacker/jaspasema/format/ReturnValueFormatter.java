@@ -4,8 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.util.Optional;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.InvalidDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -22,30 +25,31 @@ public interface ReturnValueFormatter<E> {
             @NonNull Method method)
             throws BadServiceMappingException
     {
-        String annotationName = annotationClass.getSimpleName();
-        FormatterFunction<E> pf = FormatterFunction.formatterFor(target);
-        DateTimeFormatterFunction<E> df = DateTimeFormatterFunction.formatterFor(target);
-        if (pf == null && df == null) {
-            throw new BadServiceMappingException(
+        Optional<FormatterFunction<E>> pf = FormatterFunction.formatterFor(target);
+        Optional<DateTimeFormatterFunction<E>> df = DateTimeFormatterFunction.formatterFor(target);
+        if (!pf.isPresent() && !df.isPresent()) {
+            throw TypeRestrictionViolationException.create(
                     method,
-                    "The @" + annotationName + " annotation must be used only on methods returning "
-                            + "primitives, primitive wrappers, String or date/time types. The found type was " + target + ".");
+                    annotationClass,
+                    TypeRestrictionViolationException.AllowedTypes.SIMPLE,
+                    target);
         }
-        if (pf != null) {
+        if (pf.isPresent()) {
             if (!format.isEmpty()) {
-                throw new BadServiceMappingException(
+                throw TypeRestrictionViolationException.create(
                         method,
-                        "The @" + annotationName + " format must be specified only on date/time-returning methods. "
-                                + "The found type was " + target + ".");
+                        annotationClass,
+                        TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
+                        target);
             }
-            return pf::format;
+            return pf.get()::format;
         }
         DateTimeFormatter dtf;
         try {
             dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
         } catch (IllegalArgumentException e) {
-            throw new BadServiceMappingException(method, "Invalid format at @" + annotationName + " annotation.");
+            throw InvalidDateFormatException.create(method, annotationClass, format);
         }
-        return body -> df.format(body, dtf);
+        return body -> df.get().format(body, dtf);
     }
 }

@@ -12,9 +12,10 @@ import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ObjectListParser;
 import ninja.javahacker.jaspasema.format.ParameterParser;
 import ninja.javahacker.jaspasema.format.SimpleParameterType;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
+import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -37,10 +38,6 @@ public @interface QueryPart {
                 + "for (var elem in $JS$) {\n"
                 + "    targetUrl += '&$PARAM$=' + encodeURI($JS$[elem]);\n"
                 + "}";
-
-        private static final String NOT_SIMPLE_ERROR_MESSAGE = ""
-                + "The @QueryPart annotation must be used only on parameters of primitives, "
-                + "primitive wrappers, String and date/time types and Lists of those.";
 
         @Override
         public <E> Stub<E> prepare(
@@ -66,7 +63,11 @@ public @interface QueryPart {
                             js,
                             SINGULAR_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", paramName));
                 case NOT_SIMPLE:
-                    throw new BadServiceMappingException(p, NOT_SIMPLE_ERROR_MESSAGE);
+                    throw TypeRestrictionViolationException.create(
+                            p,
+                            QueryPart.class,
+                            TypeRestrictionViolationException.AllowedTypes.SIMPLE_AND_LIST,
+                            target);
                 default:
                     throw new AssertionError(spt);
             }

@@ -7,6 +7,7 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import lombok.NonNull;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -31,7 +32,7 @@ public interface DateTimeFormatterFunction<E> {
     );
 
     @SuppressWarnings({"unchecked", "element-type-mismatch"})
-    public static <E> DateTimeFormatterFunction<E> formatterFor(@NonNull ReifiedGeneric<E> target) {
-        return (DateTimeFormatterFunction<E>) DT_MAP.get(target.getGeneric());
+    public static <E> Optional<DateTimeFormatterFunction<E>> formatterFor(@NonNull ReifiedGeneric<E> target) {
+        return Optional.ofNullable((DateTimeFormatterFunction<E>) DT_MAP.get(target.getGeneric()));
     }
 }

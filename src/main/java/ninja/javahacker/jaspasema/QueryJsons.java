@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
+import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import ninja.javahacker.reifiedgeneric.Wrappers;
 
@@ -30,6 +31,11 @@ public @interface QueryJsons {
 
     public static class Processor implements ParamProcessor<QueryJsons> {
 
+        private static final String TEMPLATE = ""
+                + "for (var elem in $JS$) {\n"
+                + "    targetUrl += '&$PN$=' + encodeURI(JSON.stringify($JS$[elem]));\n"
+                + "}";
+
         @Override
         @SuppressWarnings("unchecked")
         public <E> Stub<E> prepare(
@@ -39,7 +45,11 @@ public @interface QueryJsons {
                 throws BadServiceMappingException
         {
             if (!target.raw().isAssignableFrom(List.class)) {
-                throw new BadServiceMappingException(p, "The @QueryJsons should be used only in List types.");
+                throw TypeRestrictionViolationException.create(
+                        p,
+                        QueryJsons.class,
+                        TypeRestrictionViolationException.AllowedTypes.LIST,
+                        target);
             }
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
@@ -47,10 +57,7 @@ public @interface QueryJsons {
             return new Stub<>(
                     prepareList((ReifiedGeneric) target, annotation, p, paramName),
                     js,
-                    ""
-                            + "for (var elem in " + js + ") {\n"
-                            + "    targetUrl += '&" + paramName + "=' + encodeURI(JSON.stringify(" + js + "[elem]));\n"
-                            + "}"
+                    TEMPLATE.replace("$JS$", js).replace("$PN$", paramName)
             );
         }
 
@@ -65,9 +72,9 @@ public @interface QueryJsons {
                 for (String s : rq.queryParamsValues(paramName)) {
                     E elem = JsonTypesProcessor.readJson(
                             annotation.lenient(),
-                            x -> new MalformedParameterException(p, "The @QueryJsons parameter has not a valid value.", x),
                             Wrappers.unwrapIterable(target),
-                            s);
+                            s,
+                            x -> ParameterValueException.MalformedParameterException.create(p, QueryJsons.class, s, x));
                     elements.add(elem);
                 }
                 return elements;

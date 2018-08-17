@@ -5,8 +5,10 @@ import java.lang.reflect.Parameter;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.processor.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.InvalidDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -14,7 +16,7 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  */
 @FunctionalInterface
 public interface ParameterParser<E> {
-    public E make(String in) throws MalformedParameterException;
+    public E make(String in) throws ParameterValueException;
 
     public static <E> ParameterParser<E> prepare(
             @NonNull ReifiedGeneric<E> target,
@@ -27,37 +29,35 @@ public interface ParameterParser<E> {
         ParseFunction<E> pf = ParseFunction.parserFor(target);
         DateTimeParseFunction<E> df = DateTimeParseFunction.parserFor(target);
         if (pf == null && df == null) {
-            throw new BadServiceMappingException(
+            throw TypeRestrictionViolationException.create(
                     p,
-                    "The @" + annotationName + " annotation must be used only on parameters of "
-                            + "primitives, primitive wrappers, String and date/time types.");
+                    annotationClass,
+                    TypeRestrictionViolationException.AllowedTypes.SIMPLE,
+                    target);
         }
         if (pf != null) {
             if (!format.isEmpty()) {
-                throw new BadServiceMappingException(
-                        p,
-                        "The @" + annotationName + " format must be specified only on date/time parameters.");
+                throw TypeRestrictionViolationException.create(
+                    p,
+                    annotationClass,
+                    TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
+                    target);
             }
             return body ->
-                    pf.parse(e ->
-                            new MalformedParameterException(
-                                    p, "The value for @" + annotationName + " could not be parsed: \"" + body + "\".",
-                                    e),
+                    pf.parse(
+                            a -> ParameterValueException.MalformedParameterException.create(p, annotationClass, body, a),
                             body);
         }
         DateTimeFormatter dtf;
         try {
             dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
         } catch (IllegalArgumentException e) {
-            throw new BadServiceMappingException(p, "Invalid format at @" + annotationName + " annotation.");
+            throw InvalidDateFormatException.create(p, annotationClass, format);
         }
 
         return body ->
-                df.parse(e ->
-                        new MalformedParameterException(
-                                p,
-                                "The @" + annotationName + " could not be parsed: \"" + body + "\". Format: \"" + dtf + "\".",
-                                e),
+                df.parse(
+                        a -> ParameterValueException.MalformedParameterException.create(p, annotationClass, body, a),
                         body,
                         dtf);
     }

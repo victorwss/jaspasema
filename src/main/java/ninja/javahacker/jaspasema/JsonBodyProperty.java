@@ -6,10 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import java.util.Map;
+import java.util.function.Function;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.MalformedParameterException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -39,14 +40,19 @@ public @interface JsonBodyProperty {
                 @NonNull JsonBodyProperty annotation,
                 @NonNull Parameter p)
         {
+            Function<Throwable, ParameterValueException.MalformedJsonBodyException> thrower =
+                    e -> ParameterValueException.MalformedJsonBodyException.create(p, e);
+
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
                     (rq, rp) -> {
-                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(p, rq.body());
+                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(p, rq.body(), thrower);
                         Object obj = map.get(js);
                         if (obj == null) {
-                            if (annotation.required()) throw new MalformedParameterException(p, "Required parameter was absent.");
+                            if (annotation.required()) {
+                                throw ParameterValueException.AbsentRequiredParameterException.create(p);
+                            }
                             return null;
                         }
                         return JsonTypesProcessor.convert(annotation.lenient(), obj, target);

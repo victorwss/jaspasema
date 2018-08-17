@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.processor;
+package ninja.javahacker.jaspasema.exceptions;
 
 import java.lang.annotation.Annotation;
 

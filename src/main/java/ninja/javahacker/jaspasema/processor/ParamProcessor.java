@@ -1,5 +1,8 @@
 package ninja.javahacker.jaspasema.processor;
 
+import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.MalformedParameterProcessorException;
+import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
@@ -27,7 +30,7 @@ public interface ParamProcessor<A extends Annotation> {
         public E run(
                 @NonNull Request rq,
                 @NonNull Response rp)
-                throws MalformedParameterException;
+                throws ParameterValueException;
     }
 
     @Value
@@ -59,10 +62,10 @@ public interface ParamProcessor<A extends Annotation> {
         Annotation interesting = null;
         for (Annotation ann : p.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ParamSource.class)) continue;
-            if (interesting != null) throw new BadServiceMappingException(p, "Conflicting mapping on parameter.");
+            if (interesting != null) throw ConflictingMappingOnParameterException.create(p);
             interesting = ann;
         }
-        if (interesting == null) throw new BadServiceMappingException(p, "No mapping for parameter.");
+        if (interesting == null) throw NoMappingOnParameterException.create(p);
         return forParameter(p, interesting);
     }
 
@@ -90,5 +93,33 @@ public interface ParamProcessor<A extends Annotation> {
                     e);
         }
         return pp.prepare(ReifiedGeneric.forType(p.getParameterizedType()), interesting, p);
+    }
+
+    public static class ConflictingMappingOnParameterException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "Conflicting mapping on parameter.";
+
+        protected ConflictingMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
+            super(parameter, MESSAGE_TEMPLATE);
+        }
+
+        public static ConflictingMappingOnParameterException create(@NonNull Parameter parameter) {
+            return new ConflictingMappingOnParameterException(parameter);
+        }
+    }
+
+    public static class NoMappingOnParameterException extends BadServiceMappingException {
+        private static final long serialVersionUID = 1L;
+
+        public static final String MESSAGE_TEMPLATE = "No mapping on parameter.";
+
+        protected NoMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
+            super(parameter, MESSAGE_TEMPLATE);
+        }
+
+        public static NoMappingOnParameterException create(@NonNull Parameter parameter) {
+            return new NoMappingOnParameterException(parameter);
+        }
     }
 }
