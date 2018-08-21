@@ -20,7 +20,7 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 public interface FormatterFunction<E> {
     public String format(E value);
 
-    public static <E> FormatterFunction<E> of(Function<E, String> func) {
+    private static <E> FormatterFunction<E> of(Function<E, String> func) {
         return v -> v == null ? null : func.apply(v);
     }
 

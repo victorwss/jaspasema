@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.Value;
-import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import spark.Route;
 
 /**
@@ -124,19 +123,16 @@ public class AngularTemplate implements ApiTemplate {
         StringJoiner def = new StringJoiner(", ");
         StringJoiner rec = new StringJoiner("");
         StringJoiner extras = new StringJoiner("");
-        for (ParamProcessor.Stub<?> pps : smb.getParameterProcessors()) {
+        smb.getParameterProcessors().forEach(pps -> {
             String pa = pps.getParameterAdded();
-            if (!pa.isEmpty()) {
-                def.add(pa);
-            }
+            if (!pa.isEmpty()) def.add(pa);
             String ia = pps.getInstructionAdded();
-            if (!ia.isEmpty()) {
-                rec.add("        " + ia + "\n");
-            }
-            for (String extra : pps.getPreSendInstructionAdded()) {
-                extras.add("        " + extra + "\n");
-            }
-        }
+            if (!ia.isEmpty()) rec.add("        " + ia + "\n");
+            pps.getPreSendInstructionAdded()
+                    .stream()
+                    .map(x -> "        " + x + "\n")
+                    .forEach(extras::add);
+        });
 
         return output
                 .replace("#DEFINE_PARAMETERS#", def.toString())

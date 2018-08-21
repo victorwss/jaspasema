@@ -1,1 +1,13 @@
 rootProject.name = 'Jaspasema'
+
+def subDirs = rootDir.listFiles(new FileFilter() {
+    public boolean accept(File file) {
+        if (!file.isDirectory()) return false
+        if (file.name == 'config' || file.name == 'libs' || file.name.contains('.')) return false
+        return true
+    }
+});
+
+subDirs.each { File dir ->
+    include dir.name
+}

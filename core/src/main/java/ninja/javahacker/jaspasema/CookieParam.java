@@ -33,12 +33,8 @@ public @interface CookieParam {
                 throws BadServiceMappingException
         {
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
-            return new Stub<>(
-                    (rq, rp) -> part.make(rq.cookie(paramName)),
-                    "",
-                    "");
+            return new Stub<>((rq, rp) -> part.make(rq.cookie(paramName)), "", "");
         }
     }
 }

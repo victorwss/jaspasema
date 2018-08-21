@@ -61,7 +61,7 @@ public @interface QueryJsons {
             );
         }
 
-        private <E> ParamProcessor.Worker<List<E>> prepareList(
+        private static <E> ParamProcessor.Worker<List<E>> prepareList(
                 @NonNull ReifiedGeneric<List<E>> target,
                 @NonNull QueryJsons annotation,
                 @NonNull Parameter p,

@@ -8,6 +8,7 @@ import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.UnmatcheableParameterException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ParameterParser;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
@@ -38,9 +39,7 @@ public @interface UriPart {
         {
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             Path path = p.getDeclaringExecutable().getAnnotation(Path.class);
-            if (path == null || !containsPart(path.value(), paramName)) {
-                throw UnmatcheableParameterException.create(p);
-            }
+            if (path == null || !containsPart(path.value(), paramName)) throw UnmatcheableParameterException.create(p);
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
@@ -50,23 +49,9 @@ public @interface UriPart {
                     JS_TEMPLATE.replace("$PARAM$", paramName).replace("$JS$", js));
         }
 
-        private boolean containsPart(String parts, String part) {
+        private static boolean containsPart(String parts, String part) {
             String z = ":" + part;
             return Stream.of(parts.split("/")).anyMatch(z::equals);
-        }
-    }
-
-    public static class UnmatcheableParameterException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE = "Parameter value do not matches anything in method's @Path value.";
-
-        protected UnmatcheableParameterException(/*@NonNull*/ Parameter parameter) {
-            super(parameter, MESSAGE_TEMPLATE);
-        }
-
-        public static UnmatcheableParameterException create(@NonNull Parameter parameter) {
-            return new UnmatcheableParameterException(parameter);
         }
     }
 }

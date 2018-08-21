@@ -8,11 +8,9 @@ import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.AbsentRequiredParameterException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedJsonBodyException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.format.ParameterParser;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
@@ -21,15 +19,15 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 /**
  * @author Victor Williams Stafusa da Silva
  */
-@ParamSource(processor = JsonBodyPlainProperty.Processor.class)
+@ParamSource(processor = JsonBodyProperty.Processor.class)
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface JsonBodyPlainProperty {
+public @interface JsonBodyProperty {
     public boolean required() default false;
-    public String format() default "";
+    public boolean lenient() default false;
     public String jsVar() default "";
 
-    public static class Processor implements ParamProcessor<JsonBodyPlainProperty> {
+    public static class Processor implements ParamProcessor<JsonBodyProperty> {
 
         private static final String INSTRUCTION_TEMPLATE = "data.#VAR# = #VAR#;";
 
@@ -40,27 +38,21 @@ public @interface JsonBodyPlainProperty {
         @Override
         public <E> Stub<E> prepare(
                 @NonNull ReifiedGeneric<E> target,
-                @NonNull JsonBodyPlainProperty annotation,
+                @NonNull JsonBodyProperty annotation,
                 @NonNull Parameter p)
-                throws BadServiceMappingException
         {
             Function<Throwable, MalformedJsonBodyException> thrower =
                     e -> MalformedJsonBodyException.create(p, e);
 
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
-            ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
             return new Stub<>(
                     (rq, rp) -> {
                         Map<String, Object> map = JsonTypesProcessor.readJsonMap(p, rq.body(), thrower);
                         Object obj = map.get(js);
-                        if (obj == null) {
-                            if (annotation.required()) {
-                                throw AbsentRequiredParameterException.create(p);
-                            }
-                            return null;
-                        }
-                        return part.make(obj.toString());
+                        if (obj != null) return JsonTypesProcessor.convert(annotation.lenient(), obj, target);
+                        if (annotation.required()) throw AbsentRequiredParameterException.create(p);
+                        return null;
                     },
                     js,
                     INSTRUCTION_TEMPLATE.replace("#VAR#", js),

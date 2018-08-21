@@ -24,10 +24,10 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 public interface ParseFunction<E> {
     public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s) throws X;
 
-    public static <E> ParseFunction<E> of(@NonNull Function<String, E> func) {
-        return new ParseFunction<E>() {
+    private static <E> ParseFunction<E> of(@NonNull Function<String, E> func) {
+        return new ParseFunction<>() {
             @Override
-                public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
+            public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
                 if ("null".equals(s) || s.isEmpty()) return null;
                 try {
                     return func.apply(s);
@@ -38,8 +38,8 @@ public interface ParseFunction<E> {
         };
     }
 
-    public static <E> Function<DateTimeFormatter, ParseFunction<E>> ofDate(BiFunction<String, DateTimeFormatter, E> func) {
-        return format -> new ParseFunction<E>() {
+    private static <E> Function<DateTimeFormatter, ParseFunction<E>> ofDate(BiFunction<String, DateTimeFormatter, E> func) {
+        return format -> new ParseFunction<>() {
             @Override
             public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s) throws X {
                 if ("null".equals(s) || s.isEmpty()) return null;

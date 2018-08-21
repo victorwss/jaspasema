@@ -41,7 +41,7 @@ public @interface RawHttp {
         }
 
         @SuppressWarnings("unchecked")
-        private <E> Worker<E> simple(
+        private static <E> Worker<E> simple(
                 @NonNull ReifiedGeneric<E> target,
                 @NonNull Parameter p)
                 throws BadServiceMappingException

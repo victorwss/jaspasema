@@ -23,6 +23,7 @@ import spark.Response;
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@FunctionalInterface
 public interface ParamProcessor<A extends Annotation> {
     public <E> Stub<E> prepare(
             @NonNull ReifiedGeneric<E> target,

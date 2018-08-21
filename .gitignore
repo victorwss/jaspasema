@@ -2,3 +2,5 @@
 /.nb-gradle/
 /build/
 /gradle.properties
+/core/build/
+/app/build/
