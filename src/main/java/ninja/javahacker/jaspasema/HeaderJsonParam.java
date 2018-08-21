@@ -6,11 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ImplicitWithJsVarException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.ImplicitWithJsVarException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -49,7 +49,7 @@ public @interface HeaderJsonParam {
                             annotation.lenient(),
                             target,
                             s,
-                            x -> ParameterValueException.MalformedParameterException.create(p, HeaderJsonParam.class, s, x));
+                            x -> MalformedParameterValueException.create(p, HeaderJsonParam.class, s, x));
                     },
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : "customHeaders.push({name: '" + paramName + "', value: " + js + ");");

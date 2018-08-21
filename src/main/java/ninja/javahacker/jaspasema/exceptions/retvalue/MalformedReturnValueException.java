@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.exceptions;
+package ninja.javahacker.jaspasema.exceptions.retvalue;
 
 import java.lang.reflect.Method;
 import lombok.Getter;

@@ -1,8 +1,5 @@
 package ninja.javahacker.jaspasema.processor;
 
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.MalformedParameterProcessorException;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
@@ -11,6 +8,14 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingMappingOnParameterException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnParameterException;
+import ninja.javahacker.jaspasema.exceptions.paramproc.IncompatibleParameterProcessorException;
+import ninja.javahacker.jaspasema.exceptions.paramproc.MalformedParameterProcessorException;
+import ninja.javahacker.jaspasema.exceptions.paramproc.ParameterProcessorConstructorException;
+import ninja.javahacker.jaspasema.exceptions.paramproc.UninstantiableParameterProcessorException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
@@ -58,7 +63,10 @@ public interface ParamProcessor<A extends Annotation> {
         }
     }
 
-    public static Stub<?> forParameter(Parameter p) throws BadServiceMappingException, MalformedParameterProcessorException {
+    public static Stub<?> forParameter(
+            @NonNull Parameter p)
+            throws BadServiceMappingException, MalformedParameterProcessorException
+    {
         Annotation interesting = null;
         for (Annotation ann : p.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ParamSource.class)) continue;
@@ -70,56 +78,28 @@ public interface ParamProcessor<A extends Annotation> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <A extends Annotation> Stub<?> forParameter(Parameter p, A interesting)
+    public static <A extends Annotation> Stub<?> forParameter(
+            @NonNull Parameter p,
+            @NonNull A interesting)
             throws BadServiceMappingException, MalformedParameterProcessorException
     {
-        ParamProcessor<A> pp;
+        Class<? extends Annotation> ac = interesting.annotationType();
+        Class<? extends ParamProcessor<?>> cc = ac.getAnnotation(ParamSource.class).processor();
+
         try {
-            pp = (ParamProcessor<A>) interesting
-                    .annotationType()
-                    .getAnnotation(ParamSource.class)
-                    .processor()
-                    .getConstructor()
-                    .newInstance();
+            cc.getMethod("prepare", ReifiedGeneric.class, ac, Parameter.class);
+        } catch (NoSuchMethodException e) {
+            throw IncompatibleParameterProcessorException.create(interesting.annotationType(), e);
+        }
+
+        ParamProcessor<?> pp;
+        try {
+            pp = cc.getConstructor().newInstance();
         } catch (InvocationTargetException e) {
-            throw new MalformedParameterProcessorException(
-                    interesting.annotationType(),
-                    "Parameter processor could not be created.",
-                    e.getCause());
+            throw ParameterProcessorConstructorException.create(interesting.annotationType(), e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw new MalformedParameterProcessorException(
-                    interesting.annotationType(),
-                    "Unusable parameter processor.",
-                    e);
+            throw UninstantiableParameterProcessorException.create(interesting.annotationType(), e);
         }
-        return pp.prepare(ReifiedGeneric.forType(p.getParameterizedType()), interesting, p);
-    }
-
-    public static class ConflictingMappingOnParameterException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE = "Conflicting mapping on parameter.";
-
-        protected ConflictingMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
-            super(parameter, MESSAGE_TEMPLATE);
-        }
-
-        public static ConflictingMappingOnParameterException create(@NonNull Parameter parameter) {
-            return new ConflictingMappingOnParameterException(parameter);
-        }
-    }
-
-    public static class NoMappingOnParameterException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE = "No mapping on parameter.";
-
-        protected NoMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
-            super(parameter, MESSAGE_TEMPLATE);
-        }
-
-        public static NoMappingOnParameterException create(@NonNull Parameter parameter) {
-            return new NoMappingOnParameterException(parameter);
-        }
+        return ((ParamProcessor<A>) pp).prepare(ReifiedGeneric.forType(p.getParameterizedType()), interesting, p);
     }
 }

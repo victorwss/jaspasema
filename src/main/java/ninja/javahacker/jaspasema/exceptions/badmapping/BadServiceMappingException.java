@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.exceptions;
+package ninja.javahacker.jaspasema.exceptions.badmapping;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

@@ -4,9 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +16,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ProducesFixed;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
-import ninja.javahacker.jaspasema.exceptions.MalformedReturnProcessorException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsReturnException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsThrowsException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.retproc.BadExitDiscriminatorMethodException;
+import ninja.javahacker.jaspasema.exceptions.retproc.MalformedReturnProcessorException;
+import ninja.javahacker.jaspasema.exceptions.retproc.MultipleReturnProcessorsException;
+import ninja.javahacker.jaspasema.exceptions.retproc.ReturnProcessorNotFoundException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
@@ -65,6 +67,9 @@ public class ReturnMapper {
             + "  </body>"
             + "</html>";
 
+    private static final ReifiedGeneric<Class<? extends Throwable>> TYPE =
+            new ReifiedGeneric<Class<? extends Throwable>>() {};
+
     @ProducesFixed(DEFAULT_HTML_200)
     @ProducesFixed(on = Throwable.class, value = DEFAULT_HTML_ERROR_500, status = 500)
     @ProducesFixed(on = ParameterValueException.class, value = DEFAULT_HTML_ERROR_400, status = 400)
@@ -85,15 +90,6 @@ public class ReturnMapper {
     private final ReturnProcessor.ProcessorConfiguration returnConfig;
 
     private final Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> exceptionsConfig;
-
-    private static final String MORE_THAN_ONE_EXIT =
-            "The annotation @$XXX$ should not have more than one @ExitDiscriminator method.";
-
-    private static final String NO_EXIT =
-            "The annotation @$XXX$ do not have an @ExitDiscriminator method.";
-
-    private static final String BAD_EXIT =
-            "The annotation @$XXX$ have an ill-formed @ExitDiscriminator method.";
 
     private ReturnMapper(
             @NonNull Optional<ReturnMapper> parent,
@@ -166,51 +162,31 @@ public class ReturnMapper {
         ).makeMap(target, method);
     }
 
-    private Class<? extends Throwable> getOn(Annotation a) throws MalformedReturnProcessorException {
+    private static Class<? extends Throwable> getOn(Annotation a) throws MalformedReturnProcessorException {
         Class<? extends Annotation> c = a.annotationType();
-        Class<? extends Throwable> disc = null;
+        Class<? extends Throwable> discriminator = null;
         for (Method m : c.getMethods()) {
             if (!m.isAnnotationPresent(ReturnSerializer.ExitDiscriminator.class)) continue;
-            if (disc != null) {
-                throw new MalformedReturnProcessorException(
-                        c,
-                        MORE_THAN_ONE_EXIT.replace("$XXX$", a.annotationType().getSimpleName()));
-            }
-            String bad = BAD_EXIT.replace("$XXX$", c.getSimpleName());
-            Type t = m.getGenericReturnType();
-            if (!(t instanceof ParameterizedType)) throw new MalformedReturnProcessorException(c, bad);
-            ParameterizedType p = (ParameterizedType) t;
-            if (p.getRawType() != Class.class) throw new MalformedReturnProcessorException(c, bad);
-            Type[] f = p.getActualTypeArguments();
-            if (f.length != 1) throw new MalformedReturnProcessorException(c, bad);
-            Type pp = f[0];
-            if (!(pp instanceof WildcardType)) throw new MalformedReturnProcessorException(c, bad);
-            WildcardType w = (WildcardType) pp;
-            if (w.getLowerBounds().length != 0 || w.getUpperBounds().length != 1 || w.getUpperBounds()[0] != Throwable.class) {
-                throw new MalformedReturnProcessorException(c, bad);
-            }
+            if (discriminator != null) throw MultipleReturnProcessorsException.create(c);
+            if (!TYPE.equals(ReifiedGeneric.forType(m.getGenericReturnType()))) throw BadExitDiscriminatorMethodException.create(c);
             m.setAccessible(true);
             try {
-                disc = ((Class<?>) m.invoke(a)).asSubclass(Throwable.class);
+                discriminator = ((Class<?>) m.invoke(a)).asSubclass(Throwable.class);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 throw new AssertionError(e);
             }
         }
-        if (disc == null) {
-            throw new MalformedReturnProcessorException(
-                    c,
-                    NO_EXIT.replace("$XXX$", a.annotationType().getSimpleName()));
-        }
-        return disc;
+        if (discriminator == null) throw ReturnProcessorNotFoundException.create(c);
+        return discriminator;
     }
 
-    private void select(Annotation[] ans, Consumer<Annotation> c) throws MalformedReturnProcessorException {
+    private static void select(Annotation[] ans, Consumer<Annotation> c) throws MalformedReturnProcessorException {
         for (Annotation a : ans) {
             select(a, c);
         }
     }
 
-    private void select(Annotation a, Consumer<Annotation> c) throws MalformedReturnProcessorException {
+    private static void select(Annotation a, Consumer<Annotation> c) throws MalformedReturnProcessorException {
         if (a.annotationType().isAnnotationPresent(ReturnSerializer.class)) {
             getOn(a); // For sanity check.
             c.accept(a);
@@ -285,71 +261,6 @@ public class ReturnMapper {
                 if (p != null) return (ReturnProcessor.Stub<X>) p;
             }
             throw new AssertionError();
-        }
-    }
-
-    @Getter
-    public static class ConflictingAnnotationsReturnException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        private static final String MESSAGE_TEMPLATE =
-                "Conflicting @ReturnSerializer-annotated annotations on method for return type.";
-
-        protected ConflictingAnnotationsReturnException(/*@NonNull*/ Class<?> targetClass) {
-            super(targetClass, MESSAGE_TEMPLATE);
-        }
-
-        protected ConflictingAnnotationsReturnException(/*@NonNull*/ Method method) {
-            super(method, MESSAGE_TEMPLATE);
-        }
-
-        public static ConflictingAnnotationsReturnException create(@NonNull Class<?> targetClass) {
-            return new ConflictingAnnotationsReturnException(targetClass);
-        }
-
-        public static ConflictingAnnotationsReturnException create(@NonNull Method method) {
-            return new ConflictingAnnotationsReturnException(method);
-        }
-    }
-
-    @Getter
-    public static class ConflictingAnnotationsThrowsException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        private static final String MESSAGE_TEMPLATE =
-                "Conflicting @ReturnSerializer-annotated annotations on method for exception $X$.";
-
-        @NonNull
-        private final Class<? extends Throwable> type;
-
-        protected ConflictingAnnotationsThrowsException(
-                /*@NonNull*/ Class<?> targetClass,
-                /*@NonNull*/ Class<? extends Throwable> type)
-        {
-            super(targetClass, MESSAGE_TEMPLATE.replace("$X$", type.getSimpleName()));
-            this.type = type;
-        }
-
-        protected ConflictingAnnotationsThrowsException(
-                /*@NonNull*/ Method method,
-                /*@NonNull*/ Class<? extends Throwable> type)
-        {
-            super(method, MESSAGE_TEMPLATE.replace("$X$", type.getSimpleName()));
-            this.type = type;
-        }
-
-        public static ConflictingAnnotationsThrowsException create(
-                @NonNull Class<?> targetClass,
-                @NonNull Class<? extends Throwable> type)
-        {
-            return new ConflictingAnnotationsThrowsException(targetClass, type);
-        }
-
-        public static ConflictingAnnotationsThrowsException create(
-                @NonNull Method method,
-                @NonNull Class<? extends Throwable> type)
-        {
-            return new ConflictingAnnotationsThrowsException(method, type);
         }
     }
 }

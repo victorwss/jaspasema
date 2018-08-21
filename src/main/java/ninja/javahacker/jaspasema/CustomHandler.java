@@ -8,15 +8,14 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import lombok.Getter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.RemapperConstructorException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.UninstantiableRemapperException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -61,73 +60,5 @@ public @interface CustomHandler {
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Container {
         public CustomHandler[] value();
-    }
-
-    public static interface ExceptionRemapper {
-        public void remap(Request rq, Response rp, Object result);
-
-        public default void validate(
-                @NonNull ReifiedGeneric<?> target,
-                @NonNull CustomHandler annotation,
-                @NonNull Method method)
-                throws BadServiceMappingException
-        {
-        }
-    }
-
-    @Getter
-    public static class UninstantiableRemapperException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE =
-                "Couldn't instantiate the exception remapper $R$.";
-
-        @NonNull
-        private final Class<? extends CustomHandler.ExceptionRemapper> remapper;
-
-        protected UninstantiableRemapperException(
-                /*@NonNull*/ Method method,
-                /*@NonNull*/ Class<? extends CustomHandler.ExceptionRemapper> remapper,
-                /*@NonNull*/ Throwable cause)
-        {
-            super(method, MESSAGE_TEMPLATE.replace("$T$", remapper.getSimpleName()), cause);
-            this.remapper = remapper;
-        }
-
-        public static UninstantiableRemapperException create(
-                @NonNull Method method,
-                @NonNull Class<? extends CustomHandler.ExceptionRemapper> remapper,
-                @NonNull Throwable cause)
-        {
-            return new UninstantiableRemapperException(method, remapper, cause);
-        }
-    }
-
-    @Getter
-    public static class RemapperConstructorException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE =
-                "Remapper constructor of class $R$ throwed an exception.";
-
-        @NonNull
-        private final Class<? extends CustomHandler.ExceptionRemapper> remapper;
-
-        protected RemapperConstructorException(
-                /*@NonNull*/ Method method,
-                /*@NonNull*/ Class<? extends CustomHandler.ExceptionRemapper> remapper,
-                /*@NonNull*/ Throwable cause)
-        {
-            super(method, MESSAGE_TEMPLATE.replace("$T$", remapper.getSimpleName()), cause);
-            this.remapper = remapper;
-        }
-
-        public static RemapperConstructorException create(
-                @NonNull Method method,
-                @NonNull Class<? extends CustomHandler.ExceptionRemapper> remapper,
-                @NonNull Throwable cause)
-        {
-            return new RemapperConstructorException(method, remapper, cause);
-        }
     }
 }

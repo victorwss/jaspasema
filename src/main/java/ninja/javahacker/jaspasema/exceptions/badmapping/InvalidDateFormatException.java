@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema.exceptions;
+package ninja.javahacker.jaspasema.exceptions.badmapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -14,7 +14,7 @@ public class InvalidDateFormatException extends BadServiceMappingException {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE = "Invalid date format '$F$' at @$A$ annotation.";
+    public static final String MESSAGE_TEMPLATE = "Invalid date format \"$F$\" at @$A$ annotation.";
 
     @NonNull
     private final Class<? extends Annotation> annotation;
@@ -27,7 +27,7 @@ public class InvalidDateFormatException extends BadServiceMappingException {
             /*@NonNull*/ Class<? extends Annotation> annotation,
             /*@NonNull*/ String format)
     {
-        super(method, MESSAGE_TEMPLATE.replace("$", format).replace("$A$", annotation.getSimpleName()));
+        super(method, MESSAGE_TEMPLATE.replace("$F$", format).replace("$A$", annotation.getSimpleName()));
         this.annotation = annotation;
         this.format = format;
     }
@@ -37,7 +37,7 @@ public class InvalidDateFormatException extends BadServiceMappingException {
             /*@NonNull*/ Class<? extends Annotation> annotation,
             /*@NonNull*/ String format)
     {
-        super(parameter, MESSAGE_TEMPLATE.replace("$", format).replace("$A$", annotation.getSimpleName()));
+        super(parameter, MESSAGE_TEMPLATE.replace("$F$", format).replace("$A$", annotation.getSimpleName()));
         this.annotation = annotation;
         this.format = format;
     }

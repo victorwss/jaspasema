@@ -2,13 +2,12 @@ package ninja.javahacker.jaspasema.format;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
-import java.util.Optional;
+import java.util.function.Supplier;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.InvalidDateFormatException;
-import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.EmptyDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.InvalidDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -25,31 +24,22 @@ public interface ReturnValueFormatter<E> {
             @NonNull Method method)
             throws BadServiceMappingException
     {
-        Optional<FormatterFunction<E>> pf = FormatterFunction.formatterFor(target);
-        Optional<DateTimeFormatterFunction<E>> df = DateTimeFormatterFunction.formatterFor(target);
-        if (!pf.isPresent() && !df.isPresent()) {
-            throw TypeRestrictionViolationException.create(
+        Supplier<TypeRestrictionViolationException> w = () -> TypeRestrictionViolationException.create(
                     method,
                     annotationClass,
                     TypeRestrictionViolationException.AllowedTypes.SIMPLE,
                     target);
-        }
-        if (pf.isPresent()) {
-            if (!format.isEmpty()) {
-                throw TypeRestrictionViolationException.create(
-                        method,
-                        annotationClass,
-                        TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
-                        target);
-            }
-            return pf.get()::format;
-        }
-        DateTimeFormatter dtf;
-        try {
-            dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
-        } catch (IllegalArgumentException e) {
-            throw InvalidDateFormatException.create(method, annotationClass, format);
-        }
-        return body -> df.get().format(body, dtf);
+
+        Supplier<TypeRestrictionViolationException> x = () -> TypeRestrictionViolationException.create(
+                    method,
+                    annotationClass,
+                    TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
+                    target);
+
+        Supplier<EmptyDateFormatException> y = () -> EmptyDateFormatException.create(method, annotationClass);
+        Supplier<InvalidDateFormatException> z = () -> InvalidDateFormatException.create(method, annotationClass, format);
+
+        FormatterFunction<E> pf = FormatterFunction.formatterFor(format, target, w, x, y, z);
+        return pf::format;
     }
 }

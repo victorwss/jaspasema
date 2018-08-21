@@ -8,13 +8,13 @@ import lombok.NonNull;
  * @author Victor Williams Stafusa da Silva
  */
 @Getter
-public class MalformedProcessorException extends Exception {
+public abstract class MalformedProcessorException extends Exception {
     private static final long serialVersionUID = 1L;
 
     @NonNull
     private final Class<? extends Annotation> badAnnotation;
 
-    public MalformedProcessorException(
+    protected MalformedProcessorException(
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
             /*@NonNull*/ String message,
             /*@NonNull*/ Throwable cause)
@@ -23,7 +23,7 @@ public class MalformedProcessorException extends Exception {
         this.badAnnotation = badAnnotation;
     }
 
-    public MalformedProcessorException(
+    protected MalformedProcessorException(
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
             /*@NonNull*/ String message)
     {

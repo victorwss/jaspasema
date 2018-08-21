@@ -8,11 +8,12 @@ import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.AbsentRequiredParameterException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedJsonBodyException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ParameterParser;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -43,8 +44,8 @@ public @interface JsonBodyPlainProperty {
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {
-            Function<Throwable, ParameterValueException.MalformedJsonBodyException> thrower =
-                    e -> ParameterValueException.MalformedJsonBodyException.create(p, e);
+            Function<Throwable, MalformedJsonBodyException> thrower =
+                    e -> MalformedJsonBodyException.create(p, e);
 
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
@@ -55,7 +56,7 @@ public @interface JsonBodyPlainProperty {
                         Object obj = map.get(js);
                         if (obj == null) {
                             if (annotation.required()) {
-                                throw ParameterValueException.AbsentRequiredParameterException.create(p);
+                                throw AbsentRequiredParameterException.create(p);
                             }
                             return null;
                         }

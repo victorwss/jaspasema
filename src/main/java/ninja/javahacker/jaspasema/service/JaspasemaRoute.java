@@ -1,8 +1,8 @@
 package ninja.javahacker.jaspasema.service;
 
 import java.lang.reflect.InvocationTargetException;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
-import ninja.javahacker.jaspasema.exceptions.MalformedReturnValueException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
+import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
 import spark.Request;
 import spark.Response;
 

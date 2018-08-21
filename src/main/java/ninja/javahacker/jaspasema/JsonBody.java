@@ -6,11 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ImplicitWithJsVarException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.ImplicitWithJsVarException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -53,7 +53,7 @@ public @interface JsonBody {
                             annotation.lenient(),
                             target,
                             s,
-                            x -> ParameterValueException.MalformedParameterException.create(p, JsonBody.class, s, x));
+                            x -> MalformedParameterValueException.create(p, JsonBody.class, s, x));
                     },
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : INSTRUCTION_TEMPLATE.replace("#VAR#", js),

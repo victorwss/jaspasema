@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -42,7 +42,7 @@ public @interface QueryJson {
                             annotation.lenient(),
                             target,
                             s,
-                            x -> ParameterValueException.MalformedParameterException.create(p, QueryJson.class, s, x));
+                            x -> MalformedParameterValueException.create(p, QueryJson.class, s, x));
                     },
                     js,
                     "targetUrl += '&" + paramName + "=' + encodeURI(JSON.stringify(" + js + "));");

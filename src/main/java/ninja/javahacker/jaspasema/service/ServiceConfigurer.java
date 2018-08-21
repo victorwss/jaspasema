@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.JaspasemaDiscoverableService;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import spark.Service;
 
 /**

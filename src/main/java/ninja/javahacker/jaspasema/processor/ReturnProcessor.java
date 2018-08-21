@@ -1,14 +1,19 @@
 package ninja.javahacker.jaspasema.processor;
 
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.MalformedReturnValueException;
-import ninja.javahacker.jaspasema.exceptions.MalformedReturnProcessorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingMappingOnReturnTypeException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnReturnTypeException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.VoidWithValueReturnTypeException;
+import ninja.javahacker.jaspasema.exceptions.retproc.IncompatibleReturnProcessorException;
+import ninja.javahacker.jaspasema.exceptions.retproc.MalformedReturnProcessorException;
+import ninja.javahacker.jaspasema.exceptions.retproc.ReturnProcessorConstructorException;
+import ninja.javahacker.jaspasema.exceptions.retproc.UninstantiableReturnProcessorException;
+import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
 import spark.Response;
@@ -90,6 +95,15 @@ public interface ReturnProcessor<A extends Annotation> {
             throws BadServiceMappingException,
             MalformedReturnProcessorException
     {
+        Class<? extends Annotation> ac = interesting.annotationType();
+        Class<? extends ReturnProcessor<?>> cc = ac.getAnnotation(ReturnSerializer.class).processor();
+
+        try {
+            cc.getMethod("prepare", ReifiedGeneric.class, ac, Method.class);
+        } catch (NoSuchMethodException e) {
+            throw IncompatibleReturnProcessorException.create(interesting.annotationType(), e);
+        }
+
         ReturnProcessor<A> pp;
         try {
             pp = (ReturnProcessor<A>) interesting
@@ -99,15 +113,9 @@ public interface ReturnProcessor<A extends Annotation> {
                     .getConstructor()
                     .newInstance();
         } catch (InvocationTargetException e) {
-            throw new MalformedReturnProcessorException(
-                    interesting.annotationType(),
-                    "Return processor could not be created.",
-                    e.getCause());
+            throw ReturnProcessorConstructorException.create(interesting.annotationType(), e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw new MalformedReturnProcessorException(
-                    interesting.annotationType(),
-                    "Unusable return processor.",
-                    e);
+            throw UninstantiableReturnProcessorException.create(interesting.annotationType(), e);
         }
         return new ProcessorConfiguration() {
             @Override
@@ -123,54 +131,7 @@ public interface ReturnProcessor<A extends Annotation> {
             throws BadServiceMappingException
     {
         if (method.getReturnType() == void.class || method.getReturnType() == Void.class) {
-            throw ValuedVoidReturnTypeException.create(method, a);
-        }
-    }
-
-    public static class ConflictingMappingOnReturnTypeException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE = "Conflicting mapping on return type.";
-
-        protected ConflictingMappingOnReturnTypeException(/*@NonNull*/ Method method) {
-            super(method, MESSAGE_TEMPLATE);
-        }
-
-        public static ConflictingMappingOnReturnTypeException create(@NonNull Method method) {
-            return new ConflictingMappingOnReturnTypeException(method);
-        }
-    }
-
-    public static class NoMappingOnReturnTypeException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE = "No mapping on return type.";
-
-        protected NoMappingOnReturnTypeException(/*@NonNull*/ Method method) {
-            super(method, MESSAGE_TEMPLATE);
-        }
-
-        public static NoMappingOnReturnTypeException create(@NonNull Method method) {
-            return new NoMappingOnReturnTypeException(method);
-        }
-    }
-
-    @Getter
-    public static class ValuedVoidReturnTypeException extends BadServiceMappingException {
-        private static final long serialVersionUID = 1L;
-
-        public static final String MESSAGE_TEMPLATE = "Methods returning void should not feature @$A$-annotated annotations.";
-
-        @NonNull
-        private final Class<? extends Annotation> annotation;
-
-        protected ValuedVoidReturnTypeException(/*@NonNull*/ Method method, /*@NonNull*/ Class<? extends Annotation> annotation) {
-            super(method, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
-            this.annotation = annotation;
-        }
-
-        public static ValuedVoidReturnTypeException create(@NonNull Method method, @NonNull Class<? extends Annotation> annotation) {
-            return new ValuedVoidReturnTypeException(method, annotation);
+            throw VoidWithValueReturnTypeException.create(method, a);
         }
     }
 }

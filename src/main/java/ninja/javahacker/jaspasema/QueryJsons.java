@@ -8,13 +8,13 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
-import ninja.javahacker.jaspasema.exceptions.BadServiceMappingException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.exceptions.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.jaspasema.exceptions.TypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import ninja.javahacker.reifiedgeneric.Wrappers;
 
@@ -74,7 +74,7 @@ public @interface QueryJsons {
                             annotation.lenient(),
                             Wrappers.unwrapIterable(target),
                             s,
-                            x -> ParameterValueException.MalformedParameterException.create(p, QueryJsons.class, s, x));
+                            x -> MalformedParameterValueException.create(p, QueryJsons.class, s, x));
                     elements.add(elem);
                 }
                 return elements;
