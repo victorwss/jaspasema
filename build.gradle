@@ -10,12 +10,38 @@ plugins {
     id "io.spring.dependency-management" version "1.0.6.RELEASE"
     id "com.github.johnrengelman.shadow" version "2.0.4"
     id "com.github.spotbugs" version "1.6.2"
+    id "java-library"
+    id "maven-publish"
+    id "checkstyle"
+    id "signing"
+    id "jacoco"
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
 }
 
 allprojects {
-    apply plugin: 'base'
     group = "ninja.javahacker.jaspasema"
     version = "0.4.0"
+
+    ext.javaCompiler = "1.9"
+    ext.lombokEdge = false
+    ext.doclint = false
+    ext.extraCompilerArgs = [
+        "--add-modules", "java.xml.ws.annotation",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ]
 
     ext.versionApiguardian = "1.0.0"
     ext.versionCheckstyle = "8.12"
@@ -23,6 +49,7 @@ allprojects {
     ext.versionHibernate = "5.3.5.Final"
     ext.versionHibernateAnnotations = "5.0.4.Final"
     ext.versionJackson = "2.9.6"
+    ext.versionJaCoCo = "0.8.1"
     ext.versionJaxb = "2.4.0-b180725.0427"
     ext.versionJcip = "1.0"
     ext.versionJpa = "2.2"
@@ -35,36 +62,17 @@ allprojects {
     ext.versionReifiedGenerics = version
     ext.versionSpark = "2.7.2"
     ext.versionSpotBugs = "3.1.6"
-    ext.lombokEdge = false
 }
 
+println "Using Java " + org.gradle.api.JavaVersion.current() + "."
+
 subprojects {
-    apply plugin: 'base'
-    apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'maven-publish'
-    apply plugin: 'checkstyle'
-
-    String mavenGroupId = group
-    String mavenVersion = version
-    String mavenArtifactId = name
-    String moduleName = name
-    group = mavenGroupId
-    version = mavenVersion
-
-    checkstyle {
-        toolVersion = "${versionCheckstyle}"
-        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
-        configProperties = [
-            "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
-        ]
-        ignoreFailures = true
-        showViolations = true
-    }
-
-    spotbugs {
-        toolVersion = "${versionSpotBugs}"
-    }
+    apply plugin: "com.github.spotbugs"
+    apply plugin: "java-library"
+    apply plugin: "maven-publish"
+    apply plugin: "checkstyle"
+    apply plugin: "signing"
+    apply plugin: "jacoco"
 
     repositories {
         flatDir {
@@ -77,16 +85,13 @@ subprojects {
 
     dependencies {
 
-        // Find Security Bugs
-        compile group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: "${versionFindSecBugs}"
-
         // Jackson
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${versionJackson}"
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${versionJackson}"
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${versionJackson}"
-        compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: "${versionJackson}"
-        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${versionJackson}"
-        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "${versionJackson}"
 
         // JUnit
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "${versionJunit}"
@@ -112,36 +117,20 @@ subprojects {
         testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "${versionPmd}"
 
         // Reified-Generics
-        compile group: 'ninja.javahacker', name: 'reified-generic', version: "${versionReifiedGenerics}"
+        api group: 'ninja.javahacker', name: 'reified-generic', version: "${versionReifiedGenerics}"
 
         // Spark
-        compile group: 'com.sparkjava', name: 'spark-core', version: "${versionSpark}"
+        api group: 'com.sparkjava', name: 'spark-core', version: "${versionSpark}"
 
-        // SpotBugs
+        // SpotBugs + Find Security Bugs
+        compileOnly group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: "${versionFindSecBugs}"
         compileOnly group: 'net.jcip', name: 'jcip-annotations', version: "${versionJcip}"
         compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${versionSpotBugs}"
         compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "${versionJsr305}"
+        testCompileOnly group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: "${versionFindSecBugs}"
         testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: "${versionJcip}"
         testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${versionSpotBugs}"
         testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "${versionJsr305}"
-    }
-
-    task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from the source files.') {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives jar
-        archives sourcesJar
-    }
-
-    configure(install.repositories.mavenInstaller) {
-        pom.project {
-            groupId = mavenGroupId
-            artifactId = mavenArtifactId
-            version = mavenVersion
-        }
     }
 
     task createFolders(description: 'Creates the source folders if they do not exist.') doLast {
@@ -153,6 +142,48 @@ subprojects {
         }
     }
 
+    checkstyle {
+        toolVersion = "${versionCheckstyle}"
+        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+        configProperties = [
+            "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
+        ]
+        ignoreFailures = true
+        showViolations = true
+    }
+
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = javaCompiler
+        targetCompatibility = javaCompiler
+        options.encoding = 'UTF-8'
+        options.debug = true
+        options.fork = true
+        options.compilerArgs << "-parameters" << "-Xlint:all,-processing"
+        if (doclint) options.compilerArgs << "-Xdoclint:all"
+        extraCompilerArgs.each { e -> options.compilerArgs << e }
+    }
+
+    tasks.withType(Javadoc) {
+        options.encoding = "UTF-8"
+        options.docEncoding = "UTF-8"
+        options.addBooleanOption('html5', true)
+        options.tags = ["apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:"]
+    }
+
+    checkstyle {
+        toolVersion = "${versionCheckstyle}"
+        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+        configProperties = [
+            "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
+        ]
+        ignoreFailures = true
+        showViolations = true
+    }
+
+    spotbugs {
+        toolVersion = "${versionSpotBugs}"
+    }
+
     tasks.withType(com.github.spotbugs.SpotBugsTask) {
         reports {
             xml.enabled = false
@@ -160,9 +191,38 @@ subprojects {
         }
     }
 
-    task sourceJar(type: Jar, dependsOn: classes) {
+    jar {
+        duplicatesStrategy = "exclude"
+        inputs.property("moduleName", "${group}.${baseName}")
+        manifest {
+            attributes("Automatic-Module-Name": "${group}.${baseName}")
+        }
+    }
+
+    task sourcesJar(type: Jar) {
         from sourceSets.main.allSource
         classifier "sources"
+    }
+
+    task javadocJar(type: Jar) {
+        from javadoc
+        classifier "javadoc"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    jacoco {
+        toolVersion = "${versionJaCoCo}"
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled false
+            csv.enabled false
+            html.destination file("${buildDir}/jacocoHtml")
+        }
     }
 
     publishing {
@@ -171,40 +231,21 @@ subprojects {
                 artifactId jar.baseName
                 from components.java
 
-                artifact sourceJar {
-                    classifier "sources"
+                artifact sourcesJar
+                artifact javadocJar
+                pom {
+                    developers {
+                        developer {
+                            name = 'Victor Williams Stafusa da Silva'
+                            email = 'victorwssilva@gmail.com'
+                        }
+                    }
                 }
             }
         }
-    }
-
-    jar {
-        duplicatesStrategy = "exclude"
-        inputs.property("moduleName", moduleName)
-        manifest {
-            attributes("Automatic-Module-Name": moduleName)
+        repositories {
+            mavenLocal()
         }
-    }
-
-    test {
-        useJUnitPlatform()
-    }
-
-    tasks.withType(JavaCompile) {
-        sourceCompatibility = "1.9"
-        options.encoding = 'UTF-8'
-        options.debug = true
-        options.compilerArgs << "-parameters" << "-Xlint:all,-processing" // << "-Xdoclint:all"
-        options.compilerArgs << "--add-modules" << "java.xml.ws.annotation"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"
-        options.compilerArgs << "--add-opens" << "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
     }
 }
 
@@ -222,27 +263,29 @@ task mergedJavadoc(type: Javadoc, description: 'Creates Javadoc from all the pro
 }
 
 project(':core') {
-    ext.moduleName = "ninja.javahacker.jaspasema.core"
-    dependencies {
+    jar {
+        baseName = "core"
     }
 }
 
 project(':app') {
-    ext.moduleName = "ninja.javahacker.jaspasema.app"
+    jar {
+        baseName = "app"
+    }
     dependencies {
-        compile project(':core')
+        api project(':core')
 
         // Reflections
-        compile group: 'org.reflections', name: 'reflections', version: "${versionReflections}"
+        api group: 'org.reflections', name: 'reflections', version: "${versionReflections}"
 
         // JPA
-        compile group: 'javax.persistence', name: 'javax.persistence-api', version: "${versionJpa}"
+        api group: 'javax.persistence', name: 'javax.persistence-api', version: "${versionJpa}"
 
         // JPA Simple Transactions.
-        compile group: 'ninja.javahacker', name: 'jpa-simple-transactions', version: "${versionJpaSimpleTransactions}"
+        api group: 'ninja.javahacker', name: 'jpa-simple-transactions', version: "${versionJpaSimpleTransactions}"
 
         // Hibernate.
-        compile group: 'org.hibernate', name: 'hibernate-core', version: "${versionHibernate}"
-        compile group: 'org.hibernate.common', name: 'hibernate-commons-annotations', version: "${versionHibernateAnnotations}"
+        runtimeOnly group: 'org.hibernate', name: 'hibernate-core', version: "${versionHibernate}"
+        runtimeOnly group: 'org.hibernate.common', name: 'hibernate-commons-annotations', version: "${versionHibernateAnnotations}"
     }
 }

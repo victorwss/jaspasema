@@ -1,10 +1,13 @@
-package ninja.javahacker.jaspasema.service;
+package ninja.javahacker.jaspasema.template;
 
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.Value;
+import ninja.javahacker.jaspasema.service.ServiceBuilder;
+import ninja.javahacker.jaspasema.service.ServiceConfigurer;
+import ninja.javahacker.jaspasema.service.ServiceMethodBuilder;
 import spark.Route;
 
 /**
@@ -38,7 +41,7 @@ public class JQueryTemplate implements ApiTemplate {
             + "    'use strict';\n"
             + "\n"
             + "    var services = {};\n"
-            + "    services.targetUrl = \"#URL#\";\n"
+            + "    services.targetUrl = location.origin;\n"
             + "\n"
             + "    var jsonCall = function(type, method, urlContinuation, data, customHeaders, requestType) {\n"
             + "        return $.ajax({\n"

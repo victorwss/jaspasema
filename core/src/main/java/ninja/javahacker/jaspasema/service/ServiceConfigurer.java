@@ -61,7 +61,7 @@ public final class ServiceConfigurer {
         configureCors(service);
     }
 
-    private void configureCors(@NonNull Service service) {
+    private static void configureCors(@NonNull Service service) {
         service.options("/*", (request, response) -> {
 
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");

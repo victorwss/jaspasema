@@ -1,6 +1,7 @@
 package ninja.javahacker.jaspasema.app;
 
-import lombok.Builder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
@@ -12,55 +13,58 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingExcepti
  * @author Victor Williams Stafusa da Silva
  */
 @Value
-@Builder
 @Wither
 @Getter
+@AllArgsConstructor
+@SuppressFBWarnings("ES_COMPARING_PARAMETER_STRING_WITH_EQ")
 public class AppConfig {
-    @NonNull
-    String staticFileLocation = "";
+    private static AppConfig ROOT = new AppConfig();
 
-    @NonNull
-    String packageRoot = "";
-
-    @NonNull
-    RequestLogger logBefore = (rq, rp) -> System.out.println("start");
-
-    @NonNull
-    RequestLogger logOk = (rq, rp) -> System.out.println("ok");
-
-    @NonNull
-    RequestErrorLogger logError = (rq, rp, x) -> x.printStackTrace();
-
-    @NonNull
-    ConfiguredDatabase db = ConfiguredDatabase.nop();
-
+    @NonNull String staticFileLocation;
+    @NonNull RequestLogger logBefore;
+    @NonNull RequestLogger logOk;
+    @NonNull RequestErrorLogger logError;
+    @NonNull ConfiguredDatabase db;
     int mainPort;
-
     int adminPort;
+    @NonNull String urlString;
+    @NonNull String shutdownString;
 
-    @NonNull
-    String urlString = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "    <title>Jaspasema</title>"
-            + "  </head>"
-            + "  <body>"
-            + "    <p>Ok.</p>"
-            + "  </body>"
-            + "</html>";
+    private AppConfig() {
+        this.staticFileLocation = "";
+        this.logBefore = (rq, rp) -> System.out.println("start");
+        this.logOk = (rq, rp) -> System.out.println("ok");
+        this.logError = (rq, rp, x) -> x.printStackTrace();
+        this.db = ConfiguredDatabase.nop();
+        this.mainPort = 0;
+        this.adminPort = 0;
 
-    @NonNull
-    String shutdownString = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "    <title>Jaspasema</title>"
-            + "  </head>"
-            + "  <body>"
-            + "    <p>Bye.</p>"
-            + "  </body>"
-            + "</html>";
+        this.urlString = ""
+                + "<!DOCTYPE html>"
+                + "<html>"
+                + "  <head>"
+                + "    <title>Jaspasema</title>"
+                + "  </head>"
+                + "  <body>"
+                + "    <p>Ok.</p>"
+                + "  </body>"
+                + "</html>";
+
+        this.shutdownString = ""
+                + "<!DOCTYPE html>"
+                + "<html>"
+                + "  <head>"
+                + "    <title>Jaspasema</title>"
+                + "  </head>"
+                + "  <body>"
+                + "    <p>Bye.</p>"
+                + "  </body>"
+                + "</html>";
+    }
+
+    public static AppConfig start() {
+        return ROOT;
+    }
 
     public App newApp() throws BadServiceMappingException, MalformedProcessorException {
         return new App(this);

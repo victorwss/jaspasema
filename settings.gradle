@@ -1,10 +1,9 @@
+enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'Jaspasema'
 
 def subDirs = rootDir.listFiles(new FileFilter() {
     public boolean accept(File file) {
-        if (!file.isDirectory()) return false
-        if (file.name == 'config' || file.name == 'libs' || file.name.contains('.')) return false
-        return true
+        return file.isDirectory() && !['config', 'libs', 'build'].contains(file.name) && !file.name.contains('.')
     }
 });
 

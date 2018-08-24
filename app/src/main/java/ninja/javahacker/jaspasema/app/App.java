@@ -42,9 +42,7 @@ public class App {
         };
     }
 
-    public App(@NonNull AppConfig config)
-            throws BadServiceMappingException, MalformedProcessorException
-    {
+    public App(@NonNull AppConfig config) throws BadServiceMappingException, MalformedProcessorException {
         this.config = config;
 
         if (config.getMainPort() != 0) {
@@ -89,7 +87,7 @@ public class App {
     }
 
     public void defaultExceptionHandler(@NonNull String errorTemplate) {
-        server.orElseThrow().exception(Exception.class, (x, rq, rp) -> {
+        server.orElseThrow(IllegalStateException::new).exception(Exception.class, (x, rq, rp) -> {
             x.printStackTrace();
             try {
                 StringWriter errors = new StringWriter();

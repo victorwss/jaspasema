@@ -1,5 +1,6 @@
-package ninja.javahacker.jaspasema.service;
+package ninja.javahacker.jaspasema.template;
 
+import ninja.javahacker.jaspasema.service.ServiceConfigurer;
 import spark.Route;
 
 /**

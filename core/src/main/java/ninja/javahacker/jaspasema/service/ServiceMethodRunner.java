@@ -21,7 +21,7 @@ import spark.Response;
  * @author Victor Williams Stafusa da Silva
  */
 @Getter
-public class ServiceMethodRunner<T> implements JaspasemaRoute {
+public final class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     private static final String PANIC = ""
             + "<!DOCTYPE html>"
@@ -120,9 +120,7 @@ public class ServiceMethodRunner<T> implements JaspasemaRoute {
         try {
             return (T) method.invoke(instance, parameters.toArray());
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            AssertionError a = new AssertionError(method + " " + parameters);
-            a.initCause(e);
-            throw a;
+            throw new AssertionError(method + " " + parameters, e);
         }
     }
 }
