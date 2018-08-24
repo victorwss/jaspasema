@@ -1,8 +1,8 @@
 package ninja.javahacker.jaspasema.app;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Wither;
@@ -14,11 +14,10 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingExcepti
  */
 @Value
 @Wither
-@Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @SuppressFBWarnings("ES_COMPARING_PARAMETER_STRING_WITH_EQ")
 public class AppConfig {
-    private static AppConfig ROOT = new AppConfig();
+    private static final AppConfig ROOT = new AppConfig();
 
     @NonNull String staticFileLocation;
     @NonNull RequestLogger logBefore;
@@ -26,9 +25,7 @@ public class AppConfig {
     @NonNull RequestErrorLogger logError;
     @NonNull ConfiguredDatabase db;
     int mainPort;
-    int adminPort;
     @NonNull String urlString;
-    @NonNull String shutdownString;
 
     private AppConfig() {
         this.staticFileLocation = "";
@@ -37,29 +34,7 @@ public class AppConfig {
         this.logError = (rq, rp, x) -> x.printStackTrace();
         this.db = ConfiguredDatabase.nop();
         this.mainPort = 0;
-        this.adminPort = 0;
-
-        this.urlString = ""
-                + "<!DOCTYPE html>"
-                + "<html>"
-                + "  <head>"
-                + "    <title>Jaspasema</title>"
-                + "  </head>"
-                + "  <body>"
-                + "    <p>Ok.</p>"
-                + "  </body>"
-                + "</html>";
-
-        this.shutdownString = ""
-                + "<!DOCTYPE html>"
-                + "<html>"
-                + "  <head>"
-                + "    <title>Jaspasema</title>"
-                + "  </head>"
-                + "  <body>"
-                + "    <p>Bye.</p>"
-                + "  </body>"
-                + "</html>";
+        this.urlString = "http://localhost";
     }
 
     public static AppConfig start() {

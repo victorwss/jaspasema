@@ -3,31 +3,23 @@ package ninja.javahacker.jaspasema.app;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.service.JaspasemaRoute;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
-import spark.Request;
-import spark.Response;
 import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@Value
 public class App {
 
-    @Getter
-    private final AppConfig config;
-
-    @Getter
-    private final Optional<Service> server;
-
-    @Getter
-    private final Optional<Service> adminServer;
+    @NonNull AppConfig config;
+    @NonNull Service server;
+    @NonNull ServiceConfigurer configurer;
 
     private static JaspasemaRoute log(@NonNull JaspasemaRoute op) {
         return (rq, rp) -> {
@@ -45,49 +37,19 @@ public class App {
     public App(@NonNull AppConfig config) throws BadServiceMappingException, MalformedProcessorException {
         this.config = config;
 
-        if (config.getMainPort() != 0) {
-            Service s = Service.ignite().port(config.getMainPort());
-            if (!config.getStaticFileLocation().isEmpty()) s.staticFileLocation("/" + config.getStaticFileLocation());
-            this.server = Optional.of(s);
+        this.server = Service.ignite().port(config.getMainPort());
+        if (!config.getStaticFileLocation().isEmpty()) server.staticFileLocation("/" + config.getStaticFileLocation());
 
-            ServiceConfigurer sc = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(App::log);
-            sc.configure(s);
-        } else {
-            this.server = Optional.empty();
-        }
-
-        if (config.getAdminPort() != 0) {
-            AtomicReference<String> urlRef = new AtomicReference<>("http://localhost:" + config.getMainPort() + "/");
-            Service s = Service.ignite().port(config.getAdminPort());
-            s.get("/shutdown", this::shutdown);
-            s.get("/url", (rq, rp) -> {
-                urlRef.set(rq.queryParams("url"));
-                return config.getUrlString();
-            });
-            this.adminServer = Optional.of(s);
-        } else {
-            this.adminServer = Optional.empty();
-        }
+        this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(App::log);
+        configurer.configure(server);
     }
 
-    private String shutdown(@NonNull Request rq, @NonNull Response rp) {
-        Thread t = new Thread(() -> {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                // Ignora.
-            } finally {
-                server.ifPresent(Service::stop);
-                adminServer.ifPresent(Service::stop);
-                //log.info("Gone.");
-            }
-        });
-        t.start();
-        return config.getShutdownString();
+    public void shutdown() {
+        server.stop();
     }
 
     public void defaultExceptionHandler(@NonNull String errorTemplate) {
-        server.orElseThrow(IllegalStateException::new).exception(Exception.class, (x, rq, rp) -> {
+        server.exception(Exception.class, (x, rq, rp) -> {
             x.printStackTrace();
             try {
                 StringWriter errors = new StringWriter();
@@ -103,17 +65,17 @@ public class App {
     }
 
     private static final String DEFAULT_ERROR_HTML = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "  <title>Error</title>"
-            + "  <body>"
-            + "    <h1>Error</h1>"
-            + "    <p>"
-            + "      <strong>OPS!</strong>"
-            + "    </p>"
-            + "    <pre>#STACK_TRACE#</pre>"
-            + "  </body>"
+            + "<!DOCTYPE html>\n"
+            + "<html>\n"
+            + "  <head>\n"
+            + "  <title>Error</title>\n"
+            + "  <body>\n"
+            + "    <h1>Error</h1>\n"
+            + "    <p>\n"
+            + "      <strong>OPS!</strong>\n"
+            + "    </p>\n"
+            + "    <pre>#STACK_TRACE#</pre>\n"
+            + "  </body>\n"
             + "</html>";
 
     public void defaultExceptionHandler() {
