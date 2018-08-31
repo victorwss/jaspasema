@@ -12,26 +12,20 @@ import ninja.javahacker.jaspasema.ExceptionRemapper;
 public class UninstantiableRemapperException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE =
-            "The exception remapper $R$ is not an instantiable class.";
-
     @NonNull
     private final Class<? extends ExceptionRemapper> remapper;
 
-    protected UninstantiableRemapperException(
+    public UninstantiableRemapperException(
             /*@NonNull*/ Method method,
-            /*@NonNull*/ Class<? extends ExceptionRemapper> remapper,
+            @NonNull Class<? extends ExceptionRemapper> remapper,
             /*@NonNull*/ Throwable cause)
     {
-        super(method, MESSAGE_TEMPLATE.replace("$R$", remapper.getSimpleName()), cause);
+        super(method, cause);
         this.remapper = remapper;
     }
 
-    public static UninstantiableRemapperException create(
-            @NonNull Method method,
-            @NonNull Class<? extends ExceptionRemapper> remapper,
-            @NonNull Throwable cause)
-    {
-        return new UninstantiableRemapperException(method, remapper, cause);
+    @TemplateField("R")
+    public String getRempperName() {
+        return remapper.getSimpleName();
     }
 }

@@ -42,7 +42,7 @@ public @interface JsonBody {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw ImplicitWithJsVarException.create(p, JsonBody.class);
+                throw new ImplicitWithJsVarException(p, JsonBody.class);
             }
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
@@ -53,7 +53,7 @@ public @interface JsonBody {
                             annotation.lenient(),
                             target,
                             s,
-                            x -> MalformedParameterValueException.create(p, JsonBody.class, s, x));
+                            x -> new MalformedParameterValueException(p, JsonBody.class, s, x));
                     },
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : INSTRUCTION_TEMPLATE.replace("#VAR#", js),

@@ -39,7 +39,7 @@ public @interface UriPart {
         {
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             Path path = p.getDeclaringExecutable().getAnnotation(Path.class);
-            if (path == null || !containsPart(path.value(), paramName)) throw UnmatcheableParameterException.create(p);
+            if (path == null || !containsPart(path.value(), paramName)) throw new UnmatcheableParameterException(p);
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);

@@ -6,6 +6,7 @@ import java.lang.reflect.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.ExceptionTemplate;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -15,24 +16,13 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 public class TypeRestrictionViolationException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE =
-            "The @$A$ annotation must be used only on $V$ $U$. The found type was $T$.";
-
     @AllArgsConstructor
     public static enum AllowedTypes {
-        SIMPLE("primitives, primitive wrappers, Strings and date/time"),
-        SIMPLE_LIST("lists of primitive wrappers, Strings and date/time"),
-        SIMPLE_AND_LIST("primitives, primitive wrappers, Strings, date/time and lists of those"),
-        DATE_TIME("date/time"),
-        DATE_TIME_LIST("lists of date/time"),
-        LIST("list"),
-        HTTP("Request, Response or Session");
-
-        private final String text;
+        SIMPLE, SIMPLE_LIST, SIMPLE_AND_LIST, DATE_TIME, DATE_TIME_LIST, LIST, HTTP;
 
         @Override
         public String toString() {
-            return text;
+            return ExceptionTemplate.getExceptionTemplate().getAlloweds().get(this);
         }
     }
 
@@ -45,58 +35,49 @@ public class TypeRestrictionViolationException extends BadServiceMappingExceptio
     @NonNull
     private final AllowedTypes allowed;
 
-    private static String template(
-            /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ AllowedTypes allowed,
-            /*@NonNull*/ ReifiedGeneric<?> target,
-            /*@NonNull*/ String type)
-    {
-        return MESSAGE_TEMPLATE
-                .replace("$A$", annotation.getSimpleName())
-                .replace("$T$", target.toString())
-                .replace("$V$", allowed.toString())
-                .replace("$U$", type);
-    }
-
-    protected TypeRestrictionViolationException(
+    public TypeRestrictionViolationException(
             /*@NonNull*/ Method method,
-            /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ AllowedTypes allowed,
-            /*@NonNull*/ ReifiedGeneric<?> target)
+            @NonNull Class<? extends Annotation> annotation,
+            @NonNull AllowedTypes allowed,
+            @NonNull ReifiedGeneric<?> target)
     {
-        super(method, template(annotation, allowed, target, "returning methods"));
+        super(method);
         this.annotation = annotation;
         this.target = target;
         this.allowed = allowed;
     }
 
-    protected TypeRestrictionViolationException(
+    public TypeRestrictionViolationException(
             /*@NonNull*/ Parameter parameter,
-            /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ AllowedTypes allowed,
-            /*@NonNull*/ ReifiedGeneric<?> target)
+            @NonNull Class<? extends Annotation> annotation,
+            @NonNull AllowedTypes allowed,
+            @NonNull ReifiedGeneric<?> target)
     {
-        super(parameter, template(annotation, allowed, target, "parameters"));
+        super(parameter);
         this.annotation = annotation;
         this.target = target;
         this.allowed = allowed;
     }
 
-    public static TypeRestrictionViolationException create(
-            @NonNull Method method,
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull AllowedTypes allowed,
-            @NonNull ReifiedGeneric<?> target)
-    {
-        return new TypeRestrictionViolationException(method, annotation, allowed, target);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
     }
 
-    public static TypeRestrictionViolationException create(
-            @NonNull Parameter parameter,
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull AllowedTypes allowed,
-            @NonNull ReifiedGeneric<?> target)
-    {
-        return new TypeRestrictionViolationException(parameter, annotation, allowed, target);
+    @TemplateField("T")
+    public String getTargetName() {
+        return target.toString();
+    }
+
+    @TemplateField("V")
+    public String getAllowedName() {
+        return allowed.toString();
+    }
+
+    @TemplateField("U")
+    private String getApplyType() {
+        return getMethod().map(m -> ExceptionTemplate.getExceptionTemplate().getRm())
+                .or(() -> getParameter().map(p -> ExceptionTemplate.getExceptionTemplate().getP()))
+                .orElseThrow(AssertionError::new);
     }
 }

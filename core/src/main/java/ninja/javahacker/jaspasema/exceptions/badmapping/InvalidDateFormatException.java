@@ -14,47 +14,39 @@ public class InvalidDateFormatException extends BadServiceMappingException {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE = "Invalid date format \"$F$\" at @$A$ annotation.";
-
     @NonNull
     private final Class<? extends Annotation> annotation;
 
     @NonNull
     private final String format;
 
-    protected InvalidDateFormatException(
+    public InvalidDateFormatException(
             /*@NonNull*/ Method method,
-            /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ String format)
+            @NonNull Class<? extends Annotation> annotation,
+            @NonNull String format)
     {
-        super(method, MESSAGE_TEMPLATE.replace("$F$", format).replace("$A$", annotation.getSimpleName()));
+        super(method);
         this.annotation = annotation;
         this.format = format;
     }
 
-    protected InvalidDateFormatException(
+    public InvalidDateFormatException(
             /*@NonNull*/ Parameter parameter,
-            /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ String format)
+            @NonNull Class<? extends Annotation> annotation,
+            @NonNull String format)
     {
-        super(parameter, MESSAGE_TEMPLATE.replace("$F$", format).replace("$A$", annotation.getSimpleName()));
+        super(parameter);
         this.annotation = annotation;
         this.format = format;
     }
 
-    public static InvalidDateFormatException create(
-            @NonNull Method method,
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull String format)
-    {
-        return new InvalidDateFormatException(method, annotation, format);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
     }
 
-    public static InvalidDateFormatException create(
-            @NonNull Parameter parameter,
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull String format)
-    {
-        return new InvalidDateFormatException(parameter, annotation, format);
+    @TemplateField("F")
+    public String getFormat() {
+        return format;
     }
 }

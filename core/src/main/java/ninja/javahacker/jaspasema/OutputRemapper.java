@@ -20,11 +20,11 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 /**
  * @author Victor Williams Stafusa da Silva
  */
-@Repeatable(value = CustomHandler.Container.class)
-@ReturnSerializer(processor = CustomHandler.Processor.class)
+@Repeatable(value = OutputRemapper.Container.class)
+@ReturnSerializer(processor = OutputRemapper.Processor.class)
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CustomHandler {
+public @interface OutputRemapper {
     public String jQueryType() default "text";
 
     @ReturnSerializer.ExitDiscriminator
@@ -32,11 +32,11 @@ public @interface CustomHandler {
 
     public Class<? extends ExceptionRemapper> remapper();
 
-    public static class Processor implements ReturnProcessor<CustomHandler> {
+    public static class Processor implements ReturnProcessor<OutputRemapper> {
         @Override
         public <E> Stub<E> prepare(
                 @NonNull ReifiedGeneric<E> target,
-                @NonNull CustomHandler annotation,
+                @NonNull OutputRemapper annotation,
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
@@ -47,9 +47,9 @@ public @interface CustomHandler {
                 ctor.setAccessible(true);
                 f = ctor.newInstance();
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-                throw UninstantiableRemapperException.create(method, remapperClass, e);
+                throw new UninstantiableRemapperException(method, remapperClass, e);
             } catch (InvocationTargetException e) {
-                throw RemapperConstructorException.create(method, remapperClass, e.getCause());
+                throw new RemapperConstructorException(method, remapperClass, e.getCause());
             }
             f.validate(target, annotation, method);
             return new Stub<>(f::remap, annotation.jQueryType());
@@ -59,6 +59,6 @@ public @interface CustomHandler {
     @Target({ElementType.METHOD, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Container {
-        public CustomHandler[] value();
+        public OutputRemapper[] value();
     }
 }

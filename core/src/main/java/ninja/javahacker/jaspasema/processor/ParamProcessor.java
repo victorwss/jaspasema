@@ -71,10 +71,10 @@ public interface ParamProcessor<A extends Annotation> {
         Annotation interesting = null;
         for (Annotation ann : p.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ParamSource.class)) continue;
-            if (interesting != null) throw ConflictingMappingOnParameterException.create(p);
+            if (interesting != null) throw new ConflictingMappingOnParameterException(p);
             interesting = ann;
         }
-        if (interesting == null) throw NoMappingOnParameterException.create(p);
+        if (interesting == null) throw new NoMappingOnParameterException(p);
         return forParameter(p, interesting);
     }
 
@@ -90,16 +90,16 @@ public interface ParamProcessor<A extends Annotation> {
         try {
             cc.getMethod("prepare", ReifiedGeneric.class, ac, Parameter.class);
         } catch (NoSuchMethodException e) {
-            throw IncompatibleParameterProcessorException.create(interesting.annotationType(), e);
+            throw new IncompatibleParameterProcessorException(p, interesting.annotationType(), cc, e);
         }
 
         ParamProcessor<?> pp;
         try {
             pp = cc.getConstructor().newInstance();
         } catch (InvocationTargetException e) {
-            throw ParameterProcessorConstructorException.create(interesting.annotationType(), e.getCause());
+            throw new ParameterProcessorConstructorException(p, interesting.annotationType(), cc, e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw UninstantiableParameterProcessorException.create(interesting.annotationType(), e);
+            throw new UninstantiableParameterProcessorException(p, interesting.annotationType(), cc, e);
         }
         return ((ParamProcessor<A>) pp).prepare(ReifiedGeneric.forType(p.getParameterizedType()), interesting, p);
     }

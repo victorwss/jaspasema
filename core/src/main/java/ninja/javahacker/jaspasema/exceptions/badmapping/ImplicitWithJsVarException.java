@@ -12,23 +12,19 @@ import lombok.NonNull;
 public class ImplicitWithJsVarException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE = "The @$A$ annotation shouldn't have jsVar not empty and be implicit.";
-
     @NonNull
     private final Class<? extends Annotation> annotation;
 
-    protected ImplicitWithJsVarException(
+    public ImplicitWithJsVarException(
             /*@NonNull*/ Parameter parameter,
-            /*@NonNull*/ Class<? extends Annotation> annotation)
+            @NonNull Class<? extends Annotation> annotation)
     {
-        super(parameter, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+        super(parameter);
         this.annotation = annotation;
     }
 
-    public static ImplicitWithJsVarException create(
-            @NonNull Parameter parameter,
-            @NonNull Class<? extends Annotation> annotation)
-    {
-        return new ImplicitWithJsVarException(parameter, annotation);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
     }
 }

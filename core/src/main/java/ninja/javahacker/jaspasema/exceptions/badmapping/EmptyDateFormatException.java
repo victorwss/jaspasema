@@ -14,38 +14,27 @@ public class EmptyDateFormatException extends BadServiceMappingException {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE = "Empty date format at @$A$ annotation.";
-
     @NonNull
     private final Class<? extends Annotation> annotation;
 
-    protected EmptyDateFormatException(
+    public EmptyDateFormatException(
             /*@NonNull*/ Method method,
-            /*@NonNull*/ Class<? extends Annotation> annotation)
+            @NonNull Class<? extends Annotation> annotation)
     {
-        super(method, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+        super(method);
         this.annotation = annotation;
     }
 
-    protected EmptyDateFormatException(
+    public EmptyDateFormatException(
             /*@NonNull*/ Parameter parameter,
-            /*@NonNull*/ Class<? extends Annotation> annotation)
+            @NonNull Class<? extends Annotation> annotation)
     {
-        super(parameter, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+        super(parameter);
         this.annotation = annotation;
     }
 
-    public static EmptyDateFormatException create(
-            @NonNull Method method,
-            @NonNull Class<? extends Annotation> annotation)
-    {
-        return new EmptyDateFormatException(method, annotation);
-    }
-
-    public static EmptyDateFormatException create(
-            @NonNull Parameter parameter,
-            @NonNull Class<? extends Annotation> annotation)
-    {
-        return new EmptyDateFormatException(parameter, annotation);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
     }
 }

@@ -42,16 +42,16 @@ public @interface JsonBodyProperty {
                 @NonNull Parameter p)
         {
             Function<Throwable, MalformedJsonBodyException> thrower =
-                    e -> MalformedJsonBodyException.create(p, e);
+                    e -> new MalformedJsonBodyException(p, e);
 
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
                     (rq, rp) -> {
-                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(p, rq.body(), thrower);
+                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(rq.body(), thrower);
                         Object obj = map.get(js);
                         if (obj != null) return JsonTypesProcessor.convert(annotation.lenient(), obj, target);
-                        if (annotation.required()) throw AbsentRequiredParameterException.create(p);
+                        if (annotation.required()) throw new AbsentRequiredParameterException(p);
                         return null;
                     },
                     js,

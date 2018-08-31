@@ -11,39 +11,27 @@ import lombok.NonNull;
 public class ConflictingAnnotationsThrowsException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    private static final String MESSAGE_TEMPLATE =
-            "Conflicting @ReturnSerializer-annotated annotations on method for exception $X$.";
-
     @NonNull
-    private final Class<? extends Throwable> type;
+    private final Class<? extends Throwable> exceptionType;
 
-    protected ConflictingAnnotationsThrowsException(
+    public ConflictingAnnotationsThrowsException(
             /*@NonNull*/ Class<?> targetClass,
-            /*@NonNull*/ Class<? extends Throwable> type)
+            @NonNull Class<? extends Throwable> exceptionType)
     {
-        super(targetClass, MESSAGE_TEMPLATE.replace("$X$", type.getSimpleName()));
-        this.type = type;
+        super(targetClass);
+        this.exceptionType = exceptionType;
     }
 
-    protected ConflictingAnnotationsThrowsException(
+    public ConflictingAnnotationsThrowsException(
             /*@NonNull*/ Method method,
-            /*@NonNull*/ Class<? extends Throwable> type)
+            @NonNull Class<? extends Throwable> exceptionType)
     {
-        super(method, MESSAGE_TEMPLATE.replace("$X$", type.getSimpleName()));
-        this.type = type;
+        super(method);
+        this.exceptionType = exceptionType;
     }
 
-    public static ConflictingAnnotationsThrowsException create(
-            @NonNull Class<?> targetClass,
-            @NonNull Class<? extends Throwable> type)
-    {
-        return new ConflictingAnnotationsThrowsException(targetClass, type);
-    }
-
-    public static ConflictingAnnotationsThrowsException create(
-            @NonNull Method method,
-            @NonNull Class<? extends Throwable> type)
-    {
-        return new ConflictingAnnotationsThrowsException(method, type);
+    @TemplateField("X")
+    public String getExceptionTypeName() {
+        return exceptionType.getSimpleName();
     }
 }

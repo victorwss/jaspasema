@@ -81,20 +81,20 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
                 }
             } catch (ParameterValueException e) {
                 badThing = e;
-                returnProcessor.onException(e).getWorker().run(rq, rp, e);
+                returnProcessor.onException(e).getWorker().run(method, rq, rp, e);
                 throw e;
             }
 
             try {
                 T result = invoke(parameters);
-                returnProcessor.onReturn().getWorker().run(rq, rp, result);
+                returnProcessor.onReturn().getWorker().run(method, rq, rp, result);
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
-                returnProcessor.onException(cause).getWorker().run(rq, rp, cause);
+                returnProcessor.onException(cause).getWorker().run(method, rq, rp, cause);
                 throw e;
             } catch (MalformedReturnValueException e) {
                 badThing = e;
-                returnProcessor.onException(e).getWorker().run(rq, rp, e);
+                returnProcessor.onException(e).getWorker().run(method, rq, rp, e);
                 throw e;
             }
         } catch (MalformedReturnValueException e) {

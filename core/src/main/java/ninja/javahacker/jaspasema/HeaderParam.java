@@ -36,7 +36,7 @@ public @interface HeaderParam {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw ImplicitWithJsVarException.create(p, HeaderParam.class);
+                throw new ImplicitWithJsVarException(p, HeaderParam.class);
             }
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());

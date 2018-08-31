@@ -37,7 +37,7 @@ public @interface ProducesFixed {
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
-            return new Stub<>((rq, rp, v) -> {
+            return new Stub<>((m, rq, rp, v) -> {
                 rp.body(annotation.value());
                 rp.type(annotation.type());
                 rp.status(annotation.status());

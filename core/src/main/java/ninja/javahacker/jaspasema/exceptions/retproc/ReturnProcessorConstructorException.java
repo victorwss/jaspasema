@@ -1,8 +1,8 @@
 package ninja.javahacker.jaspasema.exceptions.retproc;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import lombok.Getter;
-import lombok.NonNull;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -11,20 +11,21 @@ import lombok.NonNull;
 public class ReturnProcessorConstructorException extends MalformedReturnProcessorException {
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE =
-            "Return processor constructor of class $R$ throwed an exception.";
-
-    protected ReturnProcessorConstructorException(
+    public ReturnProcessorConstructorException(
+            /*@NonNull*/ Method method,
             /*@NonNull*/ Class<? extends Annotation> annotation,
+            /*@NonNull*/ Class<?> processorClass,
             /*@NonNull*/ Throwable cause)
     {
-        super(annotation, MESSAGE_TEMPLATE.replace("$R$", annotation.getSimpleName()), cause);
+        super(method, annotation, processorClass, cause);
     }
 
-    public static ReturnProcessorConstructorException create(
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull Throwable cause)
+    public ReturnProcessorConstructorException(
+            /*@NonNull*/ Class<?> declaringClass,
+            /*@NonNull*/ Class<? extends Annotation> annotation,
+            /*@NonNull*/ Class<?> processorClass,
+            /*@NonNull*/ Throwable cause)
     {
-        return new ReturnProcessorConstructorException(annotation, cause);
+        super(declaringClass, annotation, processorClass, cause);
     }
 }

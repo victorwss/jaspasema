@@ -42,7 +42,7 @@ public @interface QueryJson {
                             annotation.lenient(),
                             target,
                             s,
-                            x -> MalformedParameterValueException.create(p, QueryJson.class, s, x));
+                            x -> new MalformedParameterValueException(p, QueryJson.class, s, x));
                     },
                     js,
                     "targetUrl += '&" + paramName + "=' + encodeURI(JSON.stringify(" + js + "));");

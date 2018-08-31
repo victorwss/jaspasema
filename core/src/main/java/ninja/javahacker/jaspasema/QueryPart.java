@@ -63,7 +63,7 @@ public @interface QueryPart {
                             js,
                             SINGULAR_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", paramName));
                 case NOT_SIMPLE:
-                    throw TypeRestrictionViolationException.create(
+                    throw new TypeRestrictionViolationException(
                             p,
                             QueryPart.class,
                             TypeRestrictionViolationException.AllowedTypes.SIMPLE_AND_LIST,

@@ -37,7 +37,7 @@ public @interface HeaderJsonParam {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw ImplicitWithJsVarException.create(p, HeaderJsonParam.class);
+                throw new ImplicitWithJsVarException(p, HeaderJsonParam.class);
             }
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
@@ -49,7 +49,7 @@ public @interface HeaderJsonParam {
                             annotation.lenient(),
                             target,
                             s,
-                            x -> MalformedParameterValueException.create(p, HeaderJsonParam.class, s, x));
+                            x -> new MalformedParameterValueException(p, HeaderJsonParam.class, s, x));
                     },
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : "customHeaders.push({name: '" + paramName + "', value: " + js + ");");

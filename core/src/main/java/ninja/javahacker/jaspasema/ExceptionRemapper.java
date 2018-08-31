@@ -11,11 +11,15 @@ import spark.Response;
  * @author Victor Williams Stafusa da Silva
  */
 public interface ExceptionRemapper {
-    public void remap(Request rq, Response rp, Object result);
+    public void remap(
+            @NonNull Method method,
+            @NonNull Request rq,
+            @NonNull Response rp,
+            @NonNull Object result);
 
     public default void validate(
             @NonNull ReifiedGeneric<?> target,
-            @NonNull CustomHandler annotation,
+            @NonNull OutputRemapper annotation,
             @NonNull Method method)
             throws BadServiceMappingException
     {

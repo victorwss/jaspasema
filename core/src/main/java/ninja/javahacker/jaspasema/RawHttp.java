@@ -50,7 +50,7 @@ public @interface RawHttp {
             if (target.isSameOf(RP)) return (rq, rp) -> (E) rp;
             if (target.isSameOf(SS)) return (rq, rp) -> (E) rq.session(false);
 
-            throw TypeRestrictionViolationException.create(
+            throw new TypeRestrictionViolationException(
                     p,
                     RawHttp.class,
                     TypeRestrictionViolationException.AllowedTypes.HTTP,

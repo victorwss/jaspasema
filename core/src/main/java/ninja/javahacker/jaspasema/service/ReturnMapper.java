@@ -20,10 +20,7 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingExcepti
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsReturnException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsThrowsException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
-import ninja.javahacker.jaspasema.exceptions.retproc.BadExitDiscriminatorMethodException;
 import ninja.javahacker.jaspasema.exceptions.retproc.MalformedReturnProcessorException;
-import ninja.javahacker.jaspasema.exceptions.retproc.MultipleReturnProcessorsException;
-import ninja.javahacker.jaspasema.exceptions.retproc.ReturnProcessorNotFoundException;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
@@ -79,8 +76,9 @@ public class ReturnMapper {
 
     static {
         try {
-            Annotation[] base = ReturnMapper.class.getDeclaredMethod("dummy").getAnnotations();
-            ROOT = new ReturnMapper(Optional.empty(), base, () -> null, t -> null);
+            Method m = ReturnMapper.class.getDeclaredMethod("dummy");
+            Annotation[] base = m.getAnnotations();
+            ROOT = new ReturnMapper(MalformedReturnProcessorException.onMethod(m), Optional.empty(), base, () -> null, t -> null);
         } catch (NoSuchMethodException | BadServiceMappingException | MalformedReturnProcessorException e) {
             throw new AssertionError(e);
         }
@@ -92,6 +90,7 @@ public class ReturnMapper {
     private final Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> exceptionsConfig;
 
     private ReturnMapper(
+            @NonNull MalformedReturnProcessorException.Factory x,
             @NonNull Optional<ReturnMapper> parent,
             @NonNull Annotation[] anotations,
             @NonNull Supplier<BadServiceMappingException> confictingAnnotationsErrorThrow,
@@ -100,20 +99,20 @@ public class ReturnMapper {
             MalformedReturnProcessorException
     {
         List<Annotation> appliedAnnotations = new ArrayList<>(10);
-        select(anotations, appliedAnnotations::add);
+        select(anotations, appliedAnnotations::add, x);
 
         Optional<ReturnProcessor.ProcessorConfiguration> rt = Optional.empty();
         Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> sketch
                 = new HashMap<>(appliedAnnotations.size());
         for (Annotation a : appliedAnnotations) {
-            Class<? extends Throwable> ct = getOn(a);
+            Class<? extends Throwable> ct = getOn(a, x);
             if (ct == ReturnedOk.class) {
                 if (rt.isPresent()) throw confictingAnnotationsErrorThrow.get();
-                rt = Optional.of(ReturnProcessor.prepareConfig(a));
+                rt = Optional.of(ReturnProcessor.prepareConfig(a, x));
             } else if (sketch.containsKey(ct)) {
                 throw errorThrow.apply(ct);
             } else {
-                sketch.put(ct, ReturnProcessor.prepareConfig(a));
+                sketch.put(ct, ReturnProcessor.prepareConfig(a, x));
             }
         }
 
@@ -129,10 +128,11 @@ public class ReturnMapper {
             MalformedReturnProcessorException
     {
         return new ReturnMapper(
+                MalformedReturnProcessorException.onClass(targetClass),
                 Optional.of(ROOT),
                 targetClass.getAnnotations(),
-                () -> ConflictingAnnotationsReturnException.create(targetClass),
-                t -> ConflictingAnnotationsThrowsException.create(targetClass, t));
+                () -> new ConflictingAnnotationsReturnException(targetClass),
+                t -> new ConflictingAnnotationsThrowsException(targetClass, t));
     }
 
     public static ReturnMap<?> forMethod(
@@ -141,10 +141,11 @@ public class ReturnMapper {
             MalformedReturnProcessorException
     {
         return new ReturnMapper(
+                MalformedReturnProcessorException.onMethod(method),
                 Optional.of(forClass(method.getDeclaringClass())),
                 method.getAnnotations(),
-                () -> ConflictingAnnotationsReturnException.create(method),
-                t -> ConflictingAnnotationsThrowsException.create(method, t)
+                () -> new ConflictingAnnotationsReturnException(method),
+                t -> new ConflictingAnnotationsThrowsException(method, t)
         ).makeMap(method);
     }
 
@@ -155,40 +156,58 @@ public class ReturnMapper {
             MalformedReturnProcessorException
     {
         return new ReturnMapper(
+                MalformedReturnProcessorException.onMethod(method),
                 Optional.of(forClass(method.getDeclaringClass())),
                 method.getAnnotations(),
-                () -> ConflictingAnnotationsReturnException.create(method),
-                t -> ConflictingAnnotationsThrowsException.create(method, t)
+                () -> new ConflictingAnnotationsReturnException(method),
+                t -> new ConflictingAnnotationsThrowsException(method, t)
         ).makeMap(target, method);
     }
 
-    private static Class<? extends Throwable> getOn(Annotation a) throws MalformedReturnProcessorException {
+    private static Class<? extends Throwable> getOn(
+            Annotation a,
+            MalformedReturnProcessorException.Factory x)
+            throws MalformedReturnProcessorException
+    {
         Class<? extends Annotation> c = a.annotationType();
+        ReturnSerializer r = c.getAnnotation(ReturnSerializer.class);
+        if (r == null) throw new AssertionError();
+        Class<? extends ReturnProcessor<?>> cc = r.processor();
         Class<? extends Throwable> discriminator = null;
         for (Method m : c.getMethods()) {
             if (!m.isAnnotationPresent(ReturnSerializer.ExitDiscriminator.class)) continue;
-            if (discriminator != null) throw MultipleReturnProcessorsException.create(c);
-            if (!TYPE.equals(ReifiedGeneric.forType(m.getGenericReturnType()))) throw BadExitDiscriminatorMethodException.create(c);
+            if (discriminator != null) throw x.multiple(c, cc);
+            if (!TYPE.equals(ReifiedGeneric.forType(m.getGenericReturnType()))) throw x.badExit(c, cc);
             m.setAccessible(true);
             try {
                 discriminator = ((Class<?>) m.invoke(a)).asSubclass(Throwable.class);
-            } catch (InvocationTargetException | IllegalAccessException e) {
+            } catch (InvocationTargetException | IllegalAccessException | ClassCastException e) {
                 throw new AssertionError(e);
             }
         }
-        if (discriminator == null) throw ReturnProcessorNotFoundException.create(c);
+        if (discriminator == null) throw x.notFound(c, cc);
         return discriminator;
     }
 
-    private static void select(Annotation[] ans, Consumer<Annotation> c) throws MalformedReturnProcessorException {
+    private static void select(
+            Annotation[] ans,
+            Consumer<Annotation> c,
+            MalformedReturnProcessorException.Factory x)
+            throws MalformedReturnProcessorException
+    {
         for (Annotation a : ans) {
-            select(a, c);
+            select(a, c, x);
         }
     }
 
-    private static void select(Annotation a, Consumer<Annotation> c) throws MalformedReturnProcessorException {
+    private static void select(
+            Annotation a,
+            Consumer<Annotation> c,
+            MalformedReturnProcessorException.Factory x)
+            throws MalformedReturnProcessorException
+    {
         if (a.annotationType().isAnnotationPresent(ReturnSerializer.class)) {
-            getOn(a); // For sanity check.
+            getOn(a, x); // For sanity check.
             c.accept(a);
         } else {
             Method m;
@@ -207,10 +226,10 @@ public class ReturnMapper {
             Annotation[] ar;
             try {
                 ar = (Annotation[]) m.invoke(a);
-            } catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 throw new AssertionError(e);
             }
-            select(ar, c);
+            select(ar, c, x);
         }
     }
 

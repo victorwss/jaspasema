@@ -1,6 +1,5 @@
 package ninja.javahacker.jaspasema.app;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -15,7 +14,6 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingExcepti
 @Value
 @Wither
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SuppressFBWarnings("ES_COMPARING_PARAMETER_STRING_WITH_EQ")
 public class AppConfig {
     private static final AppConfig ROOT = new AppConfig();
 

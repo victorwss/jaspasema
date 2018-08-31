@@ -99,19 +99,19 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.instance = instance;
         this.method = method;
         Path pt = method.getAnnotation(Path.class);
-        if (pt == null) throw MissingPathException.create(method);
+        if (pt == null) throw new MissingPathException(method);
         this.path = pt.value();
         Class<? extends Annotation> annotation = null;
 
         for (Annotation a : method.getAnnotations()) {
             if (!a.annotationType().isAnnotationPresent(HttpMethod.class)) continue;
-            if (annotation != null) throw MultipleHttpMethodAnnotationsException.create(method);
+            if (annotation != null) throw new MultipleHttpMethodAnnotationsException(method);
             annotation = a.annotationType();
         }
 
-        if (annotation == null) throw NoHttpMethodAnnotationsException.create(method);
+        if (annotation == null) throw new NoHttpMethodAnnotationsException(method);
         this.routeConfig = CONFIGS.get(annotation);
-        if (routeConfig == null) throw DontKnowHowToHandleAnnotationException.create(method, annotation);
+        if (routeConfig == null) throw new DontKnowHowToHandleAnnotationException(method, annotation);
 
         HttpMethod hm = annotation.getAnnotation(HttpMethod.class);
         String httpMethodName = hm.value();

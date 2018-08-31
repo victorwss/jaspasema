@@ -12,17 +12,19 @@ import lombok.NonNull;
 public class VoidWithValueReturnTypeException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE = "Methods returning void should not feature @$A$-annotated annotations.";
-
     @NonNull
     private final Class<? extends Annotation> annotation;
 
-    protected VoidWithValueReturnTypeException(/*@NonNull*/ Method method, /*@NonNull*/ Class<? extends Annotation> annotation) {
-        super(method, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+    public VoidWithValueReturnTypeException(
+            /*@NonNull*/ Method method,
+            @NonNull Class<? extends Annotation> annotation)
+    {
+        super(method);
         this.annotation = annotation;
     }
 
-    public static VoidWithValueReturnTypeException create(@NonNull Method method, @NonNull Class<? extends Annotation> annotation) {
-        return new VoidWithValueReturnTypeException(method, annotation);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
     }
 }

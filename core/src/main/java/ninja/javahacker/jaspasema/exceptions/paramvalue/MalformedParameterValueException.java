@@ -12,31 +12,30 @@ import lombok.NonNull;
 public class MalformedParameterValueException extends ParameterValueException {
     private static final long serialVersionUID = 1L;
 
-    public static final String TEMPLATE = "The value \"$V$\" is invalid for a @$A$-annotated parameter.";
-
     @NonNull
     private final Class<? extends Annotation> annotation;
 
     @NonNull
     private final String rawValue;
 
-    protected MalformedParameterValueException(
+    public MalformedParameterValueException(
             /*@NonNull*/ Parameter parameter,
-            /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ String rawValue,
+            @NonNull Class<? extends Annotation> annotation,
+            @NonNull String rawValue,
             /*@NonNull*/ Throwable cause)
     {
-        super(parameter, TEMPLATE.replace("$A$", annotation.getSimpleName()).replace("$V$", rawValue), cause);
+        super(parameter, cause);
         this.annotation = annotation;
         this.rawValue = rawValue;
     }
 
-    public static MalformedParameterValueException create(
-            @NonNull Parameter parameter,
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull String rawValue,
-            @NonNull Throwable cause)
-    {
-        return new MalformedParameterValueException(parameter, annotation, rawValue, cause);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
+    }
+
+    @TemplateField("V")
+    public String getRawValue() {
+        return rawValue;
     }
 }

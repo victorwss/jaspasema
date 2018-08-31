@@ -12,23 +12,19 @@ import lombok.NonNull;
 public class DontKnowHowToHandleAnnotationException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    public static final String MESSAGE_TEMPLATE = "Don't know how to handle @$A$.";
-
     @NonNull
     private final Class<? extends Annotation> annotation;
 
-    protected DontKnowHowToHandleAnnotationException(
+    public DontKnowHowToHandleAnnotationException(
             /*@NonNull*/ Method method,
-            /*@NonNull*/ Class<? extends Annotation> annotation)
+            @NonNull Class<? extends Annotation> annotation)
     {
-        super(method, MESSAGE_TEMPLATE.replace("$A$", annotation.getSimpleName()));
+        super(method);
         this.annotation = annotation;
     }
 
-    public static DontKnowHowToHandleAnnotationException create(
-            @NonNull Method method,
-            @NonNull Class<? extends Annotation> annotation)
-    {
-        return new DontKnowHowToHandleAnnotationException(method, annotation);
+    @TemplateField("A")
+    public String getAnnotationName() {
+        return annotation.getSimpleName();
     }
 }

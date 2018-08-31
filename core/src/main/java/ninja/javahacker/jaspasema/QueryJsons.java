@@ -45,7 +45,7 @@ public @interface QueryJsons {
                 throws BadServiceMappingException
         {
             if (!target.raw().isAssignableFrom(List.class)) {
-                throw TypeRestrictionViolationException.create(
+                throw new TypeRestrictionViolationException(
                         p,
                         QueryJsons.class,
                         TypeRestrictionViolationException.AllowedTypes.LIST,
@@ -74,7 +74,7 @@ public @interface QueryJsons {
                             annotation.lenient(),
                             Wrappers.unwrapIterable(target),
                             s,
-                            x -> MalformedParameterValueException.create(p, QueryJsons.class, s, x));
+                            x -> new MalformedParameterValueException(p, QueryJsons.class, s, x));
                     elements.add(elem);
                 }
                 return elements;

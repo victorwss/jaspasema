@@ -24,20 +24,20 @@ public interface ReturnValueFormatter<E> {
             @NonNull Method method)
             throws BadServiceMappingException
     {
-        Supplier<TypeRestrictionViolationException> w = () -> TypeRestrictionViolationException.create(
+        Supplier<TypeRestrictionViolationException> w = () -> new TypeRestrictionViolationException(
                     method,
                     annotationClass,
                     TypeRestrictionViolationException.AllowedTypes.SIMPLE,
                     target);
 
-        Supplier<TypeRestrictionViolationException> x = () -> TypeRestrictionViolationException.create(
+        Supplier<TypeRestrictionViolationException> x = () -> new TypeRestrictionViolationException(
                     method,
                     annotationClass,
                     TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
                     target);
 
-        Supplier<EmptyDateFormatException> y = () -> EmptyDateFormatException.create(method, annotationClass);
-        Supplier<InvalidDateFormatException> z = () -> InvalidDateFormatException.create(method, annotationClass, format);
+        Supplier<EmptyDateFormatException> y = () -> new EmptyDateFormatException(method, annotationClass);
+        Supplier<InvalidDateFormatException> z = () -> new InvalidDateFormatException(method, annotationClass, format);
 
         FormatterFunction<E> pf = FormatterFunction.formatterFor(format, target, w, x, y, z);
         return pf::format;

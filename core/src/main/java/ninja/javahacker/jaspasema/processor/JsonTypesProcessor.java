@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +72,6 @@ public class JsonTypesProcessor {
     }
 
     public <X extends Throwable> Map<String, Object> readJsonMap(
-            @NonNull Parameter p,
             /*@Nullable*/ String data,
             @NonNull Function<? super IOException, X> onError)
             throws X

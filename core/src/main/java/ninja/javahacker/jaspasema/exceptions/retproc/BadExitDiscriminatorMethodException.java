@@ -1,7 +1,7 @@
 package ninja.javahacker.jaspasema.exceptions.retproc;
 
 import java.lang.annotation.Annotation;
-import lombok.NonNull;
+import java.lang.reflect.Method;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -9,16 +9,19 @@ import lombok.NonNull;
 public class BadExitDiscriminatorMethodException extends MalformedReturnProcessorException {
     private static final long serialVersionUID = 1L;
 
-    private static final String TEMPLATE =
-            "The annotation @$A$ have an ill-formed @ExitDiscriminator method.";
-
-    protected BadExitDiscriminatorMethodException(
-            /*@NonNull*/ Class<? extends Annotation> badAnnotation)
+    public BadExitDiscriminatorMethodException(
+            /*@NonNull*/ Method method,
+            /*@NonNull*/ Class<? extends Annotation> badAnnotation,
+            /*@NonNull*/ Class<?> processorClass)
     {
-        super(badAnnotation, TEMPLATE.replace("$A$", badAnnotation.getSimpleName()));
+        super(method, badAnnotation, processorClass);
     }
 
-    public static BadExitDiscriminatorMethodException create(@NonNull Class<? extends Annotation> badAnnotation) {
-        return new BadExitDiscriminatorMethodException(badAnnotation);
+    public BadExitDiscriminatorMethodException(
+            /*@NonNull*/ Class<?> declaringClass,
+            /*@NonNull*/ Class<? extends Annotation> badAnnotation,
+            /*@NonNull*/ Class<?> processorClass)
+    {
+        super(declaringClass, badAnnotation, processorClass);
     }
 }

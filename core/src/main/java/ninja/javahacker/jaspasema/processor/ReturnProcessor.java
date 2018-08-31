@@ -9,10 +9,7 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingExcepti
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingMappingOnReturnTypeException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnReturnTypeException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.VoidWithValueReturnTypeException;
-import ninja.javahacker.jaspasema.exceptions.retproc.IncompatibleReturnProcessorException;
 import ninja.javahacker.jaspasema.exceptions.retproc.MalformedReturnProcessorException;
-import ninja.javahacker.jaspasema.exceptions.retproc.ReturnProcessorConstructorException;
-import ninja.javahacker.jaspasema.exceptions.retproc.UninstantiableReturnProcessorException;
 import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import spark.Request;
@@ -30,7 +27,12 @@ public interface ReturnProcessor<A extends Annotation> {
 
     @FunctionalInterface
     public interface Worker<E> {
-        public void run(Request rq, Response rp, E value) throws MalformedReturnValueException;
+        public void run(
+                @NonNull Method method,
+                @NonNull Request rq,
+                @NonNull Response rp,
+                @NonNull E value)
+                throws MalformedReturnValueException;
     }
 
     @FunctionalInterface
@@ -62,10 +64,10 @@ public interface ReturnProcessor<A extends Annotation> {
         Annotation interesting = null;
         for (Annotation ann : m.getAnnotations()) {
             if (!ann.annotationType().isAnnotationPresent(ReturnSerializer.class)) continue;
-            if (interesting != null) throw ConflictingMappingOnReturnTypeException.create(m);
+            if (interesting != null) throw new ConflictingMappingOnReturnTypeException(m);
             interesting = ann;
         }
-        if (interesting == null) throw NoMappingOnReturnTypeException.create(m);
+        if (interesting == null) throw new NoMappingOnReturnTypeException(m);
         return forMethod(m, interesting);
     }
 
@@ -76,32 +78,25 @@ public interface ReturnProcessor<A extends Annotation> {
             throws BadServiceMappingException,
             MalformedReturnProcessorException
     {
-        return prepareConfig(interesting).config(ReifiedGeneric.forType(method.getGenericReturnType()), method);
-    }
-
-    public static <T, A extends Annotation> Stub<T> forMethod(
-            @NonNull ReifiedGeneric<T> target,
-            @NonNull A interesting,
-            @NonNull Method method)
-            throws BadServiceMappingException,
-            MalformedReturnProcessorException
-    {
-        return prepareConfig(interesting).config(target, method);
+        return prepareConfig(interesting, MalformedReturnProcessorException.onMethod(method)).config(method);
     }
 
     @SuppressWarnings("unchecked")
     public static <A extends Annotation> ProcessorConfiguration prepareConfig(
-            @NonNull A interesting)
+            @NonNull A interesting,
+            @NonNull MalformedReturnProcessorException.Factory x)
             throws BadServiceMappingException,
             MalformedReturnProcessorException
     {
         Class<? extends Annotation> ac = interesting.annotationType();
-        Class<? extends ReturnProcessor<?>> cc = ac.getAnnotation(ReturnSerializer.class).processor();
+        ReturnSerializer r = ac.getAnnotation(ReturnSerializer.class);
+        if (r == null) throw new IllegalArgumentException();
+        Class<? extends ReturnProcessor<?>> cc = r.processor();
 
         try {
             cc.getMethod("prepare", ReifiedGeneric.class, ac, Method.class);
         } catch (NoSuchMethodException e) {
-            throw IncompatibleReturnProcessorException.create(interesting.annotationType(), e);
+            throw x.incompatible(ac, cc, e);
         }
 
         ReturnProcessor<A> pp;
@@ -113,9 +108,9 @@ public interface ReturnProcessor<A extends Annotation> {
                     .getConstructor()
                     .newInstance();
         } catch (InvocationTargetException e) {
-            throw ReturnProcessorConstructorException.create(interesting.annotationType(), e.getCause());
+            throw x.exception(ac, cc, e.getCause());
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
-            throw UninstantiableReturnProcessorException.create(interesting.annotationType(), e);
+            throw x.uninstantiable(ac, cc, e);
         }
         return new ProcessorConfiguration() {
             @Override
@@ -131,7 +126,7 @@ public interface ReturnProcessor<A extends Annotation> {
             throws BadServiceMappingException
     {
         if (method.getReturnType() == void.class || method.getReturnType() == Void.class) {
-            throw VoidWithValueReturnTypeException.create(method, a);
+            throw new VoidWithValueReturnTypeException(method, a);
         }
     }
 }

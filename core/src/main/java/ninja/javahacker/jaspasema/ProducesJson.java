@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
+import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedJsonReturnValueException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
@@ -40,18 +40,18 @@ public @interface ProducesJson {
                 throws BadServiceMappingException
         {
             if (annotation.on() == ReturnedOk.class) ReturnProcessor.rejectForVoid(method, ProducesJson.class);
-            return new Stub<>((rq, rp, v) -> {
+            return new Stub<>((m, rq, rp, v) -> {
                 rp.body(toJson(annotation.lenient(), method, v));
                 rp.type(annotation.type());
                 rp.status(annotation.status());
             }, "json");
         }
 
-        private static <E> String toJson(boolean lenient, Method method, E someObject) throws MalformedReturnValueException {
+        private static <E> String toJson(boolean lenient, Method method, E someObject) throws MalformedJsonReturnValueException {
             try {
                 return JsonTypesProcessor.writeJson(lenient, someObject);
             } catch (JsonProcessingException x) {
-                throw MalformedReturnValueException.create(someObject, method, x);
+                throw new MalformedJsonReturnValueException(method, someObject, x);
             }
         }
     }

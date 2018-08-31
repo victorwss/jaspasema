@@ -37,7 +37,7 @@ public @interface PlainBody {
                 throws BadServiceMappingException
         {
             if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw ImplicitWithJsVarException.create(p, PlainBody.class);
+                throw new ImplicitWithJsVarException(p, PlainBody.class);
             }
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
