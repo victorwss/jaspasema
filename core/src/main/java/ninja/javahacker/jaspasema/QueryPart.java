@@ -46,8 +46,9 @@ public @interface QueryPart {
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {
-            String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-            String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
+            String paramName = p.getName();
+            String choosenName = ObjectUtils.choose(annotation.name(), paramName);
+            String js = ObjectUtils.choose(annotation.jsVar(), paramName);
 
             SimpleParameterType spt = SimpleParameterType.plural(p, target);
             switch (spt) {
@@ -55,13 +56,13 @@ public @interface QueryPart {
                     return new Stub<>(
                             makePluralWork(target, annotation, p),
                             js,
-                            PLURAL_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", paramName));
+                            PLURAL_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", choosenName));
                 case SINGULAR:
                     ParameterParser<E> part = ParameterParser.prepare(target, annotation.getClass(), annotation.format(), p);
                     return new Stub<>(
                             (rq, rp) -> part.make(rq.queryParams(p.getName())),
                             js,
-                            SINGULAR_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", paramName));
+                            SINGULAR_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", choosenName));
                 case NOT_SIMPLE:
                     throw new TypeRestrictionViolationException(
                             p,

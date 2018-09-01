@@ -73,13 +73,13 @@ public class FwTester {
                 try {
                     r.handleIt(rq, rp);
                 } catch (Throwable x) {
-                    x.printStackTrace();
+                    //x.printStackTrace();
                     xxx.set(x);
                     rp.body(x.toString());
                 }
             }).configure(service);
         } catch (Throwable ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
             throw new AssertionError(ex);
         }
     }

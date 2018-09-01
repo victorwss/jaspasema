@@ -2,8 +2,6 @@ package ninja.javahacker.jaspasema.app;
 
 import lombok.NonNull;
 import lombok.Value;
-import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import spark.Request;
 import spark.Response;
 import spark.Service;
@@ -18,7 +16,7 @@ public class ShutdownApp {
 
     @NonNull Service adminServer;
 
-    public ShutdownApp(@NonNull ShutdownAppConfig config) throws BadServiceMappingException, MalformedProcessorException {
+    public ShutdownApp(@NonNull ShutdownAppConfig config) {
         this.config = config;
         this.adminServer = Service.ignite().port(config.getAdminPort());
         adminServer.get("/shutdown", this::shutdown);

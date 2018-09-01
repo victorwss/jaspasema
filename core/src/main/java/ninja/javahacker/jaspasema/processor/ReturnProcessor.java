@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.processor;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -82,6 +83,7 @@ public interface ReturnProcessor<A extends Annotation> {
     }
 
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
     public static <A extends Annotation> ProcessorConfiguration prepareConfig(
             @NonNull A interesting,
             @NonNull MalformedReturnProcessorException.Factory x)

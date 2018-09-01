@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ public class JsonTypesProcessor {
     }
 
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
     public <E, X extends Throwable> E readJson(
             boolean lenient,
             @NonNull ReifiedGeneric<E> jt,
@@ -71,6 +73,7 @@ public class JsonTypesProcessor {
         }
     }
 
+    @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
     public <X extends Throwable> Map<String, Object> readJsonMap(
             /*@Nullable*/ String data,
             @NonNull Function<? super IOException, X> onError)

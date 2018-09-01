@@ -44,7 +44,6 @@ public @interface OutputRemapper {
             Class<? extends ExceptionRemapper> remapperClass = annotation.remapper();
             try {
                 Constructor<? extends ExceptionRemapper> ctor = remapperClass.getConstructor();
-                ctor.setAccessible(true);
                 f = ctor.newInstance();
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
                 throw new UninstantiableRemapperException(method, remapperClass, e);

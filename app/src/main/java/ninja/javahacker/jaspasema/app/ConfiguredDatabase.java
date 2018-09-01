@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.app;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -19,6 +20,7 @@ public interface ConfiguredDatabase {
 
     public JaspasemaRoute transact(@NonNull JaspasemaRoute op);
 
+    @SuppressFBWarnings("FII_USE_FUNCTION_IDENTITY")
     public static ConfiguredDatabase nop() {
         return op -> op;
     }

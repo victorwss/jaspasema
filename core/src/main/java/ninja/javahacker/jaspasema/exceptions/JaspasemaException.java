@@ -110,7 +110,6 @@ public abstract class JaspasemaException extends Exception {
                 if (t == null) continue;
                 String replacement;
                 try {
-                    m.setAccessible(true);
                     replacement = (String) m.invoke(this);
                 } catch (Throwable e) {
                     replacement = "<ERROR>";

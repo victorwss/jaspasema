@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.InvocationTargetException;
@@ -89,6 +90,7 @@ public class ReturnMapper {
 
     private final Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> exceptionsConfig;
 
+    @SuppressFBWarnings("OI_OPTIONAL_ISSUES_CHECKING_REFERENCE")
     private ReturnMapper(
             @NonNull MalformedReturnProcessorException.Factory x,
             @NonNull Optional<ReturnMapper> parent,
@@ -178,7 +180,6 @@ public class ReturnMapper {
             if (!m.isAnnotationPresent(ReturnSerializer.ExitDiscriminator.class)) continue;
             if (discriminator != null) throw x.multiple(c, cc);
             if (!TYPE.equals(ReifiedGeneric.forType(m.getGenericReturnType()))) throw x.badExit(c, cc);
-            m.setAccessible(true);
             try {
                 discriminator = ((Class<?>) m.invoke(a)).asSubclass(Throwable.class);
             } catch (InvocationTargetException | IllegalAccessException | ClassCastException e) {
@@ -217,7 +218,6 @@ public class ReturnMapper {
                 return;
             }
 
-            m.setAccessible(true);
             Class<?> returnType = m.getReturnType();
             if (!returnType.isArray()) return;
             Class<?> component = returnType.getComponentType();

@@ -29,7 +29,7 @@ public class AppConfig {
         this.staticFileLocation = "";
         this.logBefore = (rq, rp) -> System.out.println("start");
         this.logOk = (rq, rp) -> System.out.println("ok");
-        this.logError = (rq, rp, x) -> x.printStackTrace();
+        this.logError = RequestErrorLogger.PRINT_STACK_TRACE;
         this.db = ConfiguredDatabase.nop();
         this.mainPort = 0;
         this.urlString = "http://localhost";

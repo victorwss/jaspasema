@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Wither;
-import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -44,7 +42,7 @@ public class ShutdownAppConfig {
         return ROOT;
     }
 
-    public ShutdownApp newApp() throws BadServiceMappingException, MalformedProcessorException {
+    public ShutdownApp newApp() {
         return new ShutdownApp(this);
     }
 }

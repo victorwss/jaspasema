@@ -44,7 +44,7 @@ public final class ServiceBuilder {
     public static ServiceBuilder make(@NonNull Object instance) throws BadServiceMappingException, MalformedProcessorException {
         String className = instance.getClass().getSimpleName();
         if (className.isEmpty()) {
-            className = instance.getClass().getName().replace(".", "_");
+            className = instance.getClass().getName().replace('.', '_');
         }
         ServiceName sn = null;
         for (Class<?> c = instance.getClass(); c != null; c = c.getSuperclass()) {

@@ -75,7 +75,7 @@ public class TypeRestrictionViolationException extends BadServiceMappingExceptio
     }
 
     @TemplateField("U")
-    private String getApplyType() {
+    public String getApplyType() {
         return getMethod().map(m -> ExceptionTemplate.getExceptionTemplate().getRm())
                 .or(() -> getParameter().map(p -> ExceptionTemplate.getExceptionTemplate().getP()))
                 .orElseThrow(AssertionError::new);

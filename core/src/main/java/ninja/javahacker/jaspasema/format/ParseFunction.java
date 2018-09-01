@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.format;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.DateTimeException;
@@ -27,6 +28,7 @@ public interface ParseFunction<E> {
     private static <E> ParseFunction<E> of(@NonNull Function<String, E> func) {
         return new ParseFunction<>() {
             @Override
+            @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
             public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
                 if ("null".equals(s) || s.isEmpty()) return null;
                 try {
@@ -41,6 +43,7 @@ public interface ParseFunction<E> {
     private static <E> Function<DateTimeFormatter, ParseFunction<E>> ofDate(BiFunction<String, DateTimeFormatter, E> func) {
         return format -> new ParseFunction<>() {
             @Override
+            @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
             public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s) throws X {
                 if ("null".equals(s) || s.isEmpty()) return null;
                 try {
@@ -98,6 +101,7 @@ public interface ParseFunction<E> {
     }
 
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings({"LEST_LOST_EXCEPTION_STACK_TRACE", "BED_HIERARCHICAL_EXCEPTION_DECLARATION"})
     public static <E, W extends Throwable, X extends Throwable, Y extends Throwable, Z extends Throwable> ParseFunction<E> parserFor(
             @NonNull String format,
             @NonNull ReifiedGeneric<E> target,

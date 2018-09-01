@@ -51,13 +51,14 @@ public @interface QueryJsons {
                         TypeRestrictionViolationException.AllowedTypes.LIST,
                         target);
             }
-            String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-            String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
+            String paramName = p.getName();
+            String choosenName = ObjectUtils.choose(annotation.name(), paramName);
+            String js = ObjectUtils.choose(annotation.jsVar(), paramName);
 
             return new Stub<>(
-                    prepareList((ReifiedGeneric) target, annotation, p, paramName),
+                    prepareList((ReifiedGeneric) target, annotation, p, choosenName),
                     js,
-                    TEMPLATE.replace("$JS$", js).replace("$PN$", paramName)
+                    TEMPLATE.replace("$JS$", js).replace("$PN$", choosenName)
             );
         }
 
@@ -68,8 +69,9 @@ public @interface QueryJsons {
                 @NonNull String paramName)
         {
             return (rq, rp) -> {
-                List<E> elements = new ArrayList<>();
-                for (String s : rq.queryParamsValues(paramName)) {
+                String[] values = rq.queryParamsValues(paramName);
+                List<E> elements = new ArrayList<>(values.length);
+                for (String s : values) {
                     E elem = JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             Wrappers.unwrapIterable(target),

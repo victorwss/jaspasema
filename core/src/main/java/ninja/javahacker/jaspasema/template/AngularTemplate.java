@@ -107,7 +107,7 @@ public class AngularTemplate implements ApiTemplate {
         String output = FACTORY_TEMPLATE.replace("#SERVICE_NAME#", sb.getServiceName());
         StringBuilder methodList = new StringBuilder(2048);
         String calls = sb.getMethods().stream().map(smb -> forMethod(methodList, smb)).collect(Collectors.joining());
-        methodList.append("\n");
+        methodList.append('\n');
         return output.replace("#IMPL_SERVICES#", calls).replace("#METHODS_LIST#", methodList);
     }
 

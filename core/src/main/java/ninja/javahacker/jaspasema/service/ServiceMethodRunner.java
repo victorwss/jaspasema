@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
 import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
@@ -24,15 +24,15 @@ import spark.Response;
 public final class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     private static final String PANIC = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "    <title>SERIOUS ERROR 500</title>"
-            + "  </head>"
-            + "  <body>"
-            + "    <p>A very serious error happened when trying to handle another error. Sorry.</p>"
-            + "    <pre>$ERROR$</pre>"
-            + "  </body>"
+            + "<!DOCTYPE html>\n"
+            + "<html>\n"
+            + "  <head>\n"
+            + "    <title>SERIOUS ERROR 500</title>\n"
+            + "  </head>\n"
+            + "  <body>\n"
+            + "    <p>A very serious error happened when trying to handle another error. Sorry.</p>\n"
+            + "    <pre>$ERROR$</pre>\n"
+            + "  </body>\n"
             + "</html>";
 
     @NonNull
@@ -50,13 +50,13 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
     @NonNull
     private final Object instance;
 
+    @SuppressFBWarnings("RFI_SET_ACCESSIBLE")
     public ServiceMethodRunner(
             @NonNull ReifiedGeneric<T> target,
             @NonNull Object instance,
             @NonNull Method method,
             @NonNull List<ParamProcessor.Stub<?>> parameterProcessors,
             @NonNull ReturnMapper.ReturnMap<T> returnProcessor)
-            throws BadServiceMappingException
     {
         this.target = target;
         this.instance = instance;

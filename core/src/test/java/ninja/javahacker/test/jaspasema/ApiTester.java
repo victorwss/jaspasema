@@ -1,5 +1,6 @@
 package ninja.javahacker.test.jaspasema;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +25,7 @@ public class ApiTester {
     }
 
     @Builder
+    @SuppressFBWarnings("URLCONNECTION_SSRF_FD")
     public static TestResponse request(
             int port,
             String method,

@@ -72,8 +72,6 @@ public class ExceptionTemplate {
         for (Map.Entry<String, String> entry : s.alloweds.entrySet()) {
             try {
                 newMap2.put(TypeRestrictionViolationException.AllowedTypes.valueOf(entry.getKey()), entry.getValue());
-            } catch (IllegalArgumentException x) {
-                throw x;
             } catch (ClassCastException x) {
                 throw new IllegalArgumentException(x);
             }

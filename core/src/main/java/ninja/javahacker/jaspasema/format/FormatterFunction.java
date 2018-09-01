@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.format;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,6 +18,7 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  * @author Victor Williams Stafusa da Silva
  */
 @FunctionalInterface
+@SuppressFBWarnings("FII_USE_METHOD_REFERENCE")
 public interface FormatterFunction<E> {
     public String format(E value);
 
@@ -39,7 +41,7 @@ public interface FormatterFunction<E> {
             Map.entry(ReifiedGeneric.forClass(Float.class), of((Float b) -> b.toString())),
             Map.entry(ReifiedGeneric.forClass(double.class), of((Double b) -> b.toString())),
             Map.entry(ReifiedGeneric.forClass(Double.class), of((Double b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(String.class), of((String s) -> s))
+            Map.entry(ReifiedGeneric.forClass(String.class), of(String::toString))
     );
 
     public static final Map<ReifiedGeneric<?>, Function<DateTimeFormatter, ? extends FormatterFunction<?>>> DT_MAP = Map.ofEntries(
@@ -51,6 +53,7 @@ public interface FormatterFunction<E> {
     );
 
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings({"LEST_LOST_EXCEPTION_STACK_TRACE", "BED_HIERARCHICAL_EXCEPTION_DECLARATION"})
     public static <E, W extends Throwable, X extends Throwable, Y extends Throwable, Z extends Throwable> FormatterFunction<E> formatterFor(
             @NonNull String format,
             @NonNull ReifiedGeneric<E> target,

@@ -40,7 +40,7 @@ public class HttpException extends JaspasemaException {
     }
 
     @TemplateField("STATUS")
-    private String getStatusCodeStr() {
+    public String getStatusCodeString() {
         return String.valueOf(statusCode);
     }
 

@@ -1,8 +1,6 @@
 package ninja.javahacker.jaspasema.app;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import lombok.NonNull;
 import lombok.Value;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
@@ -21,15 +19,15 @@ public class App {
     @NonNull Service server;
     @NonNull ServiceConfigurer configurer;
 
-    private static JaspasemaRoute log(@NonNull JaspasemaRoute op) {
+    private JaspasemaRoute log(@NonNull JaspasemaRoute op) {
         return (rq, rp) -> {
-            System.out.println(rq);
+            config.getLogBefore().log(rq, rp);
             try {
                 op.handleIt(rq, rp);
+                config.getLogOk().log(rq, rp);
             } catch (Throwable t) {
-                t.printStackTrace();
-            } finally {
-                System.out.println(rp);
+                config.getLogError().log(rq, rp, t);
+                throw t;
             }
         };
     }
@@ -40,7 +38,7 @@ public class App {
         this.server = Service.ignite().port(config.getMainPort());
         if (!config.getStaticFileLocation().isEmpty()) server.staticFileLocation("/" + config.getStaticFileLocation());
 
-        this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(App::log);
+        this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(this::log);
         configurer.configure(server);
     }
 
@@ -50,15 +48,10 @@ public class App {
 
     public void defaultExceptionHandler(@NonNull String errorTemplate) {
         server.exception(Exception.class, (x, rq, rp) -> {
-            x.printStackTrace();
             try {
-                StringWriter errors = new StringWriter();
-                x.printStackTrace(new PrintWriter(errors));
-                String stackTrace = errors.toString();
-
-                rp.raw().getWriter().write(errorTemplate.replace("#STACK_TRACE#", stackTrace));
+                rp.raw().getWriter().write(errorTemplate.replace("#ERROR_TYPE#", x.getClass().getName()));
             } catch (IOException ex) {
-                ex.printStackTrace();
+                config.getLogError().log(rq, rp, ex);
             }
             rp.status(500);
         });
@@ -74,7 +67,7 @@ public class App {
             + "    <p>\n"
             + "      <strong>OPS!</strong>\n"
             + "    </p>\n"
-            + "    <pre>#STACK_TRACE#</pre>\n"
+            + "    <pre>#ERROR_TYPE#</pre>\n"
             + "  </body>\n"
             + "</html>";
 

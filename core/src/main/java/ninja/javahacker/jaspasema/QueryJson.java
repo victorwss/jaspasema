@@ -32,12 +32,13 @@ public @interface QueryJson {
                 @NonNull QueryJson annotation,
                 @NonNull Parameter p)
         {
-            String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-            String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
+            String paramName = p.getName();
+            String choosenName = ObjectUtils.choose(annotation.name(), paramName);
+            String js = ObjectUtils.choose(annotation.jsVar(), paramName);
 
             return new Stub<>(
                     (rq, rp) -> {
-                        String s = rq.queryParams(paramName);
+                        String s = rq.queryParams(choosenName);
                         return JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             target,
@@ -45,7 +46,7 @@ public @interface QueryJson {
                             x -> new MalformedParameterValueException(p, QueryJson.class, s, x));
                     },
                     js,
-                    "targetUrl += '&" + paramName + "=' + encodeURI(JSON.stringify(" + js + "));");
+                    "targetUrl += '&" + choosenName + "=' + encodeURI(JSON.stringify(" + js + "));");
         }
     }
 }

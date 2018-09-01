@@ -7,7 +7,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -208,8 +207,8 @@ public class PlainProcessorTest {
                         () -> Assertions.assertEquals(123, a),
                         () -> Assertions.assertEquals("Laranja", b),
                         () -> Assertions.assertEquals(33, c),
-                        () -> Assertions.assertEquals(Arrays.asList("banana", "abacaxi", "uva"), item),
-                        () -> Assertions.assertEquals(Arrays.asList(7777L, 44444L, 987654321L), id)
+                        () -> Assertions.assertEquals(List.of("banana", "abacaxi", "uva"), item),
+                        () -> Assertions.assertEquals(List.of(7777L, 44444L, 987654321L), id)
                 );
                 FwTester.confirm();
             }
@@ -249,12 +248,12 @@ public class PlainProcessorTest {
                 );
                 FwTester.confirm();
             }
-        }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(new Header("Cookie", "a=123; b=Laranja; c=33")));
+        }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, List.of(new Header("Cookie", "a=123; b=Laranja; c=33")));
     }
 
     @Test
     public void testHeaderParams() throws Throwable {
-        List<Header> headers = Arrays.asList(new Header("a", "123"), new Header("b", "Laranja"), new Header("c", "33"));
+        List<Header> headers = List.of(new Header("a", "123"), new Header("b", "Laranja"), new Header("c", "33"));
         FwTester.reflect(new Object() {
             @Get
             @Path("/go")
@@ -287,7 +286,7 @@ public class PlainProcessorTest {
                 );
                 FwTester.confirm();
             }
-        }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(h1, h2));
+        }).post("/go", "", 200, ReturnMapper.DEFAULT_HTML_200, List.of(h1, h2));
     }
 
     @Test
@@ -352,7 +351,7 @@ public class PlainProcessorTest {
                 );
                 FwTester.confirm();
             }
-        }, session).post("/go/abacaxi?test=ABC", json, 200, ReturnMapper.DEFAULT_HTML_200, Arrays.asList(h1, h2));
+        }, session).post("/go/abacaxi?test=ABC", json, 200, ReturnMapper.DEFAULT_HTML_200, List.of(h1, h2));
     }
 
     @Test
@@ -362,7 +361,7 @@ public class PlainProcessorTest {
         Header h3 = new Header("h3", "23/06/2017 17:01");
         Header h4 = new Header("h4", "2017-06-23-17-01-22");
         Header h5 = new Header("Cookie", "c1=23/06/2017;c2=2017-06-23;c3=23/06/2017.17:01;c4=2017-06-23-17-01-22");
-        List<Header> headers = Arrays.asList(h1, h2, h3, h4, h5);
+        List<Header> headers = List.of(h1, h2, h3, h4, h5);
         FwTester.reflect(new Object() {
             @Post
             @Path("/go/:u1/:u2")

@@ -35,18 +35,17 @@ public @interface HeaderParam {
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {
-            if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw new ImplicitWithJsVarException(p, HeaderParam.class);
-            }
-            String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-            String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
+            if (annotation.implicit() && !annotation.jsVar().isEmpty()) throw new ImplicitWithJsVarException(p, HeaderParam.class);
+            String paramName = p.getName();
+            String chooseName = ObjectUtils.choose(annotation.name(), paramName);
+            String js = ObjectUtils.choose(annotation.jsVar(), paramName);
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
 
             return new Stub<>(
-                    (rq, rp) -> part.make(rq.headers(paramName)),
+                    (rq, rp) -> part.make(rq.headers(chooseName)),
                     annotation.implicit() ? "" : js,
-                    annotation.implicit() ? "" : "customHeaders.push({name: '" + paramName + "', value: " + js + ");");
+                    annotation.implicit() ? "" : "customHeaders.push({name: '" + chooseName + "', value: " + js + ");");
         }
     }
 }

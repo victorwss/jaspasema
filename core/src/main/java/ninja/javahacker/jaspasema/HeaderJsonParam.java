@@ -36,15 +36,15 @@ public @interface HeaderJsonParam {
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {
-            if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw new ImplicitWithJsVarException(p, HeaderJsonParam.class);
-            }
-            String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-            String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
+            String jsVar = annotation.jsVar();
+            String paramName = p.getName();
+            if (annotation.implicit() && !jsVar.isEmpty()) throw new ImplicitWithJsVarException(p, HeaderJsonParam.class);
+            String choosenName = ObjectUtils.choose(annotation.name(), paramName);
+            String js = ObjectUtils.choose(jsVar, p.getName());
 
             return new Stub<>(
                     (rq, rp) -> {
-                        String s = rq.headers(paramName);
+                        String s = rq.headers(choosenName);
                         return JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             target,
@@ -52,7 +52,7 @@ public @interface HeaderJsonParam {
                             x -> new MalformedParameterValueException(p, HeaderJsonParam.class, s, x));
                     },
                     annotation.implicit() ? "" : js,
-                    annotation.implicit() ? "" : "customHeaders.push({name: '" + paramName + "', value: " + js + ");");
+                    annotation.implicit() ? "" : "customHeaders.push({name: '" + choosenName + "', value: " + js + ");");
         }
     }
 }

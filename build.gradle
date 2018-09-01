@@ -20,7 +20,6 @@ allprojects {
     ext.javaCompiler = "1.9"
     ext.doclint = false
     ext.extraCompilerArgs = [
-        "--add-modules", "java.xml.ws.annotation",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
@@ -34,6 +33,7 @@ allprojects {
 
     ext.versionApiguardian = "1.0.0"
     ext.versionCheckstyle = "8.12"
+    ext.versionFbContrib = "7.4.3.sb"
     ext.versionFindSecBugs = "1.8.0"
     ext.versionHibernate = "5.3.5.Final"
     ext.versionHibernateAnnotations = "5.0.4.Final"
@@ -45,7 +45,7 @@ allprojects {
     ext.versionJpaSimpleTransactions = version
     ext.versionJunit = "5.3.0-RC1"
     ext.versionJsr305 = "3.0.2"
-    ext.versionLombok = "1.18.2" //"edge"
+    ext.versionLombok = "edge"
     ext.versionPmd = "6.6.0"
     ext.versionReflections = "0.9.11"
     ext.versionReifiedGenerics = version
@@ -75,51 +75,49 @@ subprojects {
     dependencies {
 
         // Jackson
-        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${versionJackson}"
-        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${versionJackson}"
-        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${versionJackson}"
-        api group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: "${versionJackson}"
-        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${versionJackson}"
-        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "${versionJackson}"
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versionJackson
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versionJackson
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versionJackson
+        api group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: versionJackson
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versionJackson
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: versionJackson
 
         // JUnit
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "${versionJunit}"
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "${versionJunit}"
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "${versionJunit}"
-        testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: "${versionApiguardian}"
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versionJunit
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versionJunit
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versionJunit
+        testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: versionApiguardian
 
         // Lombok
         if (versionLombok != "edge") {
-            annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
-            compileOnly group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
-            testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
-            testCompileOnly group: 'org.projectlombok', name: 'lombok', version: "${versionLombok}"
+            annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versionLombok
+            compileOnly group: 'org.projectlombok', name: 'lombok', version: versionLombok
+            testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versionLombok
+            testCompileOnly group: 'org.projectlombok', name: 'lombok', version: versionLombok
         } else {
-            annotationProcessor files("libs/lombok-edge.jar")
-            compileOnly files("libs/lombok-edge.jar")
-            testAnnotationProcessor files("libs/lombok-edge.jar")
-            testCompileOnly files("libs/lombok-edge.jar")
+            annotationProcessor files("../libs/lombok-edge.jar")
+            compileOnly files("../libs/lombok-edge.jar")
+            testAnnotationProcessor files("../libs/lombok-edge.jar")
+            testCompileOnly files("../libs/lombok-edge.jar")
         }
 
         // PMD
-        compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "${versionPmd}"
-        testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: "${versionPmd}"
+        compileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: versionPmd
+        testCompileOnly group: 'net.sourceforge.pmd', name: 'pmd', version: versionPmd
 
         // Reified-Generics
-        api group: 'ninja.javahacker', name: 'reified-generic', version: "${versionReifiedGenerics}"
+        api group: 'ninja.javahacker', name: 'reified-generic', version: versionReifiedGenerics
 
         // Spark
-        api group: 'com.sparkjava', name: 'spark-core', version: "${versionSpark}"
+        api group: 'com.sparkjava', name: 'spark-core', version: versionSpark
 
-        // SpotBugs + Find Security Bugs
-        compileOnly group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: "${versionFindSecBugs}"
-        compileOnly group: 'net.jcip', name: 'jcip-annotations', version: "${versionJcip}"
-        compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${versionSpotBugs}"
-        compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "${versionJsr305}"
-        testCompileOnly group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: "${versionFindSecBugs}"
-        testCompileOnly group: 'net.jcip', name: 'jcip-annotations', version: "${versionJcip}"
-        testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: "${versionSpotBugs}"
-        testCompileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: "${versionJsr305}"
+        // SpotBugs + plugins
+        spotbugs group: 'com.github.spotbugs', name: 'spotbugs', version :versionSpotBugs
+        spotbugs configurations.spotbugsPlugins.dependencies
+        api group: 'net.jcip', name: 'jcip-annotations', version: versionJcip
+        api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: versionSpotBugs
+        spotbugsPlugins group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: versionFindSecBugs
+        spotbugsPlugins group: 'com.mebigfatguy.fb-contrib', name: 'fb-contrib', version: versionFbContrib
     }
 
     task createFolders(description: 'Creates the source folders if they do not exist.') doLast {
@@ -131,9 +129,16 @@ subprojects {
         }
     }
 
+    checkstyleMain {
+        configFile = rootProject.file("config/checkstyle/main.xml")
+    }
+
+    checkstyleTest {
+        configFile = rootProject.file("config/checkstyle/test.xml")
+    }
+
     checkstyle {
-        toolVersion = "${versionCheckstyle}"
-        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+        toolVersion = versionCheckstyle
         configProperties = [
             "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
         ]
@@ -159,21 +164,12 @@ subprojects {
         options.tags = ["apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:"]
     }
 
-    checkstyle {
-        toolVersion = "${versionCheckstyle}"
-        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
-        configProperties = [
-            "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
-        ]
-        ignoreFailures = true
-        showViolations = true
-    }
-
     spotbugs {
-        toolVersion = "${versionSpotBugs}"
+        toolVersion = versionSpotBugs
     }
 
     tasks.withType(com.github.spotbugs.SpotBugsTask) {
+        pluginClasspath = project.configurations.spotbugsPlugins
         reports {
             xml.enabled = false
             html.enabled = true
@@ -182,10 +178,6 @@ subprojects {
 
     jar {
         duplicatesStrategy = "exclude"
-        inputs.property("moduleName", "${group}.${baseName}")
-        manifest {
-            attributes("Automatic-Module-Name": "${group}.${baseName}")
-        }
     }
 
     task sourcesJar(type: Jar) {
@@ -203,7 +195,7 @@ subprojects {
     }
 
     jacoco {
-        toolVersion = "${versionJaCoCo}"
+        toolVersion = versionJaCoCo
     }
 
     jacocoTestReport {
@@ -252,29 +244,39 @@ task mergedJavadoc(type: Javadoc, description: 'Creates Javadoc from all the pro
 }
 
 project(':core') {
+    ext.moduleName = "ninja.javahacker.jaspasema.core"
     jar {
-        baseName = "core"
+        baseName = "jaspasema-core"
+        inputs.property("moduleName", moduleName)
+        manifest {
+            attributes("Automatic-Module-Name": moduleName)
+        }
     }
 }
 
 project(':app') {
+    ext.moduleName = "ninja.javahacker.jaspasema.app"
     jar {
-        baseName = "app"
+        baseName = "jaspasema-app"
+        inputs.property("moduleName", moduleName)
+        manifest {
+            attributes("Automatic-Module-Name": moduleName)
+        }
     }
     dependencies {
         api project(':core')
 
         // Reflections
-        api group: 'org.reflections', name: 'reflections', version: "${versionReflections}"
+        api group: 'org.reflections', name: 'reflections', version: versionReflections
 
         // JPA
-        api group: 'javax.persistence', name: 'javax.persistence-api', version: "${versionJpa}"
+        api group: 'javax.persistence', name: 'javax.persistence-api', version: versionJpa
 
         // JPA Simple Transactions.
-        api group: 'ninja.javahacker', name: 'jpa-simple-transactions', version: "${versionJpaSimpleTransactions}"
+        api group: 'ninja.javahacker', name: 'jpa-simple-transactions', version: versionJpaSimpleTransactions
 
         // Hibernate.
-        runtimeOnly group: 'org.hibernate', name: 'hibernate-core', version: "${versionHibernate}"
-        runtimeOnly group: 'org.hibernate.common', name: 'hibernate-commons-annotations', version: "${versionHibernateAnnotations}"
+        runtimeOnly group: 'org.hibernate', name: 'hibernate-core', version: versionHibernate
+        runtimeOnly group: 'org.hibernate.common', name: 'hibernate-commons-annotations', version: versionHibernateAnnotations
     }
 }
