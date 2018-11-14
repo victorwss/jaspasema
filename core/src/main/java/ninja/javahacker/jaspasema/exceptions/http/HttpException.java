@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.Value;
 import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
@@ -11,6 +12,7 @@ import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueE
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@ToString
 public class HttpException extends JaspasemaException {
     private static final long serialVersionUID = 1L;
 

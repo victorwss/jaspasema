@@ -27,29 +27,29 @@ public interface FormatterFunction<E> {
     }
 
     public static final Map<ReifiedGeneric<?>, FormatterFunction<?>> MAP = Map.ofEntries(
-            Map.entry(ReifiedGeneric.forClass(boolean.class), of((Boolean b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Boolean.class), of((Boolean b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(byte.class), of((Byte b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Byte.class), of((Byte b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(short.class), of((Short b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Short.class), of((Short b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(int.class), of((Integer b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Integer.class), of((Integer b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(long.class), of((Long b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Long.class), of((Long b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(float.class), of((Float b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Float.class), of((Float b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(double.class), of((Double b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(Double.class), of((Double b) -> b.toString())),
-            Map.entry(ReifiedGeneric.forClass(String.class), of(String::toString))
+            Map.entry(ReifiedGeneric.of(boolean.class), of((Boolean b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Boolean.class), of((Boolean b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(byte.class), of((Byte b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Byte.class), of((Byte b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(short.class), of((Short b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Short.class), of((Short b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(int.class), of((Integer b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Integer.class), of((Integer b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(long.class), of((Long b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Long.class), of((Long b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(float.class), of((Float b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Float.class), of((Float b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(double.class), of((Double b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(Double.class), of((Double b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(String.class), of(String::toString))
     );
 
     public static final Map<ReifiedGeneric<?>, Function<DateTimeFormatter, ? extends FormatterFunction<?>>> DT_MAP = Map.ofEntries(
-            Map.entry(ReifiedGeneric.forClass(LocalDate.class), dtf -> of((LocalDate v) -> v.format(dtf))),
-            Map.entry(ReifiedGeneric.forClass(LocalDateTime.class), dtf -> of((LocalDateTime v) -> v.format(dtf))),
-            Map.entry(ReifiedGeneric.forClass(LocalTime.class), dtf -> of((LocalTime v) -> v.format(dtf))),
-            Map.entry(ReifiedGeneric.forClass(Year.class), dtf -> of((Year v) -> v.format(dtf))),
-            Map.entry(ReifiedGeneric.forClass(YearMonth.class), dtf -> of((YearMonth v) -> v.format(dtf)))
+            Map.entry(ReifiedGeneric.of(LocalDate.class), dtf -> of((LocalDate v) -> v.format(dtf))),
+            Map.entry(ReifiedGeneric.of(LocalDateTime.class), dtf -> of((LocalDateTime v) -> v.format(dtf))),
+            Map.entry(ReifiedGeneric.of(LocalTime.class), dtf -> of((LocalTime v) -> v.format(dtf))),
+            Map.entry(ReifiedGeneric.of(Year.class), dtf -> of((Year v) -> v.format(dtf))),
+            Map.entry(ReifiedGeneric.of(YearMonth.class), dtf -> of((YearMonth v) -> v.format(dtf)))
     );
 
     @SuppressWarnings("unchecked")

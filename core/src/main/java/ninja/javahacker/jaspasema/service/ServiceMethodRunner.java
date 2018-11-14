@@ -3,9 +3,11 @@ package ninja.javahacker.jaspasema.service;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -21,6 +23,7 @@ import spark.Response;
  * @author Victor Williams Stafusa da Silva
  */
 @Getter
+@SuppressFBWarnings("RFI_SET_ACCESSIBLE")
 public final class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     private static final String PANIC = ""
@@ -50,7 +53,6 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
     @NonNull
     private final Object instance;
 
-    @SuppressFBWarnings("RFI_SET_ACCESSIBLE")
     public ServiceMethodRunner(
             @NonNull ReifiedGeneric<T> target,
             @NonNull Object instance,
@@ -64,14 +66,18 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
         this.parameterProcessors = parameterProcessors;
         this.returnProcessor = returnProcessor;
 
-        method.setAccessible(true);
+        PrivilegedAction<Void> action = () -> {
+            method.setAccessible(true);
+            return null;
+        };
+        AccessController.doPrivileged(action);
     }
 
     @Override
     public void handleIt(@NonNull Request rq, @NonNull Response rp)
             throws InvocationTargetException, ParameterValueException, MalformedReturnValueException
     {
-        // Can't use streams here due to MalformedParameterException that run(rq, rp) might throw.
+        // Can't use streams here due to ParameterValueException that run(rq, rp) might throw.
         List<Object> parameters = new ArrayList<>(parameterProcessors.size());
         Throwable badThing = null;
         try {
@@ -102,14 +108,9 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
             e.addSuppressed(badThing);
             rp.status(500);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                // Java 10: replaces "UTF-8" with StandardCharsets.UTF_8 and get rid of the UnsupportedEncodingException.
-                PrintStream pw = new PrintStream(baos, true, "UTF-8");
-                e.printStackTrace(pw);
-                rp.body(PANIC.replace("$ERROR$", baos.toString("UTF-8")));
-            } catch (UnsupportedEncodingException x) {
-                throw new AssertionError(x);
-            }
+            PrintStream pw = new PrintStream(baos, true, StandardCharsets.UTF_8);
+            e.printStackTrace(pw);
+            rp.body(PANIC.replace("$ERROR$", baos.toString(StandardCharsets.UTF_8)));
             rp.type("text/html;charset=utf-8");
             throw e;
         }

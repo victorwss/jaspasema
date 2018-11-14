@@ -44,7 +44,7 @@ public interface ReturnProcessor<A extends Annotation> {
                 throws BadServiceMappingException;
 
         public default Stub<?> config(@NonNull Method method) throws BadServiceMappingException {
-            return config(ReifiedGeneric.forType(method.getGenericReturnType()), method);
+            return config(ReifiedGeneric.of(method.getGenericReturnType()), method);
         }
     }
 

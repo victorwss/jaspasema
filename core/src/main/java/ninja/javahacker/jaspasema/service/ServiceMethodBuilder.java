@@ -153,7 +153,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
             throws BadServiceMappingException,
             MalformedProcessorException
     {
-        ReifiedGeneric<?> target = ReifiedGeneric.forType(method.getGenericReturnType());
+        ReifiedGeneric<?> target = ReifiedGeneric.of(method.getGenericReturnType());
         return make(serviceName, target, instance, method);
     }
 
@@ -165,7 +165,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
             throws BadServiceMappingException,
             MalformedProcessorException
     {
-        ReifiedGeneric<?> target2 = ReifiedGeneric.forType(method.getGenericReturnType());
+        ReifiedGeneric<?> target2 = ReifiedGeneric.of(method.getGenericReturnType());
         if (!Objects.equals(target2, target)) throw new IllegalArgumentException();
         return new ServiceMethodBuilder<>(serviceName, target, instance, method);
     }

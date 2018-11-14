@@ -64,23 +64,23 @@ public interface ParseFunction<E> {
     }
 
     public static final Map<ReifiedGeneric<?>, ParseFunction<?>> MAP = Map.ofEntries(
-            Map.entry(ReifiedGeneric.forClass(boolean.class), ParseFunction.of(ParseFunction::booleanParse)),
-            Map.entry(ReifiedGeneric.forClass(Boolean.class), ParseFunction.of(ParseFunction::booleanParse)),
-            Map.entry(ReifiedGeneric.forClass(byte.class), ParseFunction.of(Byte::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(Byte.class), ParseFunction.of(Byte::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(short.class), ParseFunction.of(Short::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(Short.class), ParseFunction.of(Short::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(int.class), ParseFunction.of(Integer::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(Integer.class), ParseFunction.of(Integer::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(long.class), ParseFunction.of(Long::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(Long.class), ParseFunction.of(Long::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(float.class), ParseFunction.of(Float::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(Float.class), ParseFunction.of(Float::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(double.class), ParseFunction.of(Double::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(Double.class), ParseFunction.of(Double::valueOf)),
-            Map.entry(ReifiedGeneric.forClass(BigInteger.class), ParseFunction.of(BigInteger::new)),
-            Map.entry(ReifiedGeneric.forClass(BigDecimal.class), ParseFunction.of(BigDecimal::new)),
-            Map.entry(ReifiedGeneric.forClass(String.class), new ParseFunction<String>() {
+            Map.entry(ReifiedGeneric.of(boolean.class), ParseFunction.of(ParseFunction::booleanParse)),
+            Map.entry(ReifiedGeneric.of(Boolean.class), ParseFunction.of(ParseFunction::booleanParse)),
+            Map.entry(ReifiedGeneric.of(byte.class), ParseFunction.of(Byte::valueOf)),
+            Map.entry(ReifiedGeneric.of(Byte.class), ParseFunction.of(Byte::valueOf)),
+            Map.entry(ReifiedGeneric.of(short.class), ParseFunction.of(Short::valueOf)),
+            Map.entry(ReifiedGeneric.of(Short.class), ParseFunction.of(Short::valueOf)),
+            Map.entry(ReifiedGeneric.of(int.class), ParseFunction.of(Integer::valueOf)),
+            Map.entry(ReifiedGeneric.of(Integer.class), ParseFunction.of(Integer::valueOf)),
+            Map.entry(ReifiedGeneric.of(long.class), ParseFunction.of(Long::valueOf)),
+            Map.entry(ReifiedGeneric.of(Long.class), ParseFunction.of(Long::valueOf)),
+            Map.entry(ReifiedGeneric.of(float.class), ParseFunction.of(Float::valueOf)),
+            Map.entry(ReifiedGeneric.of(Float.class), ParseFunction.of(Float::valueOf)),
+            Map.entry(ReifiedGeneric.of(double.class), ParseFunction.of(Double::valueOf)),
+            Map.entry(ReifiedGeneric.of(Double.class), ParseFunction.of(Double::valueOf)),
+            Map.entry(ReifiedGeneric.of(BigInteger.class), ParseFunction.of(BigInteger::new)),
+            Map.entry(ReifiedGeneric.of(BigDecimal.class), ParseFunction.of(BigDecimal::new)),
+            Map.entry(ReifiedGeneric.of(String.class), new ParseFunction<String>() {
                 @Override
                 public <X extends Throwable> String parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) {
                     return s;
@@ -89,11 +89,11 @@ public interface ParseFunction<E> {
     );
 
     public static final Map<ReifiedGeneric<?>, Function<DateTimeFormatter, ? extends ParseFunction<?>>> DT_MAP = Map.ofEntries(
-            Map.entry(ReifiedGeneric.forClass(LocalDate.class), ofDate(LocalDate::parse)),
-            Map.entry(ReifiedGeneric.forClass(LocalDateTime.class), ofDate(LocalDateTime::parse)),
-            Map.entry(ReifiedGeneric.forClass(LocalTime.class), ofDate(LocalTime::parse)),
-            Map.entry(ReifiedGeneric.forClass(Year.class), ofDate(Year::parse)),
-            Map.entry(ReifiedGeneric.forClass(YearMonth.class), ofDate(YearMonth::parse))
+            Map.entry(ReifiedGeneric.of(LocalDate.class), ofDate(LocalDate::parse)),
+            Map.entry(ReifiedGeneric.of(LocalDateTime.class), ofDate(LocalDateTime::parse)),
+            Map.entry(ReifiedGeneric.of(LocalTime.class), ofDate(LocalTime::parse)),
+            Map.entry(ReifiedGeneric.of(Year.class), ofDate(Year::parse)),
+            Map.entry(ReifiedGeneric.of(YearMonth.class), ofDate(YearMonth::parse))
     );
 
     public static boolean accepts(@NonNull ReifiedGeneric<?> target) {

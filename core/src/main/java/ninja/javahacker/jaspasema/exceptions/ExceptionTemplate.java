@@ -56,7 +56,7 @@ public class ExceptionTemplate {
 
     public static ExceptionTemplate forJsonMap(String data) {
         SubTemplate s =
-                JsonTypesProcessor.readJson(false, ReifiedGeneric.forClass(SubTemplate.class), data, IllegalArgumentException::new);
+                JsonTypesProcessor.readJson(false, ReifiedGeneric.of(SubTemplate.class), data, IllegalArgumentException::new);
 
         Map<Class<? extends Throwable>, String> newMap = new HashMap<>(s.templates.size());
         for (Map.Entry<String, String> entry : s.templates.entrySet()) {

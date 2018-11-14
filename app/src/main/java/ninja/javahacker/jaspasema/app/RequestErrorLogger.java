@@ -8,7 +8,7 @@ import spark.Response;
  * @author Victor Williams Stafusa da Silva
  */
 @FunctionalInterface
-@SuppressFBWarnings("IMC_IMMATURE_CLASS_PRINTSTACKTRACE")
+@SuppressFBWarnings({"IMC_IMMATURE_CLASS_PRINTSTACKTRACE", "ERRMSG"})
 public interface RequestErrorLogger {
     public void log(Request rq, Response rp, Throwable error);
 

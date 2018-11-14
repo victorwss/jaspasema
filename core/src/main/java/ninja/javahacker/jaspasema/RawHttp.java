@@ -26,9 +26,9 @@ public @interface RawHttp {
 
     public static class Processor implements ParamProcessor<RawHttp> {
 
-        private static final ReifiedGeneric<Request> RQ = ReifiedGeneric.forClass(Request.class);
-        private static final ReifiedGeneric<Response> RP = ReifiedGeneric.forClass(Response.class);
-        private static final ReifiedGeneric<Session> SS = ReifiedGeneric.forClass(Session.class);
+        private static final ReifiedGeneric<Request> RQ = ReifiedGeneric.of(Request.class);
+        private static final ReifiedGeneric<Response> RP = ReifiedGeneric.of(Response.class);
+        private static final ReifiedGeneric<Session> SS = ReifiedGeneric.of(Session.class);
 
         @Override
         public <E> Stub<E> prepare(

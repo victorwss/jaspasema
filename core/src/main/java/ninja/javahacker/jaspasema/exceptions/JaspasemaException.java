@@ -32,10 +32,10 @@ public abstract class JaspasemaException extends Exception {
 
     @Value
     private static class Init {
-        @NonNull Optional<Parameter> parameter;
-        @NonNull Optional<Method> method;
-        @NonNull Class<?> declaringClass;
-        @NonNull Optional<Throwable> cause;
+        @NonNull private final Optional<Parameter> parameter;
+        @NonNull private final Optional<Method> method;
+        @NonNull private final Class<?> declaringClass;
+        @NonNull private final Optional<Throwable> cause;
 
         public Init cause(@NonNull Throwable t) {
             return new Init(parameter, method, declaringClass, Optional.of(t));
@@ -58,9 +58,8 @@ public abstract class JaspasemaException extends Exception {
         return new Init(Optional.empty(), Optional.empty(), c, Optional.empty());
     }
 
-    private JaspasemaException(@NonNull Init init) {
-        super();
-        super.initCause(init.getCause().orElse(null));
+    private JaspasemaException(/*@NonNull*/ Init init) {
+        super(init.getCause().orElse(null));
         this.parameter = init.getParameter();
         this.method = init.getMethod();
         this.declaringClass = init.getDeclaringClass();

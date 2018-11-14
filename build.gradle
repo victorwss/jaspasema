@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.spotbugs" version "1.6.2"
+    id "com.github.spotbugs" version "1.6.5"
     id "java-library"
     id "maven-publish"
     id "checkstyle"
@@ -15,9 +15,9 @@ repositories {
 
 allprojects {
     group = "ninja.javahacker.jaspasema"
-    version = "0.4.0"
+    version = "0.5.0"
 
-    ext.javaCompiler = "1.9"
+    ext.javaCompiler = "11"
     ext.doclint = false
     ext.extraCompilerArgs = [
         "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
@@ -32,25 +32,25 @@ allprojects {
     ]
 
     ext.versionApiguardian = "1.0.0"
-    ext.versionCheckstyle = "8.12"
+    ext.versionCheckstyle = "8.14"
     ext.versionFbContrib = "7.4.3.sb"
     ext.versionFindSecBugs = "1.8.0"
-    ext.versionHibernate = "5.3.5.Final"
+    ext.versionHibernate = "5.3.7.Final"
     ext.versionHibernateAnnotations = "5.0.4.Final"
-    ext.versionJackson = "2.9.6"
-    ext.versionJaCoCo = "0.8.1"
+    ext.versionJackson = "2.9.7"
+    ext.versionJaCoCo = "0.8.2"
     ext.versionJaxb = "2.4.0-b180725.0427"
     ext.versionJcip = "1.0"
     ext.versionJpa = "2.2"
-    ext.versionJpaSimpleTransactions = version
-    ext.versionJunit = "5.3.0-RC1"
+    ext.versionJpaSimpleTransactions = "0.5.0"
+    ext.versionJunit = "5.3.1"
     ext.versionJsr305 = "3.0.2"
-    ext.versionLombok = "edge"
-    ext.versionPmd = "6.6.0"
+    ext.versionLombok = "1.18.4"
+    ext.versionPmd = "6.9.0"
     ext.versionReflections = "0.9.11"
-    ext.versionReifiedGenerics = version
+    ext.versionReifiedGenerics = "1.0.0"
     ext.versionSpark = "2.7.2"
-    ext.versionSpotBugs = "3.1.6"
+    ext.versionSpotBugs = "3.1.8"
 }
 
 println "Using Java " + org.gradle.api.JavaVersion.current() + "."
@@ -153,8 +153,11 @@ subprojects {
         options.debug = true
         options.fork = true
         options.compilerArgs << "-parameters" << "-Xlint:all,-processing"
-        if (doclint) options.compilerArgs << "-Xdoclint:all"
         extraCompilerArgs.each { e -> options.compilerArgs << e }
+    }
+
+    compileJava {
+        if (doclint) options.compilerArgs << "-Xdoclint:all"
     }
 
     tasks.withType(Javadoc) {
@@ -166,6 +169,9 @@ subprojects {
 
     spotbugs {
         toolVersion = versionSpotBugs
+        effort = "max"
+        reportLevel = "low"
+        omitVisitors = ["WeakExceptionMessaging", "OverlyPermissiveMethod"]
     }
 
     tasks.withType(com.github.spotbugs.SpotBugsTask) {
@@ -175,6 +181,8 @@ subprojects {
             html.enabled = true
         }
     }
+
+    spotbugsTest.enabled = false
 
     jar {
         duplicatesStrategy = "exclude"

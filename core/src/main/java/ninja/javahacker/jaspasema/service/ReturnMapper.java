@@ -26,6 +26,7 @@ import ninja.javahacker.jaspasema.processor.ReturnProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
+import ninja.javahacker.reifiedgeneric.Token;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -66,11 +67,12 @@ public class ReturnMapper {
             + "</html>";
 
     private static final ReifiedGeneric<Class<? extends Throwable>> TYPE =
-            new ReifiedGeneric<Class<? extends Throwable>>() {};
+            new Token<Class<? extends Throwable>>() {}.reify();
 
     @ProducesFixed(DEFAULT_HTML_200)
     @ProducesFixed(on = Throwable.class, value = DEFAULT_HTML_ERROR_500, status = 500)
     @ProducesFixed(on = ParameterValueException.class, value = DEFAULT_HTML_ERROR_400, status = 400)
+    @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
     private static void dummy() {}
 
     private static final ReturnMapper ROOT;
@@ -179,7 +181,7 @@ public class ReturnMapper {
         for (Method m : c.getMethods()) {
             if (!m.isAnnotationPresent(ReturnSerializer.ExitDiscriminator.class)) continue;
             if (discriminator != null) throw x.multiple(c, cc);
-            if (!TYPE.equals(ReifiedGeneric.forType(m.getGenericReturnType()))) throw x.badExit(c, cc);
+            if (!TYPE.equals(ReifiedGeneric.of(m.getGenericReturnType()))) throw x.badExit(c, cc);
             try {
                 discriminator = ((Class<?>) m.invoke(a)).asSubclass(Throwable.class);
             } catch (InvocationTargetException | IllegalAccessException | ClassCastException e) {
@@ -245,7 +247,7 @@ public class ReturnMapper {
             @NonNull Method method)
             throws BadServiceMappingException
     {
-        return new ReturnMap<>(ReifiedGeneric.forType(method.getGenericReturnType()), method);
+        return new ReturnMap<>(ReifiedGeneric.of(method.getGenericReturnType()), method);
     }
 
     public class ReturnMap<E> {
@@ -261,7 +263,7 @@ public class ReturnMapper {
             this.map = new HashMap<>(exceptionsConfig.size());
             for (Map.Entry<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> entry : exceptionsConfig.entrySet()) {
                 if (entry.getKey() == ReturnedOk.class) continue;
-                map.put(entry.getKey(), entry.getValue().config(ReifiedGeneric.forClass(entry.getKey()), method));
+                map.put(entry.getKey(), entry.getValue().config(ReifiedGeneric.of(entry.getKey()), method));
             }
             this.forReturn = returnConfig == null ? null : returnConfig.config(target, method);
         }

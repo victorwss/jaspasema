@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.Collections;
@@ -43,7 +44,7 @@ public class JsonTypesProcessor {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
     private static JavaType of(@NonNull ReifiedGeneric<?> t) {
-        return TypeFactory.defaultInstance().constructType(t.getGeneric());
+        return TypeFactory.defaultInstance().constructType(t.getType());
     }
 
     public <E> E convert(
@@ -54,8 +55,9 @@ public class JsonTypesProcessor {
         return obj == null ? null : (lenient ? LENIENT : STRICT).convertValue(obj, of(target));
     }
 
+    @Nullable
     @SuppressWarnings("unchecked")
-    @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
+    @SuppressFBWarnings({"LEST_LOST_EXCEPTION_STACK_TRACE", "URV_UNRELATED_RETURN_VALUES"})
     public <E, X extends Throwable> E readJson(
             boolean lenient,
             @NonNull ReifiedGeneric<E> jt,
@@ -64,7 +66,7 @@ public class JsonTypesProcessor {
             throws X
     {
         if (data == null || data.isEmpty()) return null;
-        if (jt.getGeneric() == String.class) return (E) data;
+        if (jt.getType() == String.class) return (E) data;
 
         try {
             return (lenient ? LENIENT : STRICT).readValue(data, of(jt));

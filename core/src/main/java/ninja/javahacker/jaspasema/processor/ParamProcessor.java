@@ -101,6 +101,6 @@ public interface ParamProcessor<A extends Annotation> {
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException e) {
             throw new UninstantiableParameterProcessorException(p, interesting.annotationType(), cc, e);
         }
-        return ((ParamProcessor<A>) pp).prepare(ReifiedGeneric.forType(p.getParameterizedType()), interesting, p);
+        return ((ParamProcessor<A>) pp).prepare(ReifiedGeneric.of(p.getParameterizedType()), interesting, p);
     }
 }

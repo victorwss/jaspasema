@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.app;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.NonNull;
 import lombok.Value;
 import spark.Request;
@@ -10,6 +11,7 @@ import spark.Service;
  * @author Victor Williams Stafusa da Silva
  */
 @Value
+@SuppressFBWarnings("MDM_THREAD_YIELD")
 public class ShutdownApp {
 
     @NonNull ShutdownAppConfig config;
