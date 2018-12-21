@@ -1,7 +1,6 @@
 package ninja.javahacker.test.jaspasema;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -46,8 +45,7 @@ public class ApiTester {
         if (!BODYLESS.contains(method)) connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
         int rc = connection.getResponseCode();
         try (InputStream is = rc >= 400 ? connection.getErrorStream() : connection.getInputStream()) {
-            String response = read(is);
-            //String response = new String(is.readAllBytes(), StandardCharsets.UTF_8); // For Java 9
+            String response = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             return new TestResponse(connection.getResponseCode(), response);
         }
     }
@@ -62,15 +60,5 @@ public class ApiTester {
     public static class Header {
         private String name;
         private String value;
-    }
-
-    private static String read(InputStream is) throws IOException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = is.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
-        }
-        return result.toString(StandardCharsets.UTF_8.name());
     }
 }
