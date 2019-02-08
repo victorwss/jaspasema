@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.spotbugs" version "1.6.5"
+    id "com.github.spotbugs" version "1.6.9"
     id "java-library"
     id "maven-publish"
     id "checkstyle"
@@ -42,7 +42,7 @@ allprojects {
     ext.versionJaxb = "2.4.0-b180725.0427"
     ext.versionJcip = "1.0"
     ext.versionJpa = "2.2"
-    ext.versionJpaSimpleTransactions = "1.0.0"
+    ext.versionJpaSimpleTransactions = "0.5.0"
     ext.versionJunit = "5.3.1"
     ext.versionJsr305 = "3.0.2"
     ext.versionLombok = "1.18.4"
@@ -281,7 +281,8 @@ project(':app') {
         api group: 'javax.persistence', name: 'javax.persistence-api', version: versionJpa
 
         // JPA Simple Transactions.
-        api group: 'ninja.javahacker', name: 'jpa-simple-transactions', version: versionJpaSimpleTransactions
+        api group: 'ninja.javahacker.jpasimpletransactions', name: 'core', version: versionJpaSimpleTransactions
+        api group: 'ninja.javahacker.jpasimpletransactions', name: 'hibernate', version: versionJpaSimpleTransactions
 
         // Hibernate.
         runtimeOnly group: 'org.hibernate', name: 'hibernate-core', version: versionHibernate

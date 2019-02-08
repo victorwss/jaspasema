@@ -9,7 +9,7 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.service.JaspasemaRoute;
 import ninja.javahacker.jpasimpletransactions.Connector;
 import ninja.javahacker.jpasimpletransactions.Database;
-import ninja.javahacker.jpasimpletransactions.PersistenceProperties;
+import ninja.javahacker.jpasimpletransactions.config.ProviderConnectorFactory;
 import org.reflections.Reflections;
 
 /**
@@ -27,26 +27,27 @@ public interface ConfiguredDatabase {
 
     public static ConfiguredDatabase primary(
             @NonNull String packageRoot,
-            @NonNull PersistenceProperties p)
+            @NonNull ProviderConnectorFactory<?> p)
     {
         return singular(packageRoot, p, true);
     }
 
     public static ConfiguredDatabase secondary(
             @NonNull String packageRoot,
-            @NonNull PersistenceProperties p)
+            @NonNull ProviderConnectorFactory<?> p)
     {
         return singular(packageRoot, p, false);
     }
 
     public static ConfiguredDatabase singular(
             @NonNull String packageRoot,
-            @NonNull PersistenceProperties p,
+            @NonNull ProviderConnectorFactory<?> p,
             boolean primary)
     {
         Reflections reflections = new Reflections(packageRoot);
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Entity.class);
-        Connector conn = Connector.withoutXml(classes, p);
+        var f = p.withEntities(classes);
+        var conn = f.connect();
         Database.addConnector(conn, primary);
         return op -> conn.transact(JaspasemaRoute.class, op);
     }
