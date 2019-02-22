@@ -1,5 +1,6 @@
 package ninja.javahacker.test.jaspasema;
 
+import io.javalin.Javalin;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
 import ninja.javahacker.test.jaspasema.ApiTester.Header;
 import org.junit.jupiter.api.Assertions;
-import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -19,7 +19,7 @@ public class FwTester {
     private static final AtomicInteger PORT_COUNTER = new AtomicInteger(8899);
     private final int before;
     private volatile int after = 0;
-    private final Service service;
+    private final Javalin service;
     private final AtomicReference<Throwable> xxx = new AtomicReference<>();
 
     public void get(String qs, int expectedStatus, String resultBody, List<Header> headers) throws Throwable {
@@ -32,7 +32,7 @@ public class FwTester {
 
     public void http(String method, String qs, String body, int expectedStatus, String resultBody, List<Header> headers) throws Throwable {
         try {
-            service.awaitInitialization();
+            service.start();
             ApiTester.TestResponse tresult = ApiTester.builder().port(before).method(method).path(qs).body(body).headers(headers).build();
             //System.out.println(tresult);
             if (xxx.get() != null) throw xxx.get();
@@ -62,20 +62,20 @@ public class FwTester {
     }
 
     private FwTester(Object c, Map<String, Object> session) {
-        service = Service.ignite();
+        service = Javalin.create();
         before = PORT_COUNTER.getAndIncrement();
         try {
             service.port(before);
-            ServiceConfigurer.forServices(c).wrap(r -> (rq, rp) -> {
+            ServiceConfigurer.forServices(c).wrap(r -> ctx -> {
                 for (Map.Entry<String, Object> entry : session.entrySet()) {
-                    rq.session(true).attribute(entry.getKey(), entry.getValue());
+                    ctx.sessionAttribute(entry.getKey(), entry.getValue());
                 }
                 try {
-                    r.handleIt(rq, rp);
+                    r.handleIt(ctx);
                 } catch (Throwable x) {
                     //x.printStackTrace();
                     xxx.set(x);
-                    rp.body(x.toString());
+                    ctx.result(x.toString());
                 }
             }).configure(service);
         } catch (Throwable ex) {

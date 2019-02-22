@@ -5,15 +5,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
-import spark.Session;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -26,9 +26,9 @@ public @interface RawHttp {
 
     public static class Processor implements ParamProcessor<RawHttp> {
 
-        private static final ReifiedGeneric<Request> RQ = ReifiedGeneric.of(Request.class);
-        private static final ReifiedGeneric<Response> RP = ReifiedGeneric.of(Response.class);
-        private static final ReifiedGeneric<Session> SS = ReifiedGeneric.of(Session.class);
+        private static final ReifiedGeneric<HttpServletRequest> RQ = ReifiedGeneric.of(HttpServletRequest.class);
+        private static final ReifiedGeneric<HttpServletResponse> RP = ReifiedGeneric.of(HttpServletResponse.class);
+        private static final ReifiedGeneric<HttpSession> SS = ReifiedGeneric.of(HttpSession.class);
 
         @Override
         public <E> Stub<E> prepare(
@@ -46,9 +46,9 @@ public @interface RawHttp {
                 @NonNull Parameter p)
                 throws BadServiceMappingException
         {
-            if (target.isSameOf(RQ)) return (rq, rp) -> (E) rq;
-            if (target.isSameOf(RP)) return (rq, rp) -> (E) rp;
-            if (target.isSameOf(SS)) return (rq, rp) -> (E) rq.session(false);
+            if (target.isSameOf(RQ)) return ctx -> (E) ctx.req;
+            if (target.isSameOf(RP)) return ctx -> (E) ctx.res;
+            if (target.isSameOf(SS)) return ctx -> (E) ctx.req.getSession(false);
 
             throw new TypeRestrictionViolationException(
                     p,

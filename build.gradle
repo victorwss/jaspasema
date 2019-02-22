@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.spotbugs" version "1.6.9"
+    id "com.github.spotbugs" version "1.6.10"
     id "java-library"
     id "maven-publish"
     id "checkstyle"
@@ -15,7 +15,7 @@ repositories {
 
 allprojects {
     group = "ninja.javahacker.jaspasema"
-    version = "0.5.0"
+    version = "0.6.0"
 
     ext.javaCompiler = "11"
     ext.doclint = false
@@ -32,25 +32,23 @@ allprojects {
     ]
 
     ext.versionApiguardian = "1.0.0"
-    ext.versionCheckstyle = "8.14"
+    ext.versionCheckstyle = "8.17"
     ext.versionFbContrib = "7.4.3.sb"
     ext.versionFindSecBugs = "1.8.0"
-    ext.versionHibernate = "5.3.7.Final"
-    ext.versionHibernateAnnotations = "5.0.4.Final"
-    ext.versionJackson = "2.9.7"
-    ext.versionJaCoCo = "0.8.2"
+    ext.versionJackson = "2.9.8"
+    ext.versionJaCoCo = "0.8.3"
+    ext.versionJavalin = "2.6.0"
     ext.versionJaxb = "2.4.0-b180725.0427"
     ext.versionJcip = "1.0"
     ext.versionJpa = "2.2"
     ext.versionJpaSimpleTransactions = "0.5.0"
-    ext.versionJunit = "5.3.1"
+    ext.versionJunit = "5.4.0"
     ext.versionJsr305 = "3.0.2"
-    ext.versionLombok = "1.18.4"
-    ext.versionPmd = "6.9.0"
+    ext.versionLombok = "1.18.6"
+    ext.versionPmd = "6.11.0"
     ext.versionReflections = "0.9.11"
     ext.versionReifiedGenerics = "1.0.0"
-    ext.versionSpark = "2.7.2"
-    ext.versionSpotBugs = "3.1.8"
+    ext.versionSpotBugs = "3.1.11"
 }
 
 println "Using Java " + org.gradle.api.JavaVersion.current() + "."
@@ -82,6 +80,9 @@ subprojects {
         api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versionJackson
         api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: versionJackson
 
+        // Javalin
+        api group: 'io.javalin', name: 'javalin', version: versionJavalin
+
         // JUnit
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versionJunit
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versionJunit
@@ -107,9 +108,6 @@ subprojects {
 
         // Reified-Generics
         api group: 'ninja.javahacker', name: 'reified-generic', version: versionReifiedGenerics
-
-        // Spark
-        api group: 'com.sparkjava', name: 'spark-core', version: versionSpark
 
         // SpotBugs + plugins
         spotbugs group: 'com.github.spotbugs', name: 'spotbugs', version :versionSpotBugs
@@ -283,9 +281,5 @@ project(':app') {
         // JPA Simple Transactions.
         api group: 'ninja.javahacker.jpasimpletransactions', name: 'core', version: versionJpaSimpleTransactions
         api group: 'ninja.javahacker.jpasimpletransactions', name: 'hibernate', version: versionJpaSimpleTransactions
-
-        // Hibernate.
-        runtimeOnly group: 'org.hibernate', name: 'hibernate-core', version: versionHibernate
-        runtimeOnly group: 'org.hibernate.common', name: 'hibernate-commons-annotations', version: versionHibernateAnnotations
     }
 }

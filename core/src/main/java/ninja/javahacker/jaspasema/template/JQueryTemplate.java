@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.template;
 
+import io.javalin.Handler;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -8,7 +9,6 @@ import lombok.Value;
 import ninja.javahacker.jaspasema.service.ServiceBuilder;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
 import ninja.javahacker.jaspasema.service.ServiceMethodBuilder;
-import spark.Route;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -73,10 +73,10 @@ public class JQueryTemplate implements ApiTemplate {
     private Supplier<String> varName;
 
     @Override
-    public Route createStub(@NonNull ServiceConfigurer sc) {
-        return (rq, rp) -> {
-            rp.type("text/javascript");
-            return createJavascriptStub(sc);
+    public Handler createStub(@NonNull ServiceConfigurer sc) {
+        return ctx -> {
+            ctx.contentType("text/javascript");
+            createJavascriptStub(sc);
         };
     }
 

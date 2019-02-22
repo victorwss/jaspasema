@@ -68,9 +68,9 @@ public @interface QueryJsons {
                 @NonNull Parameter p,
                 @NonNull String paramName)
         {
-            return (rq, rp) -> {
-                String[] values = rq.queryParamsValues(paramName);
-                List<E> elements = new ArrayList<>(values.length);
+            return ctx -> {
+                List<String> values = ctx.queryParams(paramName);
+                List<E> elements = new ArrayList<>(values.size());
                 for (String s : values) {
                     E elem = JsonTypesProcessor.readJson(
                             annotation.lenient(),

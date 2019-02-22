@@ -1,11 +1,10 @@
 package ninja.javahacker.jaspasema.app;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.javalin.Context;
+import io.javalin.Javalin;
 import lombok.NonNull;
 import lombok.Value;
-import spark.Request;
-import spark.Response;
-import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -16,15 +15,15 @@ public class ShutdownApp {
 
     @NonNull ShutdownAppConfig config;
 
-    @NonNull Service adminServer;
+    @NonNull Javalin adminServer;
 
     public ShutdownApp(@NonNull ShutdownAppConfig config) {
         this.config = config;
-        this.adminServer = Service.ignite().port(config.getAdminPort());
+        this.adminServer = Javalin.create().port(config.getAdminPort());
         adminServer.get("/shutdown", this::shutdown);
     }
 
-    private String shutdown(@NonNull Request rq, @NonNull Response rp) {
+    private String shutdown(@NonNull Context ctx) {
         Thread t = new Thread(() -> {
             try {
                 Thread.sleep(50); // Wait the response get delivered.
@@ -32,7 +31,7 @@ public class ShutdownApp {
                 // Ignore.
             } finally {
                 shutdown();
-                config.getLogBye().log(rq, rp);
+                config.getLogBye().log(ctx);
             }
         });
         t.start();

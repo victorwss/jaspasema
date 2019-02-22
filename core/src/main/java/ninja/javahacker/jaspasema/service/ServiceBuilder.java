@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.service;
 
+import io.javalin.Javalin;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import ninja.javahacker.jaspasema.Path;
 import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -59,13 +59,9 @@ public final class ServiceBuilder {
             List<Method> mm = Arrays.asList(c.getDeclaredMethods());
             mm.sort(ServiceBuilder::compareMethods);
             for (Method m : mm) {
-                if (Modifier.isStatic(m.getModifiers())) {
-                    continue;
-                }
+                if (Modifier.isStatic(m.getModifiers())) continue;
                 Path pt = m.getAnnotation(Path.class);
-                if (pt == null) {
-                    continue;
-                }
+                if (pt == null) continue;
                 methods.add(ServiceMethodBuilder.make(serviceName, instance, m));
             }
         }
@@ -77,7 +73,7 @@ public final class ServiceBuilder {
         return new ServiceBuilder(instance, serviceName, methods.stream().map(m -> m.wrap(wrapper)).collect(Collectors.toList()));
     }
 
-    public void configure(@NonNull Service service) {
+    public void configure(@NonNull Javalin service) {
         methods.forEach(m -> m.configure(service));
     }
 

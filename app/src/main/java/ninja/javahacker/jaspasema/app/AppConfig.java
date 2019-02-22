@@ -27,8 +27,8 @@ public class AppConfig {
 
     private AppConfig() {
         this.staticFileLocation = "";
-        this.logBefore = (rq, rp) -> System.out.println("start");
-        this.logOk = (rq, rp) -> System.out.println("ok");
+        this.logBefore = ctx -> System.out.println("start");
+        this.logOk = ctx -> System.out.println("ok");
         this.logError = RequestErrorLogger.PRINT_STACK_TRACE;
         this.db = ConfiguredDatabase.nop();
         this.mainPort = 0;

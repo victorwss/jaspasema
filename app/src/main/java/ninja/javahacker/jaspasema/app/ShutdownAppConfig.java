@@ -25,7 +25,7 @@ public class ShutdownAppConfig {
     private ShutdownAppConfig() {
         this.adminPort = 0;
         this.apps = () -> List.of();
-        this.logBye = (rq, rp) -> System.out.println("exiting");
+        this.logBye = ctx -> System.out.println("exiting");
         this.shutdownString = () -> ""
                 + "<!DOCTYPE html>\n"
                 + "<html>\n"

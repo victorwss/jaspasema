@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.List;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
@@ -60,7 +59,7 @@ public @interface QueryPart {
                 case SINGULAR:
                     ParameterParser<E> part = ParameterParser.prepare(target, annotation.getClass(), annotation.format(), p);
                     return new Stub<>(
-                            (rq, rp) -> part.make(rq.queryParams(p.getName())),
+                            ctx -> part.make(ctx.queryParam(p.getName())),
                             js,
                             SINGULAR_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", choosenName));
                 case NOT_SIMPLE:
@@ -83,7 +82,7 @@ public @interface QueryPart {
         {
             ObjectListParser<E> parts =
                     ObjectListParser.prepare((ReifiedGeneric<List<E>>) target, annotation.getClass(), annotation.format(), p);
-            return (rq, rp) -> (E) parts.make(Arrays.asList(rq.queryParamsValues(p.getName())));
+            return ctx -> (E) parts.make(ctx.queryParams(p.getName()));
         }
     }
 }

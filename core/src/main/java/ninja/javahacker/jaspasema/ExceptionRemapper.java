@@ -1,11 +1,10 @@
 package ninja.javahacker.jaspasema;
 
+import io.javalin.Context;
 import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -13,8 +12,7 @@ import spark.Response;
 public interface ExceptionRemapper {
     public void remap(
             @NonNull Method method,
-            @NonNull Request rq,
-            @NonNull Response rp,
+            @NonNull Context ctx,
             @NonNull Object result);
 
     public default void validate(

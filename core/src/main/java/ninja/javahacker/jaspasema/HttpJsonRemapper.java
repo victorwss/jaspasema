@@ -1,6 +1,7 @@
 package ninja.javahacker.jaspasema;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.javalin.Context;
 import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
@@ -9,8 +10,6 @@ import ninja.javahacker.jaspasema.exceptions.http.HttpException;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -28,7 +27,7 @@ public class HttpJsonRemapper implements ExceptionRemapper {
     }
 
     @Override
-    public void remap(@NonNull Method method, @NonNull Request rq, @NonNull Response rp, @NonNull Object problem) {
+    public void remap(@NonNull Method method, @NonNull Context ctx, @NonNull Object problem) {
         Throwable trouble;
         try {
             trouble = (Throwable) problem;
@@ -42,8 +41,8 @@ public class HttpJsonRemapper implements ExceptionRemapper {
         } catch (JsonProcessingException e) {
             throw new AssertionError(e);
         }
-        rp.status(solution.getStatusCode());
-        rp.body(json);
-        rp.type("text/json;charset=utf-8");
+        ctx.status(solution.getStatusCode());
+        ctx.result(json);
+        ctx.contentType("text/json;charset=utf-8");
     }
 }

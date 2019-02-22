@@ -1,6 +1,7 @@
 package ninja.javahacker.jaspasema.processor;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.javalin.Context;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,8 +14,6 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.VoidWithValueReturnTypeE
 import ninja.javahacker.jaspasema.exceptions.retproc.MalformedReturnProcessorException;
 import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -30,8 +29,7 @@ public interface ReturnProcessor<A extends Annotation> {
     public interface Worker<E> {
         public void run(
                 @NonNull Method method,
-                @NonNull Request rq,
-                @NonNull Response rp,
+                @NonNull Context ctx,
                 @NonNull E value)
                 throws MalformedReturnValueException;
     }

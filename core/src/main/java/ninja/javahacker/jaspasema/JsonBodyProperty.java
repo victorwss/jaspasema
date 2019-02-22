@@ -47,8 +47,8 @@ public @interface JsonBodyProperty {
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
-                    (rq, rp) -> {
-                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(rq.body(), thrower);
+                    ctx -> {
+                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(ctx.body(), thrower);
                         Object obj = map.get(js);
                         if (obj != null) return JsonTypesProcessor.convert(annotation.lenient(), obj, target);
                         if (annotation.required()) throw new AbsentRequiredParameterException(p);

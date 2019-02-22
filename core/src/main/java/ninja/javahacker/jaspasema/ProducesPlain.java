@@ -40,10 +40,10 @@ public @interface ProducesPlain {
         {
             if (annotation.on() == ReturnedOk.class) ReturnProcessor.rejectForVoid(method, ProducesPlain.class);
             ReturnValueFormatter<E> parser = ReturnValueFormatter.prepare(target, annotation.annotationType(), annotation.format(), method);
-            return new Stub<>((m, rq, rp, v) -> {
-                rp.body(parser.make(v));
-                rp.type(annotation.type());
-                rp.status(annotation.status());
+            return new Stub<>((m, ctx, v) -> {
+                ctx.result(parser.make(v));
+                ctx.contentType(annotation.type());
+                ctx.status(annotation.status());
             }, annotation.jQueryType());
         }
     }

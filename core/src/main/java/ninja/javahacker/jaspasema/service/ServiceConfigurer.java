@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.service;
 
+import io.javalin.Javalin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +12,6 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.JaspasemaDiscoverableService;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -56,13 +56,14 @@ public final class ServiceConfigurer {
         return new ServiceConfigurer(serviceBuilders.stream().map(m -> m.wrap(wrapper)).collect(Collectors.toList()));
     }
 
-    public void configure(@NonNull Service service) {
+    public void configure(@NonNull Javalin service) {
         serviceBuilders.forEach(sb -> sb.configure(service));
-        configureCors(service);
+        service.enableCorsForAllOrigins();
+        //configureCors(service);
     }
 
-    private static void configureCors(@NonNull Service service) {
-        service.options("/*", (request, response) -> {
+    /*private static void configureCors(@NonNull Javalin service) {
+        service.options("/*", rqrp -> {
 
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
             if (accessControlRequestHeaders != null) {
@@ -87,5 +88,5 @@ public final class ServiceConfigurer {
             response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             //response.header("Access-Control-Allow-Headers", headers);
         });
-    }
+    }*/
 }

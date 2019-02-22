@@ -44,7 +44,7 @@ public @interface UriPart {
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
             return new Stub<>(
-                    (rq, rp) -> part.make(rq.params(paramName)),
+                    ctx -> part.make(ctx.pathParam(paramName)),
                     js,
                     JS_TEMPLATE.replace("$PARAM$", paramName).replace("$JS$", js));
         }

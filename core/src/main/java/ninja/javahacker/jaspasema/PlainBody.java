@@ -43,7 +43,7 @@ public @interface PlainBody {
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
             return new Stub<>(
-                    (rq, rp) -> part.make(rq.body()),
+                    ctx -> part.make(ctx.body()),
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : INSTRUCTION_TEMPLATE.replace("#VAR#", js));
         }

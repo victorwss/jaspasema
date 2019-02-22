@@ -51,8 +51,8 @@ public @interface JsonBodyPlainProperty {
 
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
             return new Stub<>(
-                    (rq, rp) -> {
-                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(rq.body(), thrower);
+                    ctx -> {
+                        Map<String, Object> map = JsonTypesProcessor.readJsonMap(ctx.body(), thrower);
                         Object obj = map.get(js);
                         if (obj != null) return part.make(obj.toString());
                         if (annotation.required()) throw new AbsentRequiredParameterException(p);

@@ -5,7 +5,6 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import lombok.NonNull;
@@ -43,8 +42,7 @@ public @interface OutputRemapper {
             ExceptionRemapper f;
             Class<? extends ExceptionRemapper> remapperClass = annotation.remapper();
             try {
-                Constructor<? extends ExceptionRemapper> ctor = remapperClass.getConstructor();
-                f = ctor.newInstance();
+                f = remapperClass.getConstructor().newInstance();
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
                 throw new UninstantiableRemapperException(method, remapperClass, e);
             } catch (InvocationTargetException e) {

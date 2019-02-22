@@ -7,7 +7,6 @@ import java.util.Set;
 import javax.persistence.Entity;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.service.JaspasemaRoute;
-import ninja.javahacker.jpasimpletransactions.Connector;
 import ninja.javahacker.jpasimpletransactions.Database;
 import ninja.javahacker.jpasimpletransactions.config.ProviderConnectorFactory;
 import org.reflections.Reflections;

@@ -47,8 +47,8 @@ public @interface JsonBody {
             String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
 
             return new Stub<>(
-                    (rq, rp) -> {
-                        String s = rq.body();
+                    ctx -> {
+                        String s = ctx.body();
                         return JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             target,

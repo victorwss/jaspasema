@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.processor;
 
+import io.javalin.Context;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
@@ -17,8 +18,6 @@ import ninja.javahacker.jaspasema.exceptions.paramproc.ParameterProcessorConstru
 import ninja.javahacker.jaspasema.exceptions.paramproc.UninstantiableParameterProcessorException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -33,10 +32,7 @@ public interface ParamProcessor<A extends Annotation> {
 
     @FunctionalInterface
     public interface Worker<E> {
-        public E run(
-                @NonNull Request rq,
-                @NonNull Response rp)
-                throws ParameterValueException;
+        public E run(@NonNull Context ctx) throws ParameterValueException;
     }
 
     @Value

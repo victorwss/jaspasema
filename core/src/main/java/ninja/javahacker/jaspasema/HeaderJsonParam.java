@@ -43,8 +43,8 @@ public @interface HeaderJsonParam {
             String js = ObjectUtils.choose(jsVar, p.getName());
 
             return new Stub<>(
-                    (rq, rp) -> {
-                        String s = rq.headers(choosenName);
+                    ctx -> {
+                        String s = ctx.header(choosenName);
                         return JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             target,

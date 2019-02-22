@@ -43,7 +43,7 @@ public @interface HeaderParam {
             ParameterParser<E> part = ParameterParser.prepare(target, annotation.annotationType(), annotation.format(), p);
 
             return new Stub<>(
-                    (rq, rp) -> part.make(rq.headers(chooseName)),
+                    ctx -> part.make(ctx.header(chooseName)),
                     annotation.implicit() ? "" : js,
                     annotation.implicit() ? "" : "customHeaders.push({name: '" + chooseName + "', value: " + js + ");");
         }

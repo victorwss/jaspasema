@@ -1,12 +1,12 @@
 package ninja.javahacker.jaspasema.template;
 
+import io.javalin.Handler;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
-import spark.Route;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
 @FunctionalInterface
 public interface ApiTemplate {
-    public Route createStub(ServiceConfigurer sc);
+    public Handler createStub(ServiceConfigurer sc);
 }

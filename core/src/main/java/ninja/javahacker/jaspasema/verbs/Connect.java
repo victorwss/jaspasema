@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema;
+package ninja.javahacker.jaspasema.verbs;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,5 +12,5 @@ import ninja.javahacker.jaspasema.processor.HttpMethod;
 @HttpMethod
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Post {
+public @interface Connect {
 }

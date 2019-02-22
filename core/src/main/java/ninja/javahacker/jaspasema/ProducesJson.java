@@ -40,10 +40,10 @@ public @interface ProducesJson {
                 throws BadServiceMappingException
         {
             if (annotation.on() == ReturnedOk.class) ReturnProcessor.rejectForVoid(method, ProducesJson.class);
-            return new Stub<>((m, rq, rp, v) -> {
-                rp.body(toJson(annotation.lenient(), method, v));
-                rp.type(annotation.type());
-                rp.status(annotation.status());
+            return new Stub<>((m, ctx, v) -> {
+                ctx.result(toJson(annotation.lenient(), method, v));
+                ctx.contentType(annotation.type());
+                ctx.status(annotation.status());
             }, "json");
         }
 

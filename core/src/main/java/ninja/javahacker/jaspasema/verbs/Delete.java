@@ -1,4 +1,4 @@
-package ninja.javahacker.jaspasema;
+package ninja.javahacker.jaspasema.verbs;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

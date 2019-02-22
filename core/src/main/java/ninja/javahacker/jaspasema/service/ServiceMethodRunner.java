@@ -1,6 +1,7 @@
 package ninja.javahacker.jaspasema.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.javalin.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -16,8 +17,6 @@ import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
 import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueException;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Request;
-import spark.Response;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -74,44 +73,44 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
     }
 
     @Override
-    public void handleIt(@NonNull Request rq, @NonNull Response rp)
+    public void handle(@NonNull Context ctx)
             throws InvocationTargetException, ParameterValueException, MalformedReturnValueException
     {
-        // Can't use streams here due to ParameterValueException that run(rq, rp) might throw.
+        // Can't use streams here due to ParameterValueException that run(ctx) might throw.
         List<Object> parameters = new ArrayList<>(parameterProcessors.size());
         Throwable badThing = null;
         try {
             try {
                 for (ParamProcessor.Stub<?> ppw : parameterProcessors) {
-                    parameters.add(ppw.getWorker().run(rq, rp));
+                    parameters.add(ppw.getWorker().run(ctx));
                 }
             } catch (ParameterValueException e) {
                 badThing = e;
-                returnProcessor.onException(e).getWorker().run(method, rq, rp, e);
+                returnProcessor.onException(e).getWorker().run(method, ctx, e);
                 throw e;
             }
 
             try {
                 T result = invoke(parameters);
-                returnProcessor.onReturn().getWorker().run(method, rq, rp, result);
+                returnProcessor.onReturn().getWorker().run(method, ctx, result);
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
-                returnProcessor.onException(cause).getWorker().run(method, rq, rp, cause);
+                returnProcessor.onException(cause).getWorker().run(method, ctx, cause);
                 throw e;
             } catch (MalformedReturnValueException e) {
                 badThing = e;
-                returnProcessor.onException(e).getWorker().run(method, rq, rp, e);
+                returnProcessor.onException(e).getWorker().run(method, ctx, e);
                 throw e;
             }
         } catch (MalformedReturnValueException e) {
             if (badThing == null) throw e;
             e.addSuppressed(badThing);
-            rp.status(500);
+            ctx.status(500);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream pw = new PrintStream(baos, true, StandardCharsets.UTF_8);
             e.printStackTrace(pw);
-            rp.body(PANIC.replace("$ERROR$", baos.toString(StandardCharsets.UTF_8)));
-            rp.type("text/html;charset=utf-8");
+            ctx.result(PANIC.replace("$ERROR$", baos.toString(StandardCharsets.UTF_8)));
+            ctx.contentType("text/html;charset=utf-8");
             throw e;
         }
     }

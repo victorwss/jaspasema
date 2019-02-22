@@ -1,5 +1,7 @@
 package ninja.javahacker.jaspasema.service;
 
+import io.javalin.Handler;
+import io.javalin.Javalin;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -12,12 +14,7 @@ import java.util.function.Function;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Delegate;
-import ninja.javahacker.jaspasema.Delete;
-import ninja.javahacker.jaspasema.Get;
-import ninja.javahacker.jaspasema.Patch;
 import ninja.javahacker.jaspasema.Path;
-import ninja.javahacker.jaspasema.Post;
-import ninja.javahacker.jaspasema.Put;
 import ninja.javahacker.jaspasema.ServiceName;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
@@ -28,9 +25,16 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.NoHttpMethodAnnotationsE
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.HttpMethod;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
+import ninja.javahacker.jaspasema.verbs.Connect;
+import ninja.javahacker.jaspasema.verbs.Delete;
+import ninja.javahacker.jaspasema.verbs.Get;
+import ninja.javahacker.jaspasema.verbs.Head;
+import ninja.javahacker.jaspasema.verbs.Options;
+import ninja.javahacker.jaspasema.verbs.Patch;
+import ninja.javahacker.jaspasema.verbs.Post;
+import ninja.javahacker.jaspasema.verbs.Put;
+import ninja.javahacker.jaspasema.verbs.Trace;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
-import spark.Route;
-import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -40,17 +44,30 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
 
     @FunctionalInterface
     private static interface RouteConfig {
-        public void route(Service svc, String path, Route route);
+        public void route(Javalin svc, String path, Handler route);
     }
 
-    private static final RouteConfig GET = Service::get;
-    private static final RouteConfig POST = Service::post;
-    private static final RouteConfig PUT = Service::put;
-    private static final RouteConfig DELETE = Service::delete;
-    private static final RouteConfig PATCH = Service::patch;
+    private static final RouteConfig HEAD = Javalin::head;
+    private static final RouteConfig GET = Javalin::get;
+    private static final RouteConfig POST = Javalin::post;
+    private static final RouteConfig PUT = Javalin::put;
+    private static final RouteConfig DELETE = Javalin::delete;
+    private static final RouteConfig PATCH = Javalin::patch;
+    private static final RouteConfig OPTIONS = Javalin::options;
+    private static final RouteConfig TRACE = Javalin::trace;
+    private static final RouteConfig CONNECT = Javalin::connect;
 
-    private static final Map<Class<? extends Annotation>, RouteConfig> CONFIGS =
-            Map.of(Get.class, GET, Post.class, POST, Put.class, PUT, Delete.class, DELETE, Patch.class, PATCH);
+    private static final Map<Class<? extends Annotation>, RouteConfig> CONFIGS = Map.of(
+            Head.class, HEAD,
+            Get.class, GET,
+            Post.class, POST,
+            Put.class, PUT,
+            Delete.class, DELETE,
+            Patch.class, PATCH,
+            Options.class, OPTIONS,
+            Trace.class, TRACE,
+            Connect.class, CONNECT
+    );
 
     @NonNull
     private final ReifiedGeneric<T> target;
@@ -171,13 +188,13 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
     }
 
     public ServiceMethodBuilder<T> wrap(@NonNull Function<? super JaspasemaRoute, ? extends JaspasemaRoute> wrapper) {
-        return new ServiceMethodBuilder<>(this, (rq, rp) -> wrapper.apply(call).handleIt(rq, rp));
+        return new ServiceMethodBuilder<>(this, ctx -> wrapper.apply(call).handle(ctx));
     }
 
-    public void configure(@NonNull Service service) {
-        routeConfig.route(service, path, (rq, rp) -> {
-            call.handleIt(rq, rp);
-            return rp.body();
+    public void configure(@NonNull Javalin service) {
+        routeConfig.route(service, path, ctx -> {
+            call.handle(ctx);
+            ctx.body();
         });
     }
 }

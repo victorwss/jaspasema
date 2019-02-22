@@ -37,10 +37,10 @@ public @interface ProducesFixed {
                 @NonNull Method method)
                 throws BadServiceMappingException
         {
-            return new Stub<>((m, rq, rp, v) -> {
-                rp.body(annotation.value());
-                rp.type(annotation.type());
-                rp.status(annotation.status());
+            return new Stub<>((m, ctx, v) -> {
+                ctx.result(annotation.value());
+                ctx.contentType(annotation.type());
+                ctx.status(annotation.status());
             }, annotation.jQueryType());
         }
     }

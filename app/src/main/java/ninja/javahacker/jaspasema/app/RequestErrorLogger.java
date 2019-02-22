@@ -1,8 +1,7 @@
 package ninja.javahacker.jaspasema.app;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import spark.Request;
-import spark.Response;
+import io.javalin.Context;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -10,7 +9,7 @@ import spark.Response;
 @FunctionalInterface
 @SuppressFBWarnings({"IMC_IMMATURE_CLASS_PRINTSTACKTRACE", "ERRMSG"})
 public interface RequestErrorLogger {
-    public void log(Request rq, Response rp, Throwable error);
+    public void log(Context ctx, Throwable error);
 
-    public static final RequestErrorLogger PRINT_STACK_TRACE = (rq, rp, error) -> error.printStackTrace();
+    public static final RequestErrorLogger PRINT_STACK_TRACE = (ctx, error) -> error.printStackTrace();
 }

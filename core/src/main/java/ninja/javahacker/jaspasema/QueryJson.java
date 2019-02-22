@@ -37,8 +37,8 @@ public @interface QueryJson {
             String js = ObjectUtils.choose(annotation.jsVar(), paramName);
 
             return new Stub<>(
-                    (rq, rp) -> {
-                        String s = rq.queryParams(choosenName);
+                    ctx -> {
+                        String s = ctx.queryParam(choosenName);
                         return JsonTypesProcessor.readJson(
                             annotation.lenient(),
                             target,

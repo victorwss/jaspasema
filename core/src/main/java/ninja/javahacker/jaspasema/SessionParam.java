@@ -30,7 +30,7 @@ public @interface SessionParam {
                 @NonNull Parameter p)
         {
             String paramName = ObjectUtils.choose(annotation.name(), p.getName());
-            return new Stub<>((rq, rp) -> rq.session().attribute(paramName), "", "");
+            return new Stub<>(ctx -> ctx.sessionAttribute(paramName), "", "");
         }
     }
 }

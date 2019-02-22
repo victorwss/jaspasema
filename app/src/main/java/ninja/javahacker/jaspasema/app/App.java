@@ -1,13 +1,12 @@
 package ninja.javahacker.jaspasema.app;
 
-import java.io.IOException;
+import io.javalin.Javalin;
 import lombok.NonNull;
 import lombok.Value;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.service.JaspasemaRoute;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
-import spark.Service;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -16,17 +15,17 @@ import spark.Service;
 public class App {
 
     @NonNull AppConfig config;
-    @NonNull Service server;
+    @NonNull Javalin server;
     @NonNull ServiceConfigurer configurer;
 
     private JaspasemaRoute log(@NonNull JaspasemaRoute op) {
-        return (rq, rp) -> {
-            config.getLogBefore().log(rq, rp);
+        return ctx -> {
+            config.getLogBefore().log(ctx);
             try {
-                op.handleIt(rq, rp);
-                config.getLogOk().log(rq, rp);
+                op.handleIt(ctx);
+                config.getLogOk().log(ctx);
             } catch (Throwable t) {
-                config.getLogError().log(rq, rp, t);
+                config.getLogError().log(ctx, t);
                 throw t;
             }
         };
@@ -35,8 +34,8 @@ public class App {
     public App(@NonNull AppConfig config) throws BadServiceMappingException, MalformedProcessorException {
         this.config = config;
 
-        this.server = Service.ignite().port(config.getMainPort());
-        if (!config.getStaticFileLocation().isEmpty()) server.staticFileLocation("/" + config.getStaticFileLocation());
+        this.server = Javalin.create().port(config.getMainPort());
+        if (!config.getStaticFileLocation().isEmpty()) server.enableStaticFiles("/" + config.getStaticFileLocation());
 
         this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(this::log);
         configurer.configure(server);
@@ -47,13 +46,9 @@ public class App {
     }
 
     public void defaultExceptionHandler(@NonNull String errorTemplate) {
-        server.exception(Exception.class, (x, rq, rp) -> {
-            try {
-                rp.raw().getWriter().write(errorTemplate.replace("#ERROR_TYPE#", x.getClass().getName()));
-            } catch (IOException ex) {
-                config.getLogError().log(rq, rp, ex);
-            }
-            rp.status(500);
+        server.exception(Exception.class, (x, ctx) -> {
+            ctx.result(errorTemplate.replace("#ERROR_TYPE#", x.getClass().getName()));
+            ctx.status(500);
         });
     }
 
