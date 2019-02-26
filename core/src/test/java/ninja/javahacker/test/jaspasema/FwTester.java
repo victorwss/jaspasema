@@ -71,7 +71,7 @@ public class FwTester {
                     ctx.sessionAttribute(entry.getKey(), entry.getValue());
                 }
                 try {
-                    r.handleIt(ctx);
+                    r.handle(ctx);
                 } catch (Throwable x) {
                     //x.printStackTrace();
                     xxx.set(x);

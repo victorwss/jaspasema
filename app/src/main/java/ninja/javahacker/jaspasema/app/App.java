@@ -22,7 +22,7 @@ public class App {
         return ctx -> {
             config.getLogBefore().log(ctx);
             try {
-                op.handleIt(ctx);
+                op.handle(ctx);
                 config.getLogOk().log(ctx);
             } catch (Throwable t) {
                 config.getLogError().log(ctx, t);
