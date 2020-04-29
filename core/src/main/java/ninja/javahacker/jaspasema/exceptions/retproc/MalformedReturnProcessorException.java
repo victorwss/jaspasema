@@ -2,8 +2,9 @@ package ninja.javahacker.jaspasema.exceptions.retproc;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
+import ninja.javahacker.jaspasema.processor.ResultProcessor;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -45,139 +46,154 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
         super(declaringClass, badAnnotation, processorClass);
     }
 
+    @NonNull
     public static interface Factory {
+        @NonNull
         public IncompatibleReturnProcessorException incompatible(
-                Class<? extends Annotation> ac,
-                Class<? extends ReturnProcessor<?>> cc,
-                Throwable e);
+                @NonNull Class<? extends Annotation> ac,
+                @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                @NonNull Throwable e);
 
+        @NonNull
         public ReturnProcessorConstructorException exception(
-                Class<? extends Annotation> ac,
-                Class<? extends ReturnProcessor<?>> cc,
-                Throwable e);
+                @NonNull Class<? extends Annotation> ac,
+                @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                @NonNull Throwable e);
 
+        @NonNull
         public UninstantiableReturnProcessorException uninstantiable(
-                Class<? extends Annotation> ac,
-                Class<? extends ReturnProcessor<?>> cc,
-                Throwable e);
+                @NonNull Class<? extends Annotation> ac,
+                @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                @NonNull Throwable e);
 
+        @NonNull
         public MultipleReturnProcessorsException multiple(
-                Class<? extends Annotation> ac,
-                Class<? extends ReturnProcessor<?>> cc);
+                @NonNull Class<? extends Annotation> ac,
+                @NonNull Class<? extends ResultProcessor<?, ?>> cc);
 
+        @NonNull
         public BadExitDiscriminatorMethodException badExit(
-                Class<? extends Annotation> ac,
-                Class<? extends ReturnProcessor<?>> cc);
+                @NonNull Class<? extends Annotation> ac,
+                @NonNull Class<? extends ResultProcessor<?, ?>> cc);
 
+        @NonNull
         public ReturnProcessorNotFoundException notFound(
-                Class<? extends Annotation> ac,
-                Class<? extends ReturnProcessor<?>> cc);
+                @NonNull Class<? extends Annotation> ac,
+                @NonNull Class<? extends ResultProcessor<?, ?>> cc);
     }
 
-    public static Factory onClass(Class<?> declaringClass) {
+    @NonNull
+    public static Factory onClass(@NonNull Class<?> declaringClass) {
         return new Factory() {
             @Override
             public IncompatibleReturnProcessorException incompatible(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc,
-                    Throwable e)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                    @NonNull Throwable e)
             {
                 return new IncompatibleReturnProcessorException(declaringClass, ac, cc, e);
             }
 
             @Override
             public ReturnProcessorConstructorException exception(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc,
-                    Throwable e)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                    @NonNull Throwable e)
             {
                 return new ReturnProcessorConstructorException(declaringClass, ac, cc, e);
             }
 
             @Override
             public UninstantiableReturnProcessorException uninstantiable(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc,
-                    Throwable e)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                    @NonNull Throwable e)
             {
                 return new UninstantiableReturnProcessorException(declaringClass, ac, cc, e);
             }
 
             @Override
             public MultipleReturnProcessorsException multiple(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc)
             {
                 return new MultipleReturnProcessorsException(declaringClass, ac, cc);
             }
 
             @Override
             public BadExitDiscriminatorMethodException badExit(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc)
             {
                 return new BadExitDiscriminatorMethodException(declaringClass, ac, cc);
             }
 
             @Override
             public ReturnProcessorNotFoundException notFound(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc)
             {
                 return new ReturnProcessorNotFoundException(declaringClass, ac, cc);
             }
         };
     }
 
-    public static Factory onMethod(Method method) {
+    public static Factory onMethod(@NonNull Method method) {
         return new Factory() {
+
+            @NonNull
             @Override
             public IncompatibleReturnProcessorException incompatible(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc,
-                    Throwable e)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                    @NonNull Throwable e)
             {
                 return new IncompatibleReturnProcessorException(method, ac, cc, e);
             }
 
+            @NonNull
             @Override
             public ReturnProcessorConstructorException exception(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc,
-                    Throwable e)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                    @NonNull Throwable e)
             {
                 return new ReturnProcessorConstructorException(method, ac, cc, e);
             }
 
+            @NonNull
             @Override
             public UninstantiableReturnProcessorException uninstantiable(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc,
-                    Throwable e)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc,
+                    @NonNull Throwable e)
             {
                 return new UninstantiableReturnProcessorException(method, ac, cc, e);
             }
 
+            @NonNull
             @Override
             public MultipleReturnProcessorsException multiple(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc)
             {
                 return new MultipleReturnProcessorsException(method, ac, cc);
             }
 
+            @NonNull
             @Override
             public BadExitDiscriminatorMethodException badExit(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc)
             {
                 return new BadExitDiscriminatorMethodException(method, ac, cc);
             }
 
+            @NonNull
             @Override
             public ReturnProcessorNotFoundException notFound(
-                    Class<? extends Annotation> ac,
-                    Class<? extends ReturnProcessor<?>> cc)
+                    @NonNull Class<? extends Annotation> ac,
+                    @NonNull Class<? extends ResultProcessor<?, ?>> cc)
             {
                 return new ReturnProcessorNotFoundException(method, ac, cc);
             }

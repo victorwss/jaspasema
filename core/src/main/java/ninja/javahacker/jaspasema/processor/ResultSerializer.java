@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
-public @interface ReturnSerializer {
-    public Class<? extends ReturnProcessor<?>> processor();
+public @interface ResultSerializer {
+    public Class<? extends ResultProcessor<?, ?>> processor();
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)

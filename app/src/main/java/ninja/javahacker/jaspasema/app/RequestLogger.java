@@ -1,6 +1,6 @@
 package ninja.javahacker.jaspasema.app;
 
-import io.javalin.Context;
+import io.javalin.http.Context;
 
 /**
  * @author Victor Williams Stafusa da Silva

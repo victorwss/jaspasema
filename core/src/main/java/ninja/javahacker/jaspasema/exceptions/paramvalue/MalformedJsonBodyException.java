@@ -8,6 +8,11 @@ import java.lang.reflect.Parameter;
 public class MalformedJsonBodyException extends ParameterValueException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance with a cause specifying whose is the problematic parameter.
+     * @param parameter The problematic parameter.
+     * @param cause The cause.
+     */
     public MalformedJsonBodyException(
             /*@NonNull*/ Parameter parameter,
             /*@NonNull*/ Throwable cause)

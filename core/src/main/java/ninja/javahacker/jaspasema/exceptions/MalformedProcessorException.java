@@ -82,11 +82,13 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return getBadAnnotation().getSimpleName();
     }
 
+    @NonNull
     @TemplateField("R")
     public String getRempperName() {
         return processorClass.getSimpleName();

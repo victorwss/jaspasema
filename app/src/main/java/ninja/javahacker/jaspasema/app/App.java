@@ -14,9 +14,14 @@ import ninja.javahacker.jaspasema.service.ServiceConfigurer;
 @Value
 public class App {
 
-    @NonNull AppConfig config;
-    @NonNull Javalin server;
-    @NonNull ServiceConfigurer configurer;
+    @NonNull
+    private final AppConfig config;
+
+    @NonNull
+    private final Javalin server;
+
+    @NonNull
+    private final ServiceConfigurer configurer;
 
     private JaspasemaRoute log(@NonNull JaspasemaRoute op) {
         return ctx -> {
@@ -34,11 +39,12 @@ public class App {
     public App(@NonNull AppConfig config) throws BadServiceMappingException, MalformedProcessorException {
         this.config = config;
 
-        this.server = Javalin.create().port(config.getMainPort());
-        if (!config.getStaticFileLocation().isEmpty()) server.enableStaticFiles("/" + config.getStaticFileLocation());
+        this.server = Javalin.create();
+        if (!config.getStaticFileLocation().isEmpty()) server.config.addStaticFiles("/" + config.getStaticFileLocation());
 
         this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(this::log);
         configurer.configure(server);
+        server.start(config.getMainPort());
     }
 
     public void shutdown() {

@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.format;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
@@ -15,7 +16,8 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  */
 @FunctionalInterface
 public interface ReturnValueFormatter<E> {
-    public String make(E in);
+    @Nullable
+    public String make(@Nullable E in);
 
     public static <E> ReturnValueFormatter<E> prepare(
             @NonNull ReifiedGeneric<E> target,
@@ -39,7 +41,7 @@ public interface ReturnValueFormatter<E> {
         Supplier<EmptyDateFormatException> y = () -> new EmptyDateFormatException(method, annotationClass);
         Supplier<InvalidDateFormatException> z = () -> new InvalidDateFormatException(method, annotationClass, format);
 
-        FormatterFunction<E> pf = FormatterFunction.formatterFor(format, target, w, x, y, z);
+        var pf = FormatterFunction.formatterFor(format, target, w, x, y, z);
         return pf::format;
     }
 }

@@ -1,8 +1,10 @@
 package ninja.javahacker.jaspasema.exceptions.badmapping;
 
 import java.lang.reflect.Method;
+import ninja.javahacker.jaspasema.processor.ResultSerializer;
 
 /**
+ * Thrown when two or more {@link ResultSerializer}-annotated annotations are defined on the same method for the return type.
  * @author Victor Williams Stafusa da Silva
  */
 public class ConflictingAnnotationsReturnException extends BadServiceMappingException {

@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import ninja.javahacker.jaspasema.processor.HttpMethod;
 
 /**
+ * Represents the standard OPTIONS HTTP verb.
  * @author Victor Williams Stafusa da Silva
  */
 @HttpMethod

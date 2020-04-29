@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.spotbugs" version "1.6.10"
+    id "com.github.spotbugs" version "4.0.5"
     id "java-library"
     id "maven-publish"
     id "checkstyle"
@@ -15,9 +15,9 @@ repositories {
 
 allprojects {
     group = "ninja.javahacker.jaspasema"
-    version = "0.6.0"
+    version = "0.6.0-b20200410"
 
-    ext.javaCompiler = "11"
+    ext.javaCompiler = "13"
     ext.doclint = false
     ext.extraCompilerArgs = [
         "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
@@ -31,24 +31,24 @@ allprojects {
         "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
     ]
 
-    ext.versionApiguardian = "1.0.0"
-    ext.versionCheckstyle = "8.17"
-    ext.versionFbContrib = "7.4.3.sb"
-    ext.versionFindSecBugs = "1.8.0"
-    ext.versionJackson = "2.9.8"
-    ext.versionJaCoCo = "0.8.3"
-    ext.versionJavalin = "2.6.0"
-    ext.versionJaxb = "2.4.0-b180725.0427"
+    ext.versionApiguardian = "1.1.0"
+    ext.versionCheckstyle = "8.31"
+    ext.versionSbContrib = "7.4.7"
+    ext.versionFindSecBugs = "1.10.1"
+    ext.versionJackson = "2.11.0.rc1"
+    ext.versionJaCoCo = "0.8.5"
+    ext.versionJavalin = "3.8.0"
+    ext.versionJaxb = "2.4.0-b180830.0359"
     ext.versionJcip = "1.0"
-    ext.versionJpa = "2.2"
-    ext.versionJpaSimpleTransactions = "0.5.0"
-    ext.versionJunit = "5.4.0"
+    ext.versionJakartaJpa = "2.2.3"
+    ext.versionJpaSimpleTransactions = "0.5.0-b20200406"
+    ext.versionJunit = "5.6.1"
     ext.versionJsr305 = "3.0.2"
-    ext.versionLombok = "1.18.6"
-    ext.versionPmd = "6.11.0"
-    ext.versionReflections = "0.9.11"
-    ext.versionReifiedGenerics = "1.0.0"
-    ext.versionSpotBugs = "3.1.11"
+    ext.versionLombok = "1.18.12"
+    ext.versionPmd = "6.22.0"
+    ext.versionReflections = "0.9.12"
+    ext.versionReifiedGenerics = "1.0.1-b20200406"
+    ext.versionSpotBugs = "4.0.1"
 }
 
 println "Using Java " + org.gradle.api.JavaVersion.current() + "."
@@ -115,7 +115,7 @@ subprojects {
         api group: 'net.jcip', name: 'jcip-annotations', version: versionJcip
         api group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: versionSpotBugs
         spotbugsPlugins group: 'com.h3xstream.findsecbugs', name: 'findsecbugs-plugin', version: versionFindSecBugs
-        spotbugsPlugins group: 'com.mebigfatguy.fb-contrib', name: 'fb-contrib', version: versionFbContrib
+        spotbugsPlugins group: 'com.mebigfatguy.sb-contrib', name: 'sb-contrib', version: versionSbContrib
     }
 
     task createFolders(description: 'Creates the source folders if they do not exist.') doLast {
@@ -128,11 +128,11 @@ subprojects {
     }
 
     checkstyleMain {
-        configFile = rootProject.file("config/checkstyle/main.xml")
+        configFile = rootProject.file("${rootDir}/config/checkstyle/main.xml")
     }
 
     checkstyleTest {
-        configFile = rootProject.file("config/checkstyle/test.xml")
+        configFile = rootProject.file("${rootDir}/config/checkstyle/test.xml")
     }
 
     checkstyle {
@@ -156,6 +156,10 @@ subprojects {
 
     compileJava {
         if (doclint) options.compilerArgs << "-Xdoclint:all"
+        sourceSets {
+            main.java.srcDirs = ['src/main/java']
+            main.resources.srcDirs = ['src/main/resources']
+        }
     }
 
     tasks.withType(Javadoc) {
@@ -172,8 +176,7 @@ subprojects {
         omitVisitors = ["WeakExceptionMessaging", "OverlyPermissiveMethod"]
     }
 
-    tasks.withType(com.github.spotbugs.SpotBugsTask) {
-        pluginClasspath = project.configurations.spotbugsPlugins
+    tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
         reports {
             xml.enabled = false
             html.enabled = true
@@ -217,7 +220,6 @@ subprojects {
             mavenJava(MavenPublication) {
                 artifactId jar.baseName
                 from components.java
-
                 artifact sourcesJar
                 artifact javadocJar
                 pom {
@@ -251,8 +253,9 @@ task mergedJavadoc(type: Javadoc, description: 'Creates Javadoc from all the pro
 
 project(':core') {
     ext.moduleName = "ninja.javahacker.jaspasema.core"
+    description = "Jaspasema Core"
     jar {
-        baseName = "jaspasema-core"
+        archiveBaseName = "jaspasema-core"
         inputs.property("moduleName", moduleName)
         manifest {
             attributes("Automatic-Module-Name": moduleName)
@@ -262,8 +265,9 @@ project(':core') {
 
 project(':app') {
     ext.moduleName = "ninja.javahacker.jaspasema.app"
+    description = "Jaspasema App"
     jar {
-        baseName = "jaspasema-app"
+        archiveBaseName = "jaspasema-app"
         inputs.property("moduleName", moduleName)
         manifest {
             attributes("Automatic-Module-Name": moduleName)
@@ -276,7 +280,7 @@ project(':app') {
         api group: 'org.reflections', name: 'reflections', version: versionReflections
 
         // JPA
-        api group: 'javax.persistence', name: 'javax.persistence-api', version: versionJpa
+        api group: 'jakarta.persistence', name: 'jakarta.persistence-api', version: versionJakartaJpa
 
         // JPA Simple Transactions.
         api group: 'ninja.javahacker.jpasimpletransactions', name: 'core', version: versionJpaSimpleTransactions

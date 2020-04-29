@@ -2,11 +2,11 @@ package ninja.javahacker.jaspasema.exceptions.badmapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import lombok.AllArgsConstructor;
+import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.ExceptionTemplate;
+import ninja.javahacker.jaspasema.exceptions.messages.ExceptionTemplate;
+import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -16,13 +16,13 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 public class TypeRestrictionViolationException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
-    @AllArgsConstructor
     public static enum AllowedTypes {
         SIMPLE, SIMPLE_LIST, SIMPLE_AND_LIST, DATE_TIME, DATE_TIME_LIST, LIST, HTTP;
 
+        @NonNull
         @Override
         public String toString() {
-            return ExceptionTemplate.getExceptionTemplate().getAlloweds().get(this);
+            return ExceptionTemplate.getExceptionTemplate().nameFor(this);
         }
     }
 
@@ -48,36 +48,46 @@ public class TypeRestrictionViolationException extends BadServiceMappingExceptio
     }
 
     public TypeRestrictionViolationException(
-            /*@NonNull*/ Parameter parameter,
-            @NonNull Class<? extends Annotation> annotation,
-            @NonNull AllowedTypes allowed,
-            @NonNull ReifiedGeneric<?> target)
+            /*@NonNull*/ AnnotatedParameter<?, ?> param,
+            @NonNull AllowedTypes allowed)
     {
-        super(parameter);
-        this.annotation = annotation;
-        this.target = target;
+        super(param.getParameter());
+        this.annotation = param.getAnnotationType();
+        this.target = param.getTarget();
         this.allowed = allowed;
     }
 
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();
     }
 
+    @NonNull
     @TemplateField("T")
     public String getTargetName() {
         return target.toString();
     }
 
+    @NonNull
     @TemplateField("V")
     public String getAllowedName() {
         return allowed.toString();
     }
 
+    @NonNull
     @TemplateField("U")
     public String getApplyType() {
-        return getMethod().map(m -> ExceptionTemplate.getExceptionTemplate().getRm())
-                .or(() -> getParameter().map(p -> ExceptionTemplate.getExceptionTemplate().getP()))
+        return getMethod()
+                .map(m -> ExceptionTemplate.getExceptionTemplate().getReturningMethods())
+                .or(() -> getParameter().map(p -> ExceptionTemplate.getExceptionTemplate().getParameters()))
                 .orElseThrow(AssertionError::new);
+    }
+
+    public static Supplier<TypeRestrictionViolationException> getFor(
+            @NonNull AnnotatedParameter<?, ?> param,
+            @NonNull AllowedTypes allowed)
+    {
+        return () -> new TypeRestrictionViolationException(param, allowed);
     }
 }

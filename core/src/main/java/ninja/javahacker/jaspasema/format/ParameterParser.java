@@ -1,51 +1,40 @@
 package ninja.javahacker.jaspasema.format;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Parameter;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.function.Supplier;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.EmptyDateFormatException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.InvalidDateFormatException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
-import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
+import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
 @FunctionalInterface
 public interface ParameterParser<E> {
-    public E make(String in) throws ParameterValueException;
+    @Nullable
+    public E make(@Nullable String in) throws ParameterValueException;
 
-    public static <E> ParameterParser<E> prepare(
-            @NonNull ReifiedGeneric<E> target,
-            @NonNull Class<? extends Annotation> annotationClass,
-            @NonNull String format,
-            @NonNull Parameter p)
-            throws BadServiceMappingException
+    @NonNull
+    public static <E> ParameterParser<E> prepare(@NonNull AnnotatedParameter<?, E> param, @NonNull String dateFormat)
+            throws TypeRestrictionViolationException, EmptyDateFormatException, InvalidDateFormatException
     {
-        Supplier<TypeRestrictionViolationException> w = () -> new TypeRestrictionViolationException(
-                    p,
-                    annotationClass,
-                    TypeRestrictionViolationException.AllowedTypes.SIMPLE,
-                    target);
-
-        Supplier<TypeRestrictionViolationException> x = () -> new TypeRestrictionViolationException(
-                    p,
-                    annotationClass,
-                    TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
-                    target);
+        var w = TypeRestrictionViolationException.getFor(param, TypeRestrictionViolationException.AllowedTypes.SIMPLE);
+        var x = TypeRestrictionViolationException.getFor(param, TypeRestrictionViolationException.AllowedTypes.DATE_TIME);
+        var p = param.getParameter();
+        var annotationClass = param.getAnnotationType();
 
         Supplier<EmptyDateFormatException> y = () -> new EmptyDateFormatException(p, annotationClass);
-        Supplier<InvalidDateFormatException> z = () -> new InvalidDateFormatException(p, annotationClass, format);
+        Supplier<InvalidDateFormatException> z = () -> new InvalidDateFormatException(p, annotationClass, dateFormat);
 
-        ParseFunction<E> pf = ParseFunction.parserFor(format, target, w, x, y, z);
+        var pf = ParseFunction.parserFor(dateFormat, param.getTarget(), w, x, y, z);
 
-        return body ->
-                pf.parse(
-                        a -> new MalformedParameterValueException(p, annotationClass, body, a),
-                        body);
+        return body -> {
+            var m = MalformedParameterValueException.expectingCause(param, body);
+            return pf.parse(m, body);
+        };
     }
 }

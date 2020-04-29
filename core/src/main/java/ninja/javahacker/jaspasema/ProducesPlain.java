@@ -5,20 +5,19 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.format.ReturnValueFormatter;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.AnnotatedMethod;
+import ninja.javahacker.jaspasema.processor.ResultProcessor;
+import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
-import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
 @Repeatable(value = ProducesPlain.Container.class)
-@ReturnSerializer(processor = ProducesPlain.Processor.class)
+@ResultSerializer(processor = ProducesPlain.Processor.class)
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesPlain {
@@ -27,24 +26,24 @@ public @interface ProducesPlain {
     public String jQueryType() default "text";
     public int status() default 200;
 
-    @ReturnSerializer.ExitDiscriminator
+    @ResultSerializer.ExitDiscriminator
     public Class<? extends Throwable> on() default ReturnedOk.class;
 
-    public static class Processor implements ReturnProcessor<ProducesPlain> {
+    public static class Processor implements ResultProcessor<ProducesPlain, Object> {
+
+        @NonNull
         @Override
-        public <E> Stub<E> prepare(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull ProducesPlain annotation,
-                @NonNull Method method)
-                throws BadServiceMappingException
-        {
-            if (annotation.on() == ReturnedOk.class) ReturnProcessor.rejectForVoid(method, ProducesPlain.class);
-            ReturnValueFormatter<E> parser = ReturnValueFormatter.prepare(target, annotation.annotationType(), annotation.format(), method);
-            return new Stub<>((m, ctx, v) -> {
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesPlain, E> meth) throws BadServiceMappingException {
+            var method = meth.getMethod();
+            var annotation = meth.getAnnotation();
+            if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesPlain.class);
+            var parser = ReturnValueFormatter.prepare(meth.getTarget(), annotation.annotationType(), annotation.format(), method);
+            ResultProcessor.Worker<E> w = (m, ctx, v) -> {
                 ctx.result(parser.make(v));
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());
-            }, annotation.jQueryType());
+            };
+            return new Stub<>(w, annotation.jQueryType());
         }
     }
 

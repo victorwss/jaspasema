@@ -6,21 +6,27 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@With
 @Value
-@Wither
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ShutdownAppConfig {
     private static final ShutdownAppConfig ROOT = new ShutdownAppConfig();
 
-    int adminPort;
-    @NonNull Supplier<? extends List<? extends App>> apps;
-    @NonNull Supplier<String> shutdownString;
-    @NonNull RequestLogger logBye;
+    private final int adminPort;
+
+    @NonNull
+    private final Supplier<? extends List<? extends App>> apps;
+
+    @NonNull
+    private final Supplier<String> shutdownString;
+
+    @NonNull
+    private final RequestLogger logBye;
 
     private ShutdownAppConfig() {
         this.adminPort = 0;

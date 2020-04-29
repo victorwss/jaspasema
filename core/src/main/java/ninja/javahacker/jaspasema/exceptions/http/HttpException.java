@@ -32,6 +32,7 @@ public class HttpException extends JaspasemaException {
         return statusCode;
     }
 
+    @NonNull
     public static HttpException convert(@NonNull Method method, @NonNull Throwable problem) {
         Throwable solving = problem;
         if (solving instanceof InvocationTargetException) solving = solving.getCause();
@@ -41,17 +42,20 @@ public class HttpException extends JaspasemaException {
         return (HttpException) solving;
     }
 
+    @NonNull
     @TemplateField("STATUS")
     public String getStatusCodeString() {
         return String.valueOf(statusCode);
     }
 
+    @NonNull
     @TemplateField("CAUSE")
     public String getCauseString() {
         Throwable cause = getCause();
         return cause == null ? "" : cause.toString();
     }
 
+    @NonNull
     public Object output() {
         Throwable cause = getCause();
         return cause == null
@@ -61,20 +65,20 @@ public class HttpException extends JaspasemaException {
 
     @Value
     public static class ErrorOutput {
-        int status;
+        private final int status;
 
         @NonNull
-        String message;
+        private final String message;
     }
 
     @Value
     public static class UnexpectedErrorOutput {
-        int status;
+        private final int status;
 
         @NonNull
-        String message;
+        private final String message;
 
         @NonNull
-        String exceptionName;
+        private final String exceptionName;
     }
 }

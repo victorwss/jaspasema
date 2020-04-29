@@ -1,9 +1,13 @@
 package ninja.javahacker.jaspasema.exceptions.paramvalue;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
+import java.util.function.Function;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -15,13 +19,13 @@ public class MalformedParameterValueException extends ParameterValueException {
     @NonNull
     private final Class<? extends Annotation> annotation;
 
-    @NonNull
+    @Nullable
     private final String rawValue;
 
     public MalformedParameterValueException(
             /*@NonNull*/ Parameter parameter,
             @NonNull Class<? extends Annotation> annotation,
-            @NonNull String rawValue,
+            @Nullable String rawValue,
             /*@NonNull*/ Throwable cause)
     {
         super(parameter, cause);
@@ -29,11 +33,20 @@ public class MalformedParameterValueException extends ParameterValueException {
         this.rawValue = rawValue;
     }
 
+    public static Function<Throwable, MalformedParameterValueException> expectingCause(
+            @NonNull AnnotatedParameter<?, ?> param,
+            @Nullable String rawValue)
+    {
+        return cause -> new MalformedParameterValueException(param.getParameter(), param.getAnnotationType(), rawValue, cause);
+    }
+
+    @NotNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();
     }
 
+    @Nullable
     @TemplateField("V")
     public String getRawValue() {
         return rawValue;

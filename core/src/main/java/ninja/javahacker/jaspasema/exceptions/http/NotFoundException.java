@@ -11,8 +11,10 @@ import lombok.ToString;
 public class NotFoundException extends HttpException {
     private static final long serialVersionUID = 1L;
 
+    @NonNull
     private final Class<?> entityType;
 
+    @NonNull
     private final String key;
 
     public NotFoundException(/*@NonNull*/ Method method, @NonNull Class<?> entityType, @NonNull String key) {
@@ -21,15 +23,18 @@ public class NotFoundException extends HttpException {
         this.key = key;
     }
 
+    @NonNull
     public Class<?> getEntityType() {
         return entityType;
     }
 
+    @NonNull
     @TemplateField("TYPE")
     public String getEntityTypeName() {
         return entityType.getName();
     }
 
+    @NonNull
     @TemplateField("KEY")
     public String getKey() {
         return key;

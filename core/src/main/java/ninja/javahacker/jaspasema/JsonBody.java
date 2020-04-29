@@ -4,16 +4,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Parameter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.ImplicitWithJsVarException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
-import ninja.javahacker.jaspasema.ext.ObjectUtils;
+import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
-import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -22,43 +19,46 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonBody {
+
+    /**
+     * Defines if the JSON should be read in lenient mode or not.
+     * In lenient mode, unknown properties in the JSON are simply ignored. In strict mode, their presence triggers an error.
+     * <p>The default value is {@code false}. I.e. to NOT be lenient.</p>
+     * @return If the JSON should be read in lenient mode or not.
+     */
     public boolean lenient() default false;
-    public String jsVar() default "";
-    public boolean implicit() default false;
 
+    /**
+     * The class that is responsible for processing the {@link JsonBody} annotation.
+     */
     public static class Processor implements ParamProcessor<JsonBody> {
-
-        private static final String INSTRUCTION_TEMPLATE = "data = #VAR#;";
 
         private static final String REQUEST_TYPE = "requestType = 'application/json; charset=utf-8';";
 
-        private static final String JSONIFY = "data = JSON.stringify(data);";
+        private static final String JSONIFY = "__data = JSON.stringify(__data);";
 
+        /**
+         * Sole constructor.
+         */
+        public Processor() {
+        }
+
+        /**
+         * {@inheritDoc}
+         * @param <E> {@inheritDoc}
+         * @param param {@inheritDoc}
+         * @return {@inheritDoc}
+         * @throws BadServiceMappingException {@inheritDoc}
+         */
+        @NonNull
         @Override
-        public <E> Stub<E> prepare(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull JsonBody annotation,
-                @NonNull Parameter p)
-                throws BadServiceMappingException
-        {
-            if (annotation.implicit() && !annotation.jsVar().isEmpty()) {
-                throw new ImplicitWithJsVarException(p, JsonBody.class);
-            }
-            String js = ObjectUtils.choose(annotation.jsVar(), p.getName());
-
-            return new Stub<>(
-                    ctx -> {
-                        String s = ctx.body();
-                        return JsonTypesProcessor.readJson(
-                            annotation.lenient(),
-                            target,
-                            s,
-                            x -> new MalformedParameterValueException(p, JsonBody.class, s, x));
-                    },
-                    annotation.implicit() ? "" : js,
-                    annotation.implicit() ? "" : INSTRUCTION_TEMPLATE.replace("#VAR#", js),
-                    REQUEST_TYPE,
-                    JSONIFY);
+        public <E> Stub<E> prepare(@NonNull AnnotatedParameter<JsonBody, E> param) throws BadServiceMappingException {
+            ParamProcessor.Worker<E> w = ctx -> {
+                var s = ctx.body();
+                var m = MalformedParameterValueException.expectingCause(param, s);
+                return JsonTypesProcessor.readJson(param.getAnnotation().lenient(), param.getTarget(), s, m);
+            };
+            return new Stub<>(w, "", "", REQUEST_TYPE, JSONIFY);
         }
     }
 }

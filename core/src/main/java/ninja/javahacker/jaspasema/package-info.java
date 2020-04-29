@@ -1,0 +1,1 @@
+package ninja.javahacker.jaspasema;

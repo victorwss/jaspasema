@@ -40,11 +40,13 @@ public class InvalidDateFormatException extends BadServiceMappingException {
         this.format = format;
     }
 
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();
     }
 
+    @NonNull
     @TemplateField("F")
     public String getFormat() {
         return format;

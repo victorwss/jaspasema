@@ -26,17 +26,19 @@ public final class ServiceConfigurer {
         this.serviceBuilders = serviceBuilders;
     }
 
+    @NonNull
     public static ServiceConfigurer make(@NonNull Iterable<?> instances)
             throws BadServiceMappingException,
             MalformedProcessorException
     {
         List<ServiceBuilder> serviceBuilders = new ArrayList<>();
-        for (Object ins : instances) {
+        for (var ins : instances) {
             serviceBuilders.add(ServiceBuilder.make(ins));
         }
         return new ServiceConfigurer(serviceBuilders);
     }
 
+    @NonNull
     public static ServiceConfigurer forServices(@NonNull Object... instances)
             throws BadServiceMappingException,
             MalformedProcessorException
@@ -44,21 +46,23 @@ public final class ServiceConfigurer {
         return ServiceConfigurer.make(Arrays.asList(instances));
     }
 
+    @NonNull
     public static ServiceConfigurer loadAll()
             throws BadServiceMappingException,
             MalformedProcessorException
     {
-        ServiceLoader<JaspasemaDiscoverableService> loader = ServiceLoader.load(JaspasemaDiscoverableService.class);
+        var loader = ServiceLoader.load(JaspasemaDiscoverableService.class);
         return ServiceConfigurer.make(loader);
     }
 
+    @NonNull
     public ServiceConfigurer wrap(@NonNull Function<? super JaspasemaRoute, ? extends JaspasemaRoute> wrapper) {
         return new ServiceConfigurer(serviceBuilders.stream().map(m -> m.wrap(wrapper)).collect(Collectors.toList()));
     }
 
     public void configure(@NonNull Javalin service) {
         serviceBuilders.forEach(sb -> sb.configure(service));
-        service.enableCorsForAllOrigins();
+        service.config.enableCorsForAllOrigins();
         //configureCors(service);
     }
 

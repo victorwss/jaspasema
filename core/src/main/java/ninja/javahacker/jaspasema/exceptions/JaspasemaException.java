@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.exceptions;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.Value;
+import ninja.javahacker.jaspasema.exceptions.messages.ExceptionTemplate;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -28,6 +30,7 @@ public abstract class JaspasemaException extends Exception {
     @NonNull
     private final Class<?> declaringClass;
 
+    @Nullable
     private transient String cachedMessage;
 
     @Value
@@ -97,15 +100,15 @@ public abstract class JaspasemaException extends Exception {
     }
 
     private String formatMessage() {
-        String prefix = parameter
+        var prefix = parameter
                 .map(p -> p.getDeclaringExecutable() + "|" + p.toString())
                 .or(() -> method.map(Method::toString))
                 .orElseGet(declaringClass::getName);
 
-        String template = ExceptionTemplate.getFor(this);
+        var template = ExceptionTemplate.getExceptionTemplate().templateFor(getClass());
         for (Class<?> k = getClass(); k != Object.class; k = k.getSuperclass()) {
-            for (Method m : this.getClass().getMethods()) {
-                TemplateField t = m.getAnnotation(TemplateField.class);
+            for (var m : this.getClass().getMethods()) {
+                var t = m.getAnnotation(TemplateField.class);
                 if (t == null) continue;
                 String replacement;
                 try {

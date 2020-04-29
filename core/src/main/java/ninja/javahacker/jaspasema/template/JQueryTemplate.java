@@ -1,6 +1,6 @@
 package ninja.javahacker.jaspasema.template;
 
-import io.javalin.Handler;
+import io.javalin.http.Handler;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -18,13 +18,13 @@ public class JQueryTemplate implements ApiTemplate {
 
     private static final String METHOD_TEMPLATE = ""
             + "    services.#SERVICE#.#METHOD# = function(#DEFINE_PARAMETERS#) {\n"
-            + "        var data = {};\n"
-            + "        var requestType = 'text/plain; charset=utf-8';\n"
-            + "        var customHeaders = [];\n"
-            + "        var targetUrl = \"#PATH#\";\n"
+            + "        var __data = {};\n"
+            + "        var __requestType = 'text/plain; charset=utf-8';\n"
+            + "        var __customHeaders = [];\n"
+            + "        var __targetUrl = \"#PATH#\";\n"
             + "#RECEIVE_PARAMETERS#"
             + "#PRE_SEND_INSTRUCTIONS#"
-            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", targetUrl, data, customHeaders, requestType);\n"
+            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", __targetUrl, __data, __customHeaders, __requestType);\n"
             + "    };\n"
             + "\n";
 
@@ -72,6 +72,7 @@ public class JQueryTemplate implements ApiTemplate {
     @NonNull
     private Supplier<String> varName;
 
+    @NonNull
     @Override
     public Handler createStub(@NonNull ServiceConfigurer sc) {
         return ctx -> {
@@ -80,12 +81,13 @@ public class JQueryTemplate implements ApiTemplate {
         };
     }
 
+    @NonNull
     private String createJavascriptStub(@NonNull ServiceConfigurer sc) {
-        String output = API_TEMPLATE
+        var output = API_TEMPLATE
                 .replace("#VAR_NAME#", varName.get())
                 .replace("#URL#", url.get());
 
-        String api = sc.getServiceBuilders()
+        var api = sc.getServiceBuilders()
                 .stream()
                 .map(JQueryTemplate::forService)
                 .collect(Collectors.joining());
@@ -93,27 +95,29 @@ public class JQueryTemplate implements ApiTemplate {
         return output.replace("#SERVICES#", api);
     }
 
+    @NonNull
     private static String forService(@NonNull ServiceBuilder sb) {
-        String output = SERVICE_TEMPLATE.replace("#SERVICE#", sb.getServiceName());
-        String calls = sb.getMethods().stream().map(JQueryTemplate::forMethod).collect(Collectors.joining());
+        var output = SERVICE_TEMPLATE.replace("#SERVICE#", sb.getServiceName());
+        var calls = sb.getMethods().stream().map(JQueryTemplate::forMethod).collect(Collectors.joining());
         return output.replace("#METHODS#", calls);
     }
 
+    @NonNull
     private static String forMethod(@NonNull ServiceMethodBuilder<?> smb) {
-        String output = METHOD_TEMPLATE
+        var output = METHOD_TEMPLATE
                 .replace("#SERVICE#", smb.getServiceName())
                 .replace("#METHOD#", smb.getCallName())
                 .replace("#HTTP_METHOD#", smb.getHttpMethod())
                 .replace("#TYPE#", smb.getReturnMapper().onReturn().getExpectedReturnType())
                 .replace("#PATH#", smb.getPath());
 
-        StringJoiner def = new StringJoiner(", ");
-        StringJoiner rec = new StringJoiner("");
-        StringJoiner extras = new StringJoiner("");
+        var def = new StringJoiner(", ");
+        var rec = new StringJoiner("");
+        var extras = new StringJoiner("");
         smb.getParameterProcessors().forEach((pps) -> {
-            String pa = pps.getParameterAdded();
+            var pa = pps.getParameterAdded();
             if (!pa.isEmpty()) def.add(pa);
-            String ia = pps.getInstructionAdded();
+            var ia = pps.getInstructionAdded();
             if (!ia.isEmpty()) rec.add("        " + ia + "\n");
             pps.getPreSendInstructionAdded()
                     .stream()

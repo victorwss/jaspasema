@@ -2,13 +2,13 @@ package ninja.javahacker.test.jaspasema;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
@@ -27,38 +27,43 @@ public class ApiTester {
     @SuppressFBWarnings("URLCONNECTION_SSRF_FD")
     public static TestResponse request(
             int port,
-            String method,
-            String path,
-            String body,
-            @Singular List<Header> headers)
+            @NonNull String method,
+            @NonNull String path,
+            @NonNull String body,
+            @NonNull @Singular List<Header> headers)
             throws IOException
     {
-        URL url = new URL("http://localhost:" + port + path);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        var url = new URL("http://localhost:" + port + path);
+        var connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod(method);
         if (!BODYLESS.contains(method)) connection.setDoOutput(true);
         connection.setDoInput(true);
-        for (Header h : headers) {
+        for (var h : headers) {
             connection.addRequestProperty(h.getName(), h.getValue());
         }
         connection.connect();
         if (!BODYLESS.contains(method)) connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
-        int rc = connection.getResponseCode();
-        try (InputStream is = rc >= 400 ? connection.getErrorStream() : connection.getInputStream()) {
-            String response = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        var rc = connection.getResponseCode();
+        try (var is = rc >= 400 ? connection.getErrorStream() : connection.getInputStream()) {
+            var response = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             return new TestResponse(connection.getResponseCode(), response);
         }
     }
 
     @Value
     public static class TestResponse {
-        private int status;
-        private String body;
+        private final int status;
+
+        @NonNull
+        private final String body;
     }
 
     @Value
     public static class Header {
-        private String name;
-        private String value;
+        @NonNull
+        private final String name;
+
+        @NonNull
+        private final String value;
     }
 }

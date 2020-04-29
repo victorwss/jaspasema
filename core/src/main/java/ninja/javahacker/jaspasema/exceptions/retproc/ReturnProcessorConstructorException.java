@@ -2,12 +2,10 @@ package ninja.javahacker.jaspasema.exceptions.retproc;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import lombok.Getter;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
-@Getter
 public class ReturnProcessorConstructorException extends MalformedReturnProcessorException {
     private static final long serialVersionUID = 1L;
 

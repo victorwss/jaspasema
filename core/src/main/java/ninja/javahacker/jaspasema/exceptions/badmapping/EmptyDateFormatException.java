@@ -33,6 +33,7 @@ public class EmptyDateFormatException extends BadServiceMappingException {
         this.annotation = annotation;
     }
 
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();

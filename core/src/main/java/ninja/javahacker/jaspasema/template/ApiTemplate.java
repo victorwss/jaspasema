@@ -1,6 +1,7 @@
 package ninja.javahacker.jaspasema.template;
 
-import io.javalin.Handler;
+import io.javalin.http.Handler;
+import lombok.NonNull;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
 
 /**
@@ -8,5 +9,6 @@ import ninja.javahacker.jaspasema.service.ServiceConfigurer;
  */
 @FunctionalInterface
 public interface ApiTemplate {
-    public Handler createStub(ServiceConfigurer sc);
+    @NonNull
+    public Handler createStub(@NonNull ServiceConfigurer sc);
 }

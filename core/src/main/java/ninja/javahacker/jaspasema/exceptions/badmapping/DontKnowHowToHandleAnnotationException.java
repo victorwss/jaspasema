@@ -23,6 +23,7 @@ public class DontKnowHowToHandleAnnotationException extends BadServiceMappingExc
         this.annotation = annotation;
     }
 
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();

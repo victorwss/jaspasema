@@ -23,6 +23,7 @@ public class VoidWithValueReturnTypeException extends BadServiceMappingException
         this.annotation = annotation;
     }
 
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();

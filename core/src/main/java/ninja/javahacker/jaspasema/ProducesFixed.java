@@ -5,19 +5,18 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.AnnotatedMethod;
+import ninja.javahacker.jaspasema.processor.ResultProcessor;
+import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
-import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
 @Repeatable(value = ProducesFixed.Container.class)
-@ReturnSerializer(processor = ProducesFixed.Processor.class)
+@ResultSerializer(processor = ProducesFixed.Processor.class)
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesFixed {
@@ -26,22 +25,21 @@ public @interface ProducesFixed {
     public String jQueryType() default "html";
     public int status() default 200;
 
-    @ReturnSerializer.ExitDiscriminator
+    @ResultSerializer.ExitDiscriminator
     public Class<? extends Throwable> on() default ReturnedOk.class;
 
-    public static class Processor implements ReturnProcessor<ProducesFixed> {
+    public static class Processor implements ResultProcessor<ProducesFixed, Object> {
+
+        @NonNull
         @Override
-        public <E> Stub<E> prepare(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull ProducesFixed annotation,
-                @NonNull Method method)
-                throws BadServiceMappingException
-        {
-            return new Stub<>((m, ctx, v) -> {
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesFixed, E> meth) throws BadServiceMappingException {
+            var annotation = meth.getAnnotation();
+            ResultProcessor.Worker<E> w = (m, ctx, v) -> {
                 ctx.result(annotation.value());
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());
-            }, annotation.jQueryType());
+            };
+            return new Stub<>(w, annotation.jQueryType());
         }
     }
 

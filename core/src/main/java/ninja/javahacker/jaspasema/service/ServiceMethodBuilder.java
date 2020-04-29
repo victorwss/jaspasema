@@ -1,10 +1,9 @@
 package ninja.javahacker.jaspasema.service;
 
-import io.javalin.Handler;
 import io.javalin.Javalin;
+import io.javalin.http.Handler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +24,6 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.NoHttpMethodAnnotationsE
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.HttpMethod;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
-import ninja.javahacker.jaspasema.verbs.Connect;
 import ninja.javahacker.jaspasema.verbs.Delete;
 import ninja.javahacker.jaspasema.verbs.Get;
 import ninja.javahacker.jaspasema.verbs.Head;
@@ -33,7 +31,6 @@ import ninja.javahacker.jaspasema.verbs.Options;
 import ninja.javahacker.jaspasema.verbs.Patch;
 import ninja.javahacker.jaspasema.verbs.Post;
 import ninja.javahacker.jaspasema.verbs.Put;
-import ninja.javahacker.jaspasema.verbs.Trace;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -54,8 +51,6 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
     private static final RouteConfig DELETE = Javalin::delete;
     private static final RouteConfig PATCH = Javalin::patch;
     private static final RouteConfig OPTIONS = Javalin::options;
-    private static final RouteConfig TRACE = Javalin::trace;
-    private static final RouteConfig CONNECT = Javalin::connect;
 
     private static final Map<Class<? extends Annotation>, RouteConfig> CONFIGS = Map.of(
             Head.class, HEAD,
@@ -64,9 +59,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
             Put.class, PUT,
             Delete.class, DELETE,
             Patch.class, PATCH,
-            Options.class, OPTIONS,
-            Trace.class, TRACE,
-            Connect.class, CONNECT
+            Options.class, OPTIONS
     );
 
     @NonNull
@@ -101,7 +94,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
     private final List<ParamProcessor.Stub<?>> parameterProcessors;
 
     @NonNull
-    private final ReturnMapper.ReturnMap<T> returnMapper;
+    private final ReturnMapper<T> returnMapper;
 
     private ServiceMethodBuilder(
             @NonNull String serviceName,
@@ -115,12 +108,12 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.target = target;
         this.instance = instance;
         this.method = method;
-        Path pt = method.getAnnotation(Path.class);
+        var pt = method.getAnnotation(Path.class);
         if (pt == null) throw new MissingPathException(method);
         this.path = pt.value();
         Class<? extends Annotation> annotation = null;
 
-        for (Annotation a : method.getAnnotations()) {
+        for (var a : method.getAnnotations()) {
             if (!a.annotationType().isAnnotationPresent(HttpMethod.class)) continue;
             if (annotation != null) throw new MultipleHttpMethodAnnotationsException(method);
             annotation = a.annotationType();
@@ -130,26 +123,26 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.routeConfig = CONFIGS.get(annotation);
         if (routeConfig == null) throw new DontKnowHowToHandleAnnotationException(method, annotation);
 
-        HttpMethod hm = annotation.getAnnotation(HttpMethod.class);
-        String httpMethodName = hm.value();
+        var hm = annotation.getAnnotation(HttpMethod.class);
+        var httpMethodName = hm.value();
         if (httpMethodName.isEmpty()) httpMethodName = annotation.getSimpleName().toUpperCase(Locale.ROOT);
         this.httpMethod = httpMethodName;
-        ServiceName sn = method.getAnnotation(ServiceName.class);
+        var sn = method.getAnnotation(ServiceName.class);
         this.callName = ObjectUtils.choose(sn == null ? "" : sn.value(), method.getName());
 
         this.returnMapper = ReturnMapper.forMethod(target, method);
 
         // Can't use streams here due to BadServiceMappingException that ParamProcessor.forParameter(p) might throw.
-        Parameter[] params = method.getParameters();
+        var params = method.getParameters();
         this.parameterProcessors = new ArrayList<>(params.length);
-        for (Parameter p : params) {
+        for (var p : params) {
             parameterProcessors.add(ParamProcessor.forParameter(p));
         }
 
         this.call = new ServiceMethodRunner<>(target, instance, method, parameterProcessors, returnMapper);
     }
 
-    private ServiceMethodBuilder(ServiceMethodBuilder<T> original, JaspasemaRoute call) {
+    private ServiceMethodBuilder(@NonNull ServiceMethodBuilder<T> original, @NonNull JaspasemaRoute call) {
         this.target = original.target;
         this.callName = original.callName;
         this.path = original.path;
@@ -163,6 +156,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
         this.call = call;
     }
 
+    @NonNull
     public static ServiceMethodBuilder<?> make(
             @NonNull String serviceName,
             @NonNull Object instance,
@@ -174,6 +168,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
         return make(serviceName, target, instance, method);
     }
 
+    @NonNull
     public static <T> ServiceMethodBuilder<T> make(
             @NonNull String serviceName,
             @NonNull ReifiedGeneric<T> target,
@@ -187,6 +182,7 @@ public final class ServiceMethodBuilder<T> implements JaspasemaRoute {
         return new ServiceMethodBuilder<>(serviceName, target, instance, method);
     }
 
+    @NonNull
     public ServiceMethodBuilder<T> wrap(@NonNull Function<? super JaspasemaRoute, ? extends JaspasemaRoute> wrapper) {
         return new ServiceMethodBuilder<>(this, ctx -> wrapper.apply(call).handle(ctx));
     }

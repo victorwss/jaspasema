@@ -4,13 +4,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Parameter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
@@ -22,39 +22,43 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RawHttp {
-    public String format() default "";
 
+    /**
+     * The class that is responsible for processing the {@link RawHttp} annotation.
+     */
     public static class Processor implements ParamProcessor<RawHttp> {
 
         private static final ReifiedGeneric<HttpServletRequest> RQ = ReifiedGeneric.of(HttpServletRequest.class);
         private static final ReifiedGeneric<HttpServletResponse> RP = ReifiedGeneric.of(HttpServletResponse.class);
         private static final ReifiedGeneric<HttpSession> SS = ReifiedGeneric.of(HttpSession.class);
 
-        @Override
-        public <E> Stub<E> prepare(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull RawHttp annotation,
-                @NonNull Parameter p)
-                throws BadServiceMappingException
-        {
-            return new Stub<>(simple(target, p), "", "");
+        /**
+         * Sole constructor.
+         */
+        public Processor() {
         }
 
+        /**
+         * {@inheritDoc}
+         * @param <E> {@inheritDoc}
+         * @param param {@inheritDoc}
+         * @return {@inheritDoc}
+         * @throws BadServiceMappingException {@inheritDoc}
+         */
+        @NonNull
+        @Override
+        public <E> Stub<E> prepare(@NonNull AnnotatedParameter<RawHttp, E> param) throws BadServiceMappingException {
+            return new Stub<>(simple(param), "", "");
+        }
+
+        @NonNull
         @SuppressWarnings("unchecked")
-        private static <E> Worker<E> simple(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull Parameter p)
-                throws BadServiceMappingException
-        {
+        private static <E> Worker<E> simple(@NonNull AnnotatedParameter<RawHttp, E> param) throws TypeRestrictionViolationException {
+            var target = param.getTarget();
             if (target.isSameOf(RQ)) return ctx -> (E) ctx.req;
             if (target.isSameOf(RP)) return ctx -> (E) ctx.res;
             if (target.isSameOf(SS)) return ctx -> (E) ctx.req.getSession(false);
-
-            throw new TypeRestrictionViolationException(
-                    p,
-                    RawHttp.class,
-                    TypeRestrictionViolationException.AllowedTypes.HTTP,
-                    target);
+            throw new TypeRestrictionViolationException(param, TypeRestrictionViolationException.AllowedTypes.HTTP);
         }
     }
 }

@@ -1,7 +1,8 @@
 package ninja.javahacker.jaspasema.service;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.javalin.Context;
+import io.javalin.http.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -47,7 +48,7 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
     private final List<ParamProcessor.Stub<?>> parameterProcessors;
 
     @NonNull
-    private final ReturnMapper.ReturnMap<T> returnProcessor;
+    private final ReturnMapper<T> returnProcessor;
 
     @NonNull
     private final Object instance;
@@ -57,7 +58,7 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
             @NonNull Object instance,
             @NonNull Method method,
             @NonNull List<ParamProcessor.Stub<?>> parameterProcessors,
-            @NonNull ReturnMapper.ReturnMap<T> returnProcessor)
+            @NonNull ReturnMapper<T> returnProcessor)
     {
         this.target = target;
         this.instance = instance;
@@ -81,7 +82,7 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
         Throwable badThing = null;
         try {
             try {
-                for (ParamProcessor.Stub<?> ppw : parameterProcessors) {
+                for (var ppw : parameterProcessors) {
                     parameters.add(ppw.getWorker().run(ctx));
                 }
             } catch (ParameterValueException e) {
@@ -91,10 +92,10 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
             }
 
             try {
-                T result = invoke(parameters);
+                var result = invoke(parameters);
                 returnProcessor.onReturn().getWorker().run(method, ctx, result);
             } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
+                var cause = e.getCause();
                 returnProcessor.onException(cause).getWorker().run(method, ctx, cause);
                 throw e;
             } catch (MalformedReturnValueException e) {
@@ -106,8 +107,8 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
             if (badThing == null) throw e;
             e.addSuppressed(badThing);
             ctx.status(500);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream pw = new PrintStream(baos, true, StandardCharsets.UTF_8);
+            var baos = new ByteArrayOutputStream();
+            var pw = new PrintStream(baos, true, StandardCharsets.UTF_8);
             e.printStackTrace(pw);
             ctx.result(PANIC.replace("$ERROR$", baos.toString(StandardCharsets.UTF_8)));
             ctx.contentType("text/html;charset=utf-8");
@@ -115,6 +116,7 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
         }
     }
 
+    @Nullable
     @SuppressWarnings("unchecked")
     private T invoke(@NonNull List<Object> parameters) throws InvocationTargetException {
         try {

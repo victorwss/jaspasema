@@ -43,13 +43,15 @@ public class JsonTypesProcessor {
             .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
+    @NonNull
     private static JavaType of(@NonNull ReifiedGeneric<?> t) {
         return TypeFactory.defaultInstance().constructType(t.getType());
     }
 
+    @Nullable
     public <E> E convert(
             boolean lenient,
-            Object obj,
+            @Nullable Object obj,
             @NonNull ReifiedGeneric<E> target)
     {
         return obj == null ? null : (lenient ? LENIENT : STRICT).convertValue(obj, of(target));
@@ -61,7 +63,7 @@ public class JsonTypesProcessor {
     public <E, X extends Throwable> E readJson(
             boolean lenient,
             @NonNull ReifiedGeneric<E> jt,
-            /*@Nullable*/ String data,
+            @Nullable String data,
             @NonNull Function<? super IOException, X> onError)
             throws X
     {
@@ -70,14 +72,15 @@ public class JsonTypesProcessor {
 
         try {
             return (lenient ? LENIENT : STRICT).readValue(data, of(jt));
-        } catch (IOException e) {
+        } catch (JsonProcessingException e) {
             throw onError.apply(e);
         }
     }
 
+    @NonNull
     @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
     public <X extends Throwable> Map<String, Object> readJsonMap(
-            /*@Nullable*/ String data,
+            @Nullable String data,
             @NonNull Function<? super IOException, X> onError)
             throws X
     {
@@ -85,16 +88,18 @@ public class JsonTypesProcessor {
 
         try {
             return STRICT.readValue(data, MAP_TYPE);
-        } catch (IOException e) {
+        } catch (JsonProcessingException e) {
             throw onError.apply(e);
         }
     }
 
-    public <E> String writeJson(E value) throws JsonProcessingException {
+    @Nullable
+    public <E> String writeJson(@Nullable E value) throws JsonProcessingException {
         return writeJson(false, value);
     }
 
-    public <E> String writeJson(boolean lenient, E value) throws JsonProcessingException {
+    @Nullable
+    public <E> String writeJson(boolean lenient, @Nullable E value) throws JsonProcessingException {
         return (lenient ? LENIENT : STRICT).writeValueAsString(value);
     }
 }

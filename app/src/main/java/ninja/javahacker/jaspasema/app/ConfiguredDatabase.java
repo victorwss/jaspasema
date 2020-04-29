@@ -57,10 +57,11 @@ public interface ConfiguredDatabase {
 
     public static ConfiguredDatabase join(Collection<ConfiguredDatabase> databases) {
         return op -> {
+            var newOp = op;
             for (ConfiguredDatabase cd : databases) {
-                op = cd.transact(op);
+                newOp = cd.transact(newOp);
             }
-            return op;
+            return newOp;
         };
     }
 }

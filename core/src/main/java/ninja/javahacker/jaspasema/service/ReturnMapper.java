@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ProducesFixed;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
@@ -22,8 +20,9 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsRe
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsThrowsException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
 import ninja.javahacker.jaspasema.exceptions.retproc.MalformedReturnProcessorException;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.AnnotatedMethod;
+import ninja.javahacker.jaspasema.processor.ResultProcessor;
+import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import ninja.javahacker.reifiedgeneric.Token;
@@ -31,7 +30,8 @@ import ninja.javahacker.reifiedgeneric.Token;
 /**
  * @author Victor Williams Stafusa da Silva
  */
-public class ReturnMapper {
+@SuppressFBWarnings("IMC_IMMATURE_CLASS_NO_TOSTRING")
+public class ReturnMapper<E> {
 
     public static final String DEFAULT_HTML_200 = ""
             + "<!DOCTYPE html>"
@@ -75,63 +75,48 @@ public class ReturnMapper {
     @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
     private static void dummy() {}
 
-    private static final ReturnMapper ROOT;
+    private static final Method DUMMY;
+    private static final ReturnMapper<Object> ROOT;
 
     static {
+        Supplier<BadServiceMappingException> xxx1 = () -> {
+            throw new AssertionError();
+        };
+        Function<Class<? extends Throwable>, ? extends BadServiceMappingException> xxx2 = c -> {
+            throw new AssertionError(c);
+        };
         try {
-            Method m = ReturnMapper.class.getDeclaredMethod("dummy");
-            Annotation[] base = m.getAnnotations();
-            ROOT = new ReturnMapper(MalformedReturnProcessorException.onMethod(m), Optional.empty(), base, () -> null, t -> null);
+            DUMMY = ReturnMapper.class.getDeclaredMethod("dummy");
+            Annotation[] base = DUMMY.getAnnotations();
+            var t = mapIt(
+                    DUMMY,
+                    ReifiedGeneric.of(Object.class),
+                    MalformedReturnProcessorException.onMethod(DUMMY),
+                    Optional.empty(),
+                    base,
+                    xxx1,
+                    xxx2);
+            ROOT = t;
         } catch (NoSuchMethodException | BadServiceMappingException | MalformedReturnProcessorException e) {
             throw new AssertionError(e);
         }
     }
 
-    @Getter(AccessLevel.PRIVATE)
-    private final ReturnProcessor.ProcessorConfiguration returnConfig;
+    @NonNull
+    private final Map<Class<? extends Throwable>, ResultProcessor.Stub<? extends Throwable>> map;
 
-    private final Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> exceptionsConfig;
+    @NonNull
+    private final ResultProcessor.Stub<E> forReturn;
 
-    @SuppressFBWarnings("OI_OPTIONAL_ISSUES_CHECKING_REFERENCE")
-    private ReturnMapper(
-            @NonNull MalformedReturnProcessorException.Factory x,
-            @NonNull Optional<ReturnMapper> parent,
-            @NonNull Annotation[] anotations,
-            @NonNull Supplier<BadServiceMappingException> confictingAnnotationsErrorThrow,
-            @NonNull Function<Class<? extends Throwable>, ? extends BadServiceMappingException> errorThrow)
-            throws BadServiceMappingException,
-            MalformedReturnProcessorException
-    {
-        List<Annotation> appliedAnnotations = new ArrayList<>(10);
-        select(anotations, appliedAnnotations::add, x);
-
-        Optional<ReturnProcessor.ProcessorConfiguration> rt = Optional.empty();
-        Map<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> sketch
-                = new HashMap<>(appliedAnnotations.size());
-        for (Annotation a : appliedAnnotations) {
-            Class<? extends Throwable> ct = getOn(a, x);
-            if (ct == ReturnedOk.class) {
-                if (rt.isPresent()) throw confictingAnnotationsErrorThrow.get();
-                rt = Optional.of(ReturnProcessor.prepareConfig(a, x));
-            } else if (sketch.containsKey(ct)) {
-                throw errorThrow.apply(ct);
-            } else {
-                sketch.put(ct, ReturnProcessor.prepareConfig(a, x));
-            }
-        }
-
-        returnConfig = rt.or(() -> parent.map(ReturnMapper::getReturnConfig)).orElseThrow(AssertionError::new);
-        exceptionsConfig = new HashMap<>(20);
-        parent.ifPresent(p -> exceptionsConfig.putAll(p.exceptionsConfig));
-        exceptionsConfig.putAll(sketch);
-    }
-
-    public static ReturnMapper forClass(
+    @NonNull
+    private static ReturnMapper<Object> forClass(
             @NonNull Class<?> targetClass)
             throws BadServiceMappingException,
             MalformedReturnProcessorException
     {
-        return new ReturnMapper(
+        return mapIt(
+                DUMMY,
+                ReifiedGeneric.of(Object.class),
                 MalformedReturnProcessorException.onClass(targetClass),
                 Optional.of(ROOT),
                 targetClass.getAnnotations(),
@@ -139,47 +124,36 @@ public class ReturnMapper {
                 t -> new ConflictingAnnotationsThrowsException(targetClass, t));
     }
 
-    public static ReturnMap<?> forMethod(
-            @NonNull Method method)
-            throws BadServiceMappingException,
-            MalformedReturnProcessorException
-    {
-        return new ReturnMapper(
-                MalformedReturnProcessorException.onMethod(method),
-                Optional.of(forClass(method.getDeclaringClass())),
-                method.getAnnotations(),
-                () -> new ConflictingAnnotationsReturnException(method),
-                t -> new ConflictingAnnotationsThrowsException(method, t)
-        ).makeMap(method);
-    }
-
-    public static <E> ReturnMap<E> forMethod(
+    @NonNull
+    public static <E> ReturnMapper<E> forMethod(
             @NonNull ReifiedGeneric<E> target,
             @NonNull Method method)
             throws BadServiceMappingException,
             MalformedReturnProcessorException
     {
-        return new ReturnMapper(
+        return mapIt(
+                method,
+                target,
                 MalformedReturnProcessorException.onMethod(method),
                 Optional.of(forClass(method.getDeclaringClass())),
                 method.getAnnotations(),
                 () -> new ConflictingAnnotationsReturnException(method),
-                t -> new ConflictingAnnotationsThrowsException(method, t)
-        ).makeMap(target, method);
+                t -> new ConflictingAnnotationsThrowsException(method, t));
     }
 
+    @NonNull
     private static Class<? extends Throwable> getOn(
             Annotation a,
             MalformedReturnProcessorException.Factory x)
             throws MalformedReturnProcessorException
     {
-        Class<? extends Annotation> c = a.annotationType();
-        ReturnSerializer r = c.getAnnotation(ReturnSerializer.class);
+        var c = a.annotationType();
+        var r = c.getAnnotation(ResultSerializer.class);
         if (r == null) throw new AssertionError();
-        Class<? extends ReturnProcessor<?>> cc = r.processor();
+        var cc = r.processor();
         Class<? extends Throwable> discriminator = null;
         for (Method m : c.getMethods()) {
-            if (!m.isAnnotationPresent(ReturnSerializer.ExitDiscriminator.class)) continue;
+            if (!m.isAnnotationPresent(ResultSerializer.ExitDiscriminator.class)) continue;
             if (discriminator != null) throw x.multiple(c, cc);
             if (!TYPE.equals(ReifiedGeneric.of(m.getGenericReturnType()))) throw x.badExit(c, cc);
             try {
@@ -209,7 +183,7 @@ public class ReturnMapper {
             MalformedReturnProcessorException.Factory x)
             throws MalformedReturnProcessorException
     {
-        if (a.annotationType().isAnnotationPresent(ReturnSerializer.class)) {
+        if (a.annotationType().isAnnotationPresent(ResultSerializer.class)) {
             getOn(a, x); // For sanity check.
             c.accept(a);
         } else {
@@ -220,9 +194,9 @@ public class ReturnMapper {
                 return;
             }
 
-            Class<?> returnType = m.getReturnType();
+            var returnType = m.getReturnType();
             if (!returnType.isArray()) return;
-            Class<?> component = returnType.getComponentType();
+            var component = returnType.getComponentType();
             if (!component.isAnnotation() || !component.isAnnotationPresent(Repeatable.class)) return;
 
             Annotation[] ar;
@@ -235,53 +209,84 @@ public class ReturnMapper {
         }
     }
 
-    public <E> ReturnMap<E> makeMap(
+    private ReturnMapper(
+            @NonNull Map<Class<? extends Throwable>, ResultProcessor.Stub<? extends Throwable>> exceptionsConfig,
+            @NonNull ResultProcessor.Stub<E> forReturn)
+    {
+        this.map = new HashMap<>(exceptionsConfig.size());
+        this.forReturn = forReturn;
+    }
+
+    @NonNull
+    private static <E> ReturnMapper<E> of(
+            @NonNull Map<Class<? extends Throwable>, ResultProcessor.Stub<? extends Throwable>> exceptionsConfig,
+            @NonNull ResultProcessor.Stub<E> forReturn)
+    {
+        return new ReturnMapper<>(exceptionsConfig, forReturn);
+    }
+
+    @NonNull
+    @SuppressFBWarnings("OI_OPTIONAL_ISSUES_CHECKING_REFERENCE")
+    private static <E> ReturnMapper<E> mapIt(
+            @NonNull Method m,
             @NonNull ReifiedGeneric<E> target,
-            @NonNull Method method)
-            throws BadServiceMappingException
+            @NonNull MalformedReturnProcessorException.Factory x,
+            @NonNull Optional<ReturnMapper<Object>> parent,
+            @NonNull Annotation[] annotations,
+            @NonNull Supplier<BadServiceMappingException> conflictingAnnotationsErrorThrow,
+            @NonNull Function<Class<? extends Throwable>, ? extends BadServiceMappingException> errorThrow)
+            throws BadServiceMappingException,
+            MalformedReturnProcessorException
     {
-        return new ReturnMap<>(target, method);
+        List<Annotation> appliedAnnotations = new ArrayList<>(10);
+        select(annotations, appliedAnnotations::add, x);
+
+        Optional<ResultProcessor.Stub<E>> rt = Optional.empty();
+        Map<Class<? extends Throwable>, ResultProcessor.Stub<? extends Throwable>> sketch
+                = new HashMap<>(appliedAnnotations.size());
+        for (var a : appliedAnnotations) {
+            var ct = getOn(a, x);
+            if (sketch.containsKey(ct)) throw errorThrow.apply(ct);
+            if (ct == ReturnedOk.class) {
+                if (rt.isPresent()) throw conflictingAnnotationsErrorThrow.get();
+                var ar = AnnotatedMethod.of(target, a, m);
+                rt = Optional.of(ResultProcessor.prepareConfig(ar, x));
+            } else {
+                var ax = AnnotatedMethod.ofException(ReifiedGeneric.of(ct), a, m);
+                sketch.put(ct, ResultProcessor.prepareConfig(ax, x));
+            }
+        }
+        var def = parent.map(p -> {
+            Map<Class<? extends Throwable>, ResultProcessor.Stub<? extends Throwable>> n = new HashMap<>(p.map);
+            n.putAll(sketch);
+            return n;
+        }).orElse(sketch);
+
+        var oo = rt.orElseGet(() -> parent.map(ReturnMapper::onReturn).map(g -> reduce(target, g)).orElseThrow(AssertionError::new));
+        return of(def, oo);
     }
 
-    public ReturnMap<?> makeMap(
-            @NonNull Method method)
-            throws BadServiceMappingException
-    {
-        return new ReturnMap<>(ReifiedGeneric.of(method.getGenericReturnType()), method);
+    @NonNull
+    public ResultProcessor.Stub<E> onReturn() {
+        return forReturn;
     }
 
-    public class ReturnMap<E> {
-        private final Map<Class<? extends Throwable>, ReturnProcessor.Stub<? extends Throwable>> map;
-
-        private final ReturnProcessor.Stub<E> forReturn;
-
-        public ReturnMap(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull Method method)
-                throws BadServiceMappingException
-        {
-            this.map = new HashMap<>(exceptionsConfig.size());
-            for (Map.Entry<Class<? extends Throwable>, ReturnProcessor.ProcessorConfiguration> entry : exceptionsConfig.entrySet()) {
-                if (entry.getKey() == ReturnedOk.class) continue;
-                map.put(entry.getKey(), entry.getValue().config(ReifiedGeneric.of(entry.getKey()), method));
-            }
-            this.forReturn = returnConfig == null ? null : returnConfig.config(target, method);
+    @NonNull
+    @SuppressWarnings("unchecked")
+    public <X extends Throwable> ResultProcessor.Stub<X> onException(X what) {
+        Class<?> c = what.getClass();
+        while (true) {
+            var p = map.get(c.asSubclass(Throwable.class));
+            if (p != null) return (ResultProcessor.Stub<X>) p;
+            if (c == Throwable.class) throw new AssertionError();
+            c = c.getSuperclass().asSubclass(Throwable.class);
         }
+    }
 
-        public ReturnProcessor.Stub<E> onReturn() {
-            return forReturn;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <X extends Throwable> ReturnProcessor.Stub<X> onException(X what) {
-            for (Class<?> c = what.getClass();
-                    c != Object.class;
-                    c = c.getSuperclass().asSubclass(Throwable.class))
-            {
-                ReturnProcessor.Stub<? extends Throwable> p = map.get(c.asSubclass(Throwable.class));
-                if (p != null) return (ReturnProcessor.Stub<X>) p;
-            }
-            throw new AssertionError();
-        }
+    @SuppressFBWarnings("UP_UNUSED_PARAMETER")
+    private static <E> ResultProcessor.Stub<E> reduce(ReifiedGeneric<E> newTarget, ResultProcessor.Stub<Object> oldTarget) {
+        return new ResultProcessor.Stub<>((a, b, c) -> {
+            oldTarget.getWorker().run(a, b, c);
+        }, oldTarget.getExpectedReturnType());
     }
 }

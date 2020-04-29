@@ -1,8 +1,8 @@
 package ninja.javahacker.jaspasema.app;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.javalin.Context;
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -19,7 +19,7 @@ public class ShutdownApp {
 
     public ShutdownApp(@NonNull ShutdownAppConfig config) {
         this.config = config;
-        this.adminServer = Javalin.create().port(config.getAdminPort());
+        this.adminServer = Javalin.create().start(config.getAdminPort());
         adminServer.get("/shutdown", this::shutdown);
     }
 

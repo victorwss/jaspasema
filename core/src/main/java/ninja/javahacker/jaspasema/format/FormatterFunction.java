@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.format;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,9 +21,11 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 @FunctionalInterface
 @SuppressFBWarnings("FII_USE_METHOD_REFERENCE")
 public interface FormatterFunction<E> {
-    public String format(E value);
+    @Nullable
+    public String format(@Nullable E value);
 
-    private static <E> FormatterFunction<E> of(Function<E, String> func) {
+    @NonNull
+    private static <E> FormatterFunction<E> of(@NonNull Function<E, String> func) {
         return v -> v == null ? null : func.apply(v);
     }
 
@@ -52,7 +55,7 @@ public interface FormatterFunction<E> {
             Map.entry(ReifiedGeneric.of(YearMonth.class), dtf -> of((YearMonth v) -> v.format(dtf)))
     );
 
-    @SuppressWarnings("unchecked")
+    @NonNull
     @SuppressFBWarnings({"LEST_LOST_EXCEPTION_STACK_TRACE", "BED_HIERARCHICAL_EXCEPTION_DECLARATION"})
     public static <E, W extends Throwable, X extends Throwable, Y extends Throwable, Z extends Throwable> FormatterFunction<E> formatterFor(
             @NonNull String format,
@@ -63,14 +66,15 @@ public interface FormatterFunction<E> {
             @NonNull Supplier<Z> dateWithBadFormat)
             throws W, X, Y, Z
     {
-        FormatterFunction<E> x = (FormatterFunction<E>) MAP.get(target);
+        @SuppressWarnings("unchecked")
+        var x = (FormatterFunction<E>) MAP.get(target);
         if (x != null) {
             if (!format.isEmpty()) throw nonDateWithFormat.get();
             return x;
         }
 
-        Function<DateTimeFormatter, FormatterFunction<E>> d =
-                (Function<DateTimeFormatter, FormatterFunction<E>>) DT_MAP.get(target);
+        @SuppressWarnings("unchecked")
+        var d = (Function<DateTimeFormatter, FormatterFunction<E>>) DT_MAP.get(target);
         if (d == null) throw unmappeableTarget.get();
 
         if (format.isEmpty()) throw dateWithoutFormat.get();

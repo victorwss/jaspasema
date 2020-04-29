@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import lombok.NonNull;
 import ninja.javahacker.jaspasema.service.ServiceConfigurer;
 import ninja.javahacker.test.jaspasema.ApiTester.Header;
 import org.junit.jupiter.api.Assertions;
@@ -15,27 +17,60 @@ import org.junit.jupiter.api.Assertions;
  */
 public class FwTester {
 
-    private static final AtomicReference<FwTester> TESTER = new AtomicReference<>();
     private static final AtomicInteger PORT_COUNTER = new AtomicInteger(8899);
-    private final int before;
-    private volatile int after = 0;
-    private final Javalin service;
-    private final AtomicReference<Throwable> xxx = new AtomicReference<>();
 
-    public void get(String qs, int expectedStatus, String resultBody, List<Header> headers) throws Throwable {
+    private final int before;
+
+    private volatile int after = 0;
+
+    @NonNull
+    private final Javalin service;
+
+    @NonNull
+    private final AtomicReference<Throwable> problem;
+
+    private FwTester() {
+        this.service = Javalin.create();
+        this.before = PORT_COUNTER.getAndIncrement();
+        this.problem = new AtomicReference<>();
+        this.service.start(before);
+    }
+
+    public void get(
+            @NonNull String qs,
+            int expectedStatus,
+            @NonNull String resultBody,
+            @NonNull List<Header> headers)
+            throws Throwable
+    {
         http("GET", qs, "", expectedStatus, resultBody, headers);
     }
 
-    public void post(String qs, String body, int expectedStatus, String resultBody, List<Header> headers) throws Throwable {
+    public void post(
+            @NonNull String qs,
+            @NonNull String body,
+            int expectedStatus,
+            @NonNull String resultBody,
+            @NonNull List<Header> headers)
+            throws Throwable
+    {
         http("POST", qs, body, expectedStatus, resultBody, headers);
     }
 
-    public void http(String method, String qs, String body, int expectedStatus, String resultBody, List<Header> headers) throws Throwable {
+    @NonNull
+    public void http(
+            @NonNull String method,
+            @NonNull String qs,
+            @NonNull String body,
+            int expectedStatus,
+            @NonNull String resultBody,
+            @NonNull List<Header> headers)
+            throws Throwable
+    {
         try {
-            service.start();
             ApiTester.TestResponse tresult = ApiTester.builder().port(before).method(method).path(qs).body(body).headers(headers).build();
             //System.out.println(tresult);
-            if (xxx.get() != null) throw xxx.get();
+            if (problem.get() != null) throw problem.get();
             Assertions.assertAll(
                     () -> Assertions.assertEquals(expectedStatus, tresult.getStatus()),
                     () -> Assertions.assertEquals(resultBody, tresult.getBody()),
@@ -46,35 +81,34 @@ public class FwTester {
         }
     }
 
-    public static FwTester reflect(Object c) {
-        return reflect(c, Collections.emptyMap());
+    @NonNull
+    public static FwTester reflect(@NonNull Function<FwTester, Object> callback) {
+        return reflect(callback, Collections.emptyMap());
     }
 
-    public static FwTester reflect(Object c, Map<String, Object> session) {
-        FwTester fwt = new FwTester(c, session);
-        TESTER.set(fwt);
+    public void confirm() {
+        after = before;
+    }
+
+    @NonNull
+    public static FwTester reflect(@NonNull Function<FwTester, Object> callback, @NonNull Map<String, Object> session) {
+        var fwt = new FwTester();
+        var obj = callback.apply(fwt);
+        fwt.configure(obj, session);
         return fwt;
     }
 
-    public static void confirm() {
-        FwTester f = TESTER.get();
-        f.after = f.before;
-    }
-
-    private FwTester(Object c, Map<String, Object> session) {
-        service = Javalin.create();
-        before = PORT_COUNTER.getAndIncrement();
+    private void configure(Object obj, @NonNull Map<String, Object> session) {
         try {
-            service.port(before);
-            ServiceConfigurer.forServices(c).wrap(r -> ctx -> {
-                for (Map.Entry<String, Object> entry : session.entrySet()) {
+            ServiceConfigurer.forServices(obj).wrap(r -> ctx -> {
+                for (var entry : session.entrySet()) {
                     ctx.sessionAttribute(entry.getKey(), entry.getValue());
                 }
                 try {
                     r.handle(ctx);
                 } catch (Throwable x) {
                     //x.printStackTrace();
-                    xxx.set(x);
+                    problem.set(x);
                     ctx.result(x.toString());
                 }
             }).configure(service);

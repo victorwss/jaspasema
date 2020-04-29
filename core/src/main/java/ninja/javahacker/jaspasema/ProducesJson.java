@@ -10,17 +10,17 @@ import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedJsonReturnValueException;
+import ninja.javahacker.jaspasema.processor.AnnotatedMethod;
 import ninja.javahacker.jaspasema.processor.JsonTypesProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.ResultProcessor;
+import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
-import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
 @Repeatable(value = ProducesJson.Container.class)
-@ReturnSerializer(processor = ProducesJson.Processor.class)
+@ResultSerializer(processor = ProducesJson.Processor.class)
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesJson {
@@ -28,28 +28,35 @@ public @interface ProducesJson {
     public String type() default "text/json;charset=utf-8";
     public int status() default 200;
 
-    @ReturnSerializer.ExitDiscriminator
+    @ResultSerializer.ExitDiscriminator
     public Class<? extends Throwable> on() default ReturnedOk.class;
 
-    public static class Processor implements ReturnProcessor<ProducesJson> {
+    public static class Processor implements ResultProcessor<ProducesJson, Object> {
+
+        @NonNull
         @Override
-        public <E> Stub<E> prepare(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull ProducesJson annotation,
-                @NonNull Method method)
-                throws BadServiceMappingException
-        {
-            if (annotation.on() == ReturnedOk.class) ReturnProcessor.rejectForVoid(method, ProducesJson.class);
-            return new Stub<>((m, ctx, v) -> {
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesJson, E> meth) throws BadServiceMappingException {
+            var method = meth.getMethod();
+            var annotation = meth.getAnnotation();
+            if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesJson.class);
+            ResultProcessor.Worker<E> w = (m, ctx, v) -> {
                 ctx.result(toJson(annotation.lenient(), method, v));
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());
-            }, "json");
+            };
+            return new Stub<>(w, "json");
         }
 
-        private static <E> String toJson(boolean lenient, Method method, E someObject) throws MalformedJsonReturnValueException {
+        @NonNull
+        private static <E> String toJson(
+                boolean lenient,
+                @NonNull Method method,
+                @NonNull E someObject)
+                throws MalformedJsonReturnValueException
+        {
             try {
-                return JsonTypesProcessor.writeJson(lenient, someObject);
+                var x = JsonTypesProcessor.writeJson(lenient, someObject);
+                return x == null ? "" : x;
             } catch (JsonProcessingException x) {
                 throw new MalformedJsonReturnValueException(method, someObject, x);
             }

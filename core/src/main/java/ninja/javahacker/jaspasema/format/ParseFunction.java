@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.format;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,10 +24,13 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  */
 @FunctionalInterface
 public interface ParseFunction<E> {
-    public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s) throws X;
+    @Nullable
+    public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X;
 
+    @NonNull
     private static <E> ParseFunction<E> of(@NonNull Function<String, E> func) {
         return new ParseFunction<>() {
+            @Nullable
             @Override
             @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
             public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
@@ -40,11 +44,12 @@ public interface ParseFunction<E> {
         };
     }
 
-    private static <E> Function<DateTimeFormatter, ParseFunction<E>> ofDate(BiFunction<String, DateTimeFormatter, E> func) {
+    private static <E> Function<DateTimeFormatter, ParseFunction<E>> ofDate(@NonNull BiFunction<String, DateTimeFormatter, E> func) {
         return format -> new ParseFunction<>() {
+            @Nullable
             @Override
             @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
-            public <X extends Throwable> E parse(Function<? super Throwable, X> onError, String s) throws X {
+            public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
                 if ("null".equals(s) || s.isEmpty()) return null;
                 try {
                     return func.apply(s, format);
@@ -55,7 +60,7 @@ public interface ParseFunction<E> {
         };
     }
 
-    private static boolean booleanParse(String s) {
+    private static boolean booleanParse(@NonNull String s) {
         switch (s) {
             case "true": return true;
             case "false": return false;
@@ -100,10 +105,10 @@ public interface ParseFunction<E> {
         return MAP.get(target) != null || DT_MAP.get(target) != null;
     }
 
-    @SuppressWarnings("unchecked")
+    @NonNull
     @SuppressFBWarnings({"LEST_LOST_EXCEPTION_STACK_TRACE", "BED_HIERARCHICAL_EXCEPTION_DECLARATION"})
     public static <E, W extends Throwable, X extends Throwable, Y extends Throwable, Z extends Throwable> ParseFunction<E> parserFor(
-            @NonNull String format,
+            @NonNull String dateFormat,
             @NonNull ReifiedGeneric<E> target,
             @NonNull Supplier<W> unmappeableTarget,
             @NonNull Supplier<X> nonDateWithFormat,
@@ -111,19 +116,21 @@ public interface ParseFunction<E> {
             @NonNull Supplier<Z> dateWithBadFormat)
             throws W, X, Y, Z
     {
-        ParseFunction<E> x = (ParseFunction<E>) MAP.get(target);
+        @SuppressWarnings("unchecked")
+        var x = (ParseFunction<E>) MAP.get(target);
         if (x != null) {
-            if (!format.isEmpty()) throw nonDateWithFormat.get();
+            if (!dateFormat.isEmpty()) throw nonDateWithFormat.get();
             return x;
         }
 
-        Function<DateTimeFormatter, ParseFunction<E>> d = (Function<DateTimeFormatter, ParseFunction<E>>) DT_MAP.get(target);
+        @SuppressWarnings("unchecked")
+        var d = (Function<DateTimeFormatter, ParseFunction<E>>) DT_MAP.get(target);
         if (d == null) throw unmappeableTarget.get();
 
-        if (format.isEmpty()) throw dateWithoutFormat.get();
+        if (dateFormat.isEmpty()) throw dateWithoutFormat.get();
         DateTimeFormatter dtf;
         try {
-            dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
+            dtf = DateTimeFormatter.ofPattern(dateFormat).withResolverStyle(ResolverStyle.STRICT);
         } catch (IllegalArgumentException e) {
             throw dateWithBadFormat.get();
         }

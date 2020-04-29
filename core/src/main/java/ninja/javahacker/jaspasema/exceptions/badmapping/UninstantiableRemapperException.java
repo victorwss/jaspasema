@@ -24,6 +24,7 @@ public class UninstantiableRemapperException extends BadServiceMappingException 
         this.remapper = remapper;
     }
 
+    @NonNull
     @TemplateField("R")
     public String getRempperName() {
         return remapper.getSimpleName();

@@ -2,7 +2,7 @@ rootProject.name = 'Jaspasema'
 
 def subDirs = rootDir.listFiles(new FileFilter() {
     public boolean accept(File file) {
-        return file.isDirectory() && !['config', 'libs', 'build'].contains(file.name) && !file.name.contains('.')
+        return file.isDirectory() && ['core', 'app'].contains(file.name)
     }
 });
 

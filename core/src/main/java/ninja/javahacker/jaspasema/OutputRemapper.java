@@ -6,41 +6,39 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.RemapperConstructorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.UninstantiableRemapperException;
-import ninja.javahacker.jaspasema.processor.ReturnProcessor;
-import ninja.javahacker.jaspasema.processor.ReturnSerializer;
+import ninja.javahacker.jaspasema.processor.AnnotatedMethod;
+import ninja.javahacker.jaspasema.processor.ResultProcessor;
+import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
-import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
  * @author Victor Williams Stafusa da Silva
  */
 @Repeatable(value = OutputRemapper.Container.class)
-@ReturnSerializer(processor = OutputRemapper.Processor.class)
+@ResultSerializer(processor = OutputRemapper.Processor.class)
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OutputRemapper {
     public String jQueryType() default "text";
 
-    @ReturnSerializer.ExitDiscriminator
+    @ResultSerializer.ExitDiscriminator
     public Class<? extends Throwable> on() default ReturnedOk.class;
 
     public Class<? extends ExceptionRemapper> remapper();
 
-    public static class Processor implements ReturnProcessor<OutputRemapper> {
+    public static class Processor implements ResultProcessor<OutputRemapper, Object> {
+
+        @NonNull
         @Override
-        public <E> Stub<E> prepare(
-                @NonNull ReifiedGeneric<E> target,
-                @NonNull OutputRemapper annotation,
-                @NonNull Method method)
-                throws BadServiceMappingException
-        {
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<OutputRemapper, E> meth) throws BadServiceMappingException {
+            var method = meth.getMethod();
+            var annotation = meth.getAnnotation();
+            var remapperClass = annotation.remapper();
             ExceptionRemapper f;
-            Class<? extends ExceptionRemapper> remapperClass = annotation.remapper();
             try {
                 f = remapperClass.getConstructor().newInstance();
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
@@ -48,7 +46,7 @@ public @interface OutputRemapper {
             } catch (InvocationTargetException e) {
                 throw new RemapperConstructorException(method, remapperClass, e.getCause());
             }
-            f.validate(target, annotation, method);
+            f.validate(meth);
             return new Stub<>(f::remap, annotation.jQueryType());
         }
     }
