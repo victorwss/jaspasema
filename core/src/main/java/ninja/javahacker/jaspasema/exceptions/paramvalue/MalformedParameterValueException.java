@@ -7,7 +7,6 @@ import java.util.function.Function;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -40,7 +39,7 @@ public class MalformedParameterValueException extends ParameterValueException {
         return cause -> new MalformedParameterValueException(param.getParameter(), param.getAnnotationType(), rawValue, cause);
     }
 
-    @NotNull
+    @NonNull
     @TemplateField("A")
     public String getAnnotationName() {
         return annotation.getSimpleName();

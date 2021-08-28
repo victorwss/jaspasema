@@ -67,7 +67,7 @@ public class ReturnMapper<E> {
             + "</html>";
 
     private static final ReifiedGeneric<Class<? extends Throwable>> TYPE =
-            new Token<Class<? extends Throwable>>() {}.reify();
+            new Token<Class<? extends Throwable>>() {}.getReified();
 
     @ProducesFixed(DEFAULT_HTML_200)
     @ProducesFixed(on = Throwable.class, value = DEFAULT_HTML_ERROR_500, status = 500)

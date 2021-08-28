@@ -79,7 +79,7 @@ public @interface QueryJsons {
             var annotation = param.getAnnotation();
             var paramName = param.getParameterName();
             var target = param.getTarget();
-            if (target.raw() != List.class) {
+            if (target.getType() != List.class) {
                 throw new TypeRestrictionViolationException(param, TypeRestrictionViolationException.AllowedTypes.LIST);
             }
             var choosenName = ObjectUtils.choose(annotation.name(), paramName);
