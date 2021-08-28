@@ -1,8 +1,9 @@
-rootProject.name = 'Jaspasema'
+rootProject.name = "Jaspasema"
 
 def subDirs = rootDir.listFiles(new FileFilter() {
+    @Override
     public boolean accept(File file) {
-        return file.isDirectory() && ['core', 'app'].contains(file.name)
+        return file.isDirectory() && !["config", "libs", "build", "gradle"].contains(file.name) && !file.name.contains(".")
     }
 });
 
