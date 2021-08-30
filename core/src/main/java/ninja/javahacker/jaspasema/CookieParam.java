@@ -42,7 +42,7 @@ public @interface CookieParam {
      * {@link LocalDateTime}, {@link LocalTime}, {@link Year} or {@link YearMonth}.
      * <p>Example of valid formats includes {@code "dd-MM-uuuu"}, {@code "dd/MM/uuuu HH:mm:ss"}, {@code "MM/uuuu"} among others.</p>
      * <p>This field is mandatory if the parameter type is one of the aforemetioned formats. Otherwise, this field should not be used.</p>
-     * @see <a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns">Patterns</a>
+     * @see <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns">Patterns</a>
      * @return The desired date format.
      */
     public String dateFormat() default "";

@@ -90,7 +90,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
 
     @NonNull
     @TemplateField("R")
-    public String getRempperName() {
+    public String getRemapperName() {
         return processorClass.getSimpleName();
     }
 }

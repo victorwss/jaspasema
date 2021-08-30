@@ -8,6 +8,10 @@ import java.lang.reflect.Parameter;
 public class NoMappingOnParameterException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance specifying which is the offending parameter.
+     * @param parameter The offending parameter.
+     */
     public NoMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);
     }

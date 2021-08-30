@@ -11,8 +11,8 @@ public class ConflictingMappingOnParameterException extends BadServiceMappingExc
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates an instance specifying whose is the problematic parameter.
-     * @param parameter The problematic parameter.
+     * Creates an instance specifying which is the offending parameter.
+     * @param parameter The offending parameter.
      */
     public ConflictingMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);

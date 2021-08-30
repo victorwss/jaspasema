@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Used to annotate other annotations stating that they represent a particular HTTP verb and can themselves be used
+ * to annotate methods in order to bind them to the HTTP verb.
  * @author Victor Williams Stafusa da Silva
  */
 @Retention(RetentionPolicy.RUNTIME)

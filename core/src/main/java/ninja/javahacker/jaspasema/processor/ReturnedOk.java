@@ -1,6 +1,8 @@
 package ninja.javahacker.jaspasema.processor;
 
 /**
+ * Unistantiable class used to denote, in exception mapping tables, that some method returned normally
+ * instead of throwing an exception.
  * @author Victor Williams Stafusa da Silva
  */
 public final class ReturnedOk extends Throwable {

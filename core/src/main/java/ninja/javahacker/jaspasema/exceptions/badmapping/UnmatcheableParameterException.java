@@ -8,6 +8,10 @@ import java.lang.reflect.Parameter;
 public class UnmatcheableParameterException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance specifying which is the offending parameter.
+     * @param parameter The offending parameter.
+     */
     public UnmatcheableParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);
     }

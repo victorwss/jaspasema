@@ -81,13 +81,13 @@ public class FwTester {
         }
     }
 
+    public void confirm() {
+        after = before;
+    }
+
     @NonNull
     public static FwTester reflect(@NonNull Function<FwTester, Object> callback) {
         return reflect(callback, Collections.emptyMap());
-    }
-
-    public void confirm() {
-        after = before;
     }
 
     @NonNull

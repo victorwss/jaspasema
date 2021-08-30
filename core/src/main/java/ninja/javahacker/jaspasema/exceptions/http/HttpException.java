@@ -10,6 +10,7 @@ import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 
 /**
+ * Used to represent an exception that should carry off an HTTP status code.
  * @author Victor Williams Stafusa da Silva
  */
 @ToString

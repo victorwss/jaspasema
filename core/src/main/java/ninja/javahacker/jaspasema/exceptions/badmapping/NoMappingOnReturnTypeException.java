@@ -8,6 +8,10 @@ import java.lang.reflect.Method;
 public class NoMappingOnReturnTypeException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance specifying which is the offending method.
+     * @param method The offending method.
+     */
     public NoMappingOnReturnTypeException(/*@NonNull*/ Method method) {
         super(method);
     }

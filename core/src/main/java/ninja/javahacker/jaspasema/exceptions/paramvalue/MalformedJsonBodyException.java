@@ -9,8 +9,8 @@ public class MalformedJsonBodyException extends ParameterValueException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates an instance with a cause specifying whose is the problematic parameter.
-     * @param parameter The problematic parameter.
+     * Creates an instance with a cause specifying which is the offending parameter.
+     * @param parameter The offending parameter.
      * @param cause The cause.
      */
     public MalformedJsonBodyException(

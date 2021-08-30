@@ -10,10 +10,18 @@ import ninja.javahacker.jaspasema.processor.ResultSerializer;
 public class ConflictingAnnotationsReturnException extends BadServiceMappingException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance specifying which is the offending class.
+     * @param targetClass The offending class.
+     */
     public ConflictingAnnotationsReturnException(/*@NonNull*/ Class<?> targetClass) {
         super(targetClass);
     }
 
+    /**
+     * Creates an instance specifying which is the offending method.
+     * @param method The offending method.
+     */
     public ConflictingAnnotationsReturnException(/*@NonNull*/ Method method) {
         super(method);
     }

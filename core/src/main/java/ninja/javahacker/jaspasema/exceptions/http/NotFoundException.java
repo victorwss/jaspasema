@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.ToString;
 
 /**
+ * Represents a resource not found error (HTTP status code 404).
+ * I.e., the client tried to access some resource or perform some operation, but the requested resource or operation do not exists.
  * @author Victor Williams Stafusa da Silva
  */
 @ToString
