@@ -11,6 +11,19 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
+ * Denotes that the value of a method parameter should be read from the session.
+ *
+ * <p>For example:</p>
+ * <pre>
+ *     public String foo(
+ *         &#64;HeaderParam(name = "user-agent") String userAgent, // Uses the content of the "user-agent" header.
+ *         &#64;SessionParam String bar,                           // Reads the bar from the session's "bar".
+ *         &#64;SessionParam LocalDate loginDate,                  // Reads the loginDate from the session's "loginDate".
+ *         &#64;SessionParam(name = "-^what") Fruit fruit)         // Reads a fruit object from the session's "-^what".
+ *     {
+ *         // Do stuff.
+ *     }
+ * </pre>
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = SessionParam.Processor.class)
@@ -26,6 +39,7 @@ public @interface SessionParam {
 
     /**
      * The class that is responsible for processing the {@link SessionParam} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<SessionParam> {
 

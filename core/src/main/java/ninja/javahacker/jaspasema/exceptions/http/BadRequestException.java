@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import lombok.ToString;
 
 /**
- * Represents a bad rquest error (HTTP status code 400).
+ * Represents a bad request error (HTTP status code 400).
  * I.e., the client tried to perform an operation in the server, but the sent request was structurally malformed.
  * @author Victor Williams Stafusa da Silva
  */

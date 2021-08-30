@@ -17,6 +17,31 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
+ * Denotes that the value of a method parameter should be read from the request body as plain text before being desserialized.
+ *
+ * <p>For example:</p>
+ * <pre>
+ *     // Reads the contents of the body as a String.
+ *     &#64;Post
+ *     &#64;Path("/foo1")
+ *     public String foo1(&#64;PlainBody String bar) {
+ *         // Do stuff.
+ *     }
+ *
+ *     // Reads the contents of the body as a LocalDate.
+ *     &#64;Post
+ *     &#64;Path("/foo2")
+ *     public String foo2(&#64;PlainBody(dateFormat = "dd-MM-uuuu") LocalDate bar) {
+ *         // Do stuff.
+ *     }
+ *
+ *     // Reads the contents of the body as an int.
+ *     &#64;Post
+ *     &#64;Path("/foo3")
+ *     public String foo3(&#64;PlainBody(dateFormat = "dd-MM-uuuu") int bar) {
+ *         // Do stuff.
+ *     }
+ * </pre>
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = PlainBody.Processor.class)
@@ -36,6 +61,7 @@ public @interface PlainBody {
 
     /**
      * The class that is responsible for processing the {@link PlainBody} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<PlainBody> {
 

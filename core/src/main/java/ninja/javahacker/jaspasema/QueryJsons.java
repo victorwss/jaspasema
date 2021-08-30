@@ -35,7 +35,7 @@ public @interface QueryJsons {
 
     /**
      * The name of the query string parameter. Uses the name of the parameter if blank or left unspecified.
-     * @return The name of the cookie.
+     * @return The name of the query string parameter.
      */
     public String name() default "";
 
@@ -48,6 +48,7 @@ public @interface QueryJsons {
 
     /**
      * The class that is responsible for processing the {@link QueryJsons} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<QueryJsons> {
 

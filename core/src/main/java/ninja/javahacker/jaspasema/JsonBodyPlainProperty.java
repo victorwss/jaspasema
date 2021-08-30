@@ -23,6 +23,7 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
+ * Defines that a method parameter corresponds to the body of a request in plain text format.
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = JsonBodyPlainProperty.Processor.class)

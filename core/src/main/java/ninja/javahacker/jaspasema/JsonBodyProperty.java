@@ -16,6 +16,7 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
+ * Defines that a method parameter corresponds to a property from the body of a request in JSON format.
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = JsonBodyProperty.Processor.class)

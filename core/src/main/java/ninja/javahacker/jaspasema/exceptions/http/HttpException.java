@@ -3,6 +3,7 @@ package ninja.javahacker.jaspasema.exceptions.http;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
@@ -17,6 +18,13 @@ import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueE
 public class HttpException extends JaspasemaException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The HTTP status code for this exception.
+     * -- GETTER --
+     * Provides the HTTP status code for this exception.
+     * @return The HTTP status code for this exception.
+     */
+    @Getter
     private final int statusCode;
 
     public HttpException(/*@NonNull*/ Method method, int statusCode) {
@@ -27,10 +35,6 @@ public class HttpException extends JaspasemaException {
     public HttpException(/*@NonNull*/ Method method, int statusCode, /*@NonNull*/ Throwable cause) {
         super(method, cause);
         this.statusCode = statusCode;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
     }
 
     @NonNull

@@ -26,9 +26,20 @@ public @interface ProducesPlain {
     public String jQueryType() default "text";
     public int status() default 200;
 
+    /**
+     * Defines which exception triggers the behaviour described in this annotation.
+     * Left it unspecified (with the default {@link ReturnedOk}) for denoting a normal return behaviour instead
+     * of one triggered by the raise of an exception.
+     * @return The exception which triggers the behaviour described in this annotation
+     *     or unspecified (with the default {@link ReturnedOk}) for a normal return.
+     */
     @ResultSerializer.ExitDiscriminator
     public Class<? extends Throwable> on() default ReturnedOk.class;
 
+    /**
+     * The class that is responsible for processing the {@link ProducesPlain} annotation.
+     * @author Victor Williams Stafusa da Silva
+     */
     public static class Processor implements ResultProcessor<ProducesPlain, Object> {
 
         @NonNull
@@ -47,9 +58,17 @@ public @interface ProducesPlain {
         }
     }
 
+    /**
+     * Container annotation for repeated &#64;{@link ProducesPlain}.
+     */
     @Target({ElementType.METHOD, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Container {
+
+        /**
+         * The multiple {@link ProducesPlain} contained.
+         * @return The multiple {@link ProducesPlain} contained.
+         */
         public ProducesPlain[] value();
     }
 }

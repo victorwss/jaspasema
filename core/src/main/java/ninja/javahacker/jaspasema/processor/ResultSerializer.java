@@ -13,6 +13,10 @@ import java.lang.annotation.Target;
 public @interface ResultSerializer {
     public Class<? extends ResultProcessor<?, ?>> processor();
 
+    /**
+     * Used to tell which method inside an annotation gives the exception type that triggers its behaviour.
+     * @author Victor Williams Stafusa da Silva
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface ExitDiscriminator {

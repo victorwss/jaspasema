@@ -24,6 +24,22 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 import ninja.javahacker.reifiedgeneric.Wrappers;
 
 /**
+ * Denotes that the value of a method parameter should be read from a query string parameter.
+ * Lists might be used for repeated query string parameters.
+ *
+ * <p>For example:</p>
+ * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo")
+ *     public String foo(
+ *         &#64;QueryPart String bar,                                     // Uses the content of the "bar" query string parameter.
+ *         &#64;QueryPart(name = "-foo-xxx") String userAgent,            // Uses the content of the "-foo-xxx" query string parameter.
+ *         &#64;QueryPart(dateFormat = "dd/MM/uuuu") LocalDate loginDate) // Sets a date format for the "loginDate" query string parameter.
+ *         &#64;QueryPart List&gt;String&lt; goo,                         // Uses the content of the "goo" possibly multiple query string parameters.
+ *     {
+ *         // Do stuff.
+ *     }
+ * </pre>
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = QueryPart.Processor.class)
@@ -33,7 +49,7 @@ public @interface QueryPart {
 
     /**
      * This tells which is the desired date format for converting the value of the query string parameter to an instance of
-     * {@link LocalDate}, {@link LocalDateTime}, {@link LocalTime}, {@link Year},{@link YearMonth} or {@link List}s of those.
+     * {@link LocalDate}, {@link LocalDateTime}, {@link LocalTime}, {@link Year}, {@link YearMonth} or {@link List}s of those.
      * <p>Example of valid formats includes {@code "dd-MM-uuuu"}, {@code "dd/MM/uuuu HH:mm:ss"}, {@code "MM/uuuu"} among others.</p>
      * <p>This field is mandatory if the parameter type is one of the aforemetioned formats. Otherwise, this field should not be used.</p>
      * @see <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns">Patterns</a>
@@ -43,7 +59,7 @@ public @interface QueryPart {
 
     /**
      * The name of the query string parameter. Uses the name of the parameter if blank or left unspecified.
-     * @return The name of the cookie.
+     * @return The name of the query string parameter.
      */
     public String name() default "";
 
@@ -56,6 +72,7 @@ public @interface QueryPart {
 
     /**
      * The class that is responsible for processing the {@link QueryPart} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<QueryPart> {
 

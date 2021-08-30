@@ -2,6 +2,7 @@ package ninja.javahacker.jaspasema.exceptions.messages;
 
 import java.util.Map;
 import lombok.NonNull;
+import lombok.experimental.PackagePrivate;
 import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsReturnException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsThrowsException;
@@ -48,7 +49,8 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedJsonReturnValueEx
 /**
  * @author Victor Williams Stafusa da Silva
  */
-public enum EnglishExceptionTemplate implements ExceptionTemplate {
+@PackagePrivate
+enum EnglishExceptionTemplate implements ExceptionTemplate {
     INSTANCE;
 
     private static final Map<Class<? extends JaspasemaException>, String> TEMPLATES = Map.ofEntries(

@@ -20,6 +20,8 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
  *
  * <p>For example:</p>
  * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo")
  *     public String foo(
  *         // Uses the content of the "f1" header, reads it as a JSON and deserializes a Fruit instance.
  *         &#64;HeaderJsonParam Fruit f1,
@@ -69,6 +71,7 @@ public @interface HeaderJsonParam {
 
     /**
      * The class that is responsible for processing the {@link HeaderJsonParam} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<HeaderJsonParam> {
 

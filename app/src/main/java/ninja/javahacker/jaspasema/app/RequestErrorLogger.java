@@ -11,5 +11,8 @@ import io.javalin.http.Context;
 public interface RequestErrorLogger {
     public void log(Context ctx, Throwable error);
 
+    /**
+     * Default error logger which just calls {@link Throwable#printStackTrace()}.
+     */
     public static final RequestErrorLogger PRINT_STACK_TRACE = (ctx, error) -> error.printStackTrace();
 }

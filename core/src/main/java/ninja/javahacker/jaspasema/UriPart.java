@@ -20,6 +20,20 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
+ * Denotes that the value of a method parameter should be read from part of the path.
+ *
+ * <p>For example:</p>
+ * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo/:bar/:loginDate/:z-z")
+ *     public String foo(
+ *         &#64;UriPart String bar,                                     // Uses the content of the "bar" part of the URI.
+ *         &#64;UriPart(dateFormat = "dd-MM-uuuu") LocalDate loginDate) // Sets a date format for the "loginDate" part of the URI.
+ *         &#64;UriPart(name = "z-z") int z)                            // Sets the "z-z" part of the URI.
+ *     {
+ *         // Do stuff.
+ *     }
+ * </pre>
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = UriPart.Processor.class)
@@ -32,14 +46,14 @@ public @interface UriPart {
      * {@link LocalDateTime}, {@link LocalTime}, {@link Year} or {@link YearMonth}.
      * <p>Example of valid formats includes {@code "dd-MM-uuuu"}, {@code "dd/MM/uuuu HH:mm:ss"}, {@code "MM/uuuu"} among others.</p>
      * <p>This field is mandatory if the parameter type is one of the aforemetioned formats. Otherwise, this field should not be used.</p>
-     * @see <a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns">Patterns</a>
+     * @see <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns">Patterns</a>
      * @return The desired date format.
      */
     public String dateFormat() default "";
 
     /**
      * The name of the URI part. Uses the name of the parameter if blank or left unspecified.
-     * @return The name of the cookie.
+     * @return The name of the URI part.
      */
     public String name() default "";
 
@@ -52,6 +66,7 @@ public @interface UriPart {
 
     /**
      * The class that is responsible for processing the {@link UriPart} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<UriPart> {
 

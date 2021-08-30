@@ -23,6 +23,8 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
  *
  * <p>For example:</p>
  * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo")
  *     public String foo(
  *         &#64;HeaderParam String bar,                                     // Uses the content of the "bar" header.
  *         &#64;HeaderParam(name = "user-agent") String userAgent,          // Uses the content of the "user-agent" header.
@@ -73,6 +75,7 @@ public @interface HeaderParam {
 
     /**
      * The class that is responsible for processing the {@link HeaderParam} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<HeaderParam> {
 

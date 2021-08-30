@@ -16,6 +16,22 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
+ * Denotes that the value of a method parameter should be the base
+ * {@link HttpServletRequest}, {@link HttpServletResponse} or {@link HttpSession}.
+ *
+ * <p>For example:</p>
+ * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo")
+ *     public String foo(
+ *         &#64;HeaderParam String bar,               // Uses the content of the "bar" header.
+ *         &#64;RawHttp HttpServletRequest request,   // The request.
+ *         &#64;RawHttp HttpServletResponse response, // The response.
+ *         &#64;RawHttp HttpSession session,          // The session.
+ *     {
+ *         // Do stuff.
+ *     }
+ * </pre>
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = RawHttp.Processor.class)
@@ -25,6 +41,7 @@ public @interface RawHttp {
 
     /**
      * The class that is responsible for processing the {@link RawHttp} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<RawHttp> {
 

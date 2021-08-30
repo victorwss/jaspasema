@@ -22,6 +22,8 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
  *
  * <p>For example:</p>
  * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo")
  *     public String foo(
  *         &#64;CookieParam String bar,                                     // Uses the content of the "bar" cookie.
  *         &#64;CookieParam(name = "login-hash") String loginHash,          // Uses the content of the "login-hash" cookie.
@@ -55,6 +57,7 @@ public @interface CookieParam {
 
     /**
      * The class that is responsible for processing the {@link CookieParam} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static final class Processor implements ParamProcessor<CookieParam> {
 

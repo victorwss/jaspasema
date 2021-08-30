@@ -13,6 +13,22 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
+ * Denotes that the value of a method parameter should be read from the query string as
+ * a JSON and the value desserialized as an object from that JSON.
+ *
+ * <p>For example:</p>
+ * <pre>
+ *     &#64;Get
+ *     &#64;Path("/foo")
+ *     public String foo(
+ *         // Uses the content of the "f1" query string parameter, reads it as a JSON and deserializes a Fruit instance.
+ *         &#64;QueryJson Fruit f1,
+ *         // Uses the content of the "X-flavor" query string parameter, reads it as a JSON and deserializes a Flavor instance.
+ *         &#64;QueryJson(name = "X-flavor") Flavor f2)
+ *     {
+ *         // Do stuff.
+ *     }
+ * </pre>
  * @author Victor Williams Stafusa da Silva
  */
 @ParamSource(processor = QueryJson.Processor.class)
@@ -30,7 +46,7 @@ public @interface QueryJson {
 
     /**
      * The name of the query string parameter. Uses the name of the parameter if blank or left unspecified.
-     * @return The name of the cookie.
+     * @return The name of the query string parameter.
      */
     public String name() default "";
 
@@ -43,6 +59,7 @@ public @interface QueryJson {
 
     /**
      * The class that is responsible for processing the {@link QueryJson} annotation.
+     * @author Victor Williams Stafusa da Silva
      */
     public static class Processor implements ParamProcessor<QueryJson> {
 
