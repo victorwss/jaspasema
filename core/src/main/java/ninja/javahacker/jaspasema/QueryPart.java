@@ -106,7 +106,7 @@ public @interface QueryPart {
             var choosenName = ObjectUtils.choose(annotation.name(), paramName);
             var js = ObjectUtils.choose(annotation.jsVar(), paramName);
             var target = param.getTarget();
-            var isList = target.getType() == List.class;
+            var isList = target.asClass() == List.class;
             if (isList && ParseFunction.accepts(Wrappers.unwrapIterable((ReifiedGeneric<List<E>>) target))) {
                 var t1 = PLURAL_JS_TEMPLATE.replace("$JS$", js).replace("$PARAM$", choosenName);
                 var parts = ObjectListParser.prepare((AnnotatedParameter<QueryPart, List<E>>) param, annotation.dateFormat());
