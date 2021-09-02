@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Path {
+
     /**
      * The path to route.
      * @return The path to route.

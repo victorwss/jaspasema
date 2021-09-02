@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 /**
+ * Superclass of all exceptions that denote that a Jaspasema annotation processor is broken.
  * @author Victor Williams Stafusa da Silva
  */
 @Getter

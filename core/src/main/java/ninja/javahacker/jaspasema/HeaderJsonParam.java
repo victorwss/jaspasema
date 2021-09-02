@@ -99,13 +99,13 @@ public @interface HeaderJsonParam {
             if (annotation.implicit() && !jsVar.isEmpty()) throw new ImplicitWithJsVarException(param);
             var choosenName = ObjectUtils.choose(annotation.name(), paramName);
             var js = ObjectUtils.choose(jsVar, paramName);
+            var t1 = annotation.implicit() ? "" : js;
+            var t2 = annotation.implicit() ? "" : TEMPLATE.replace("#N#", choosenName).replace("#JS#", js);
             ParamProcessor.Worker<E> w = ctx -> {
                 var s = ctx.header(choosenName);
                 var c = MalformedParameterValueException.expectingCause(param, s);
                 return JsonTypesProcessor.readJson(annotation.lenient(), param.getTarget(), s, c);
             };
-            var t1 = annotation.implicit() ? "" : js;
-            var t2 = annotation.implicit() ? "" : TEMPLATE.replace("#N#", choosenName).replace("#JS#", js);
             return new Stub<>(w, t1, t2);
         }
     }

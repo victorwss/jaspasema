@@ -8,7 +8,8 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
@@ -68,20 +69,20 @@ public @interface QueryJsons {
          * @param <E> {@inheritDoc}
          * @param param {@inheritDoc}
          * @return {@inheritDoc}
-         * @throws TypeRestrictionViolationException If the raw type of the parameter is not {@code java.util.List}.
+         * @throws ParameterTypeRestrictionViolationException If the raw type of the parameter is not {@code java.util.List}.
          */
         @NonNull
         @Override
         @SuppressWarnings("unchecked")
         public <E> Stub<E> prepare(
                 @NonNull AnnotatedParameter<QueryJsons, E> param)
-                throws TypeRestrictionViolationException
+                throws ParameterTypeRestrictionViolationException
         {
             var annotation = param.getAnnotation();
             var paramName = param.getParameterName();
             var target = param.getTarget();
             if (target.getType() != List.class) {
-                throw new TypeRestrictionViolationException(param, TypeRestrictionViolationException.AllowedTypes.LIST);
+                throw new ParameterTypeRestrictionViolationException(param, AllowedTypes.LIST);
             }
             var choosenName = ObjectUtils.choose(annotation.name(), paramName);
             var js = ObjectUtils.choose(annotation.jsVar(), paramName);

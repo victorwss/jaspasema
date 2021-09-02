@@ -5,6 +5,11 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Year;
+import java.time.YearMonth;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.format.ReturnValueFormatter;
@@ -21,9 +26,27 @@ import ninja.javahacker.jaspasema.processor.ReturnedOk;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesPlain {
+
+    /**
+     * If the output is a {@link LocalDate}, {@link LocalTime}, {@link LocalDateTime}, {@link Year} or {@link YearMonth},
+     * specifies which is the date/time format excepted. Otherwise, should be left blank.
+     * @return If the output is a {@link LocalDate}, {@link LocalTime}, {@link LocalDateTime}, {@link Year} or {@link YearMonth},
+     *     specifies which is the date/time format excepted. Otherwise, should be left blank.
+     */
     public String format() default "";
+
+    /**
+     * The MIME type of the output that should be produced.
+     * @return The MIME type of the output that should be produced.
+     */
     public String type() default "text/plain;charset=utf-8";
+
     public String jQueryType() default "text";
+
+    /**
+     * The HTTP status code that should be produced.
+     * @return The HTTP status code that should be produced.
+     */
     public int status() default 200;
 
     /**
@@ -42,6 +65,19 @@ public @interface ProducesPlain {
      */
     public static class Processor implements ResultProcessor<ProducesPlain, Object> {
 
+        /**
+         * Sole constructor.
+         */
+        public Processor() {
+        }
+
+        /**
+         * {@inheritDoc}
+         * @param <E> {@inheritDoc}
+         * @param meth {@inheritDoc}
+         * @return {@inheritDoc}
+         * @throws BadServiceMappingException {@inheritDoc}
+         */
         @NonNull
         @Override
         public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesPlain, E> meth) throws BadServiceMappingException {

@@ -23,13 +23,21 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonBodyProperty {
+
+    /**
+     * Defines if the JSON property is required or not.
+     * If not required, missing properties in the JSON are simply ignored and default values would fill them.
+     * If required, their absence triggers an error.
+     * <p>The default value is {@code false}. I.e. to NOT be required.</p>
+     * @return If the JSON property is required.
+     */
     public boolean required() default false;
 
     /**
-     * Defines if the JSON should be read in lenient mode or not.
+     * Defines if the JSON property should be read in lenient mode or not.
      * In lenient mode, unknown properties in the JSON are simply ignored. In strict mode, their presence triggers an error.
      * <p>The default value is {@code false}. I.e. to NOT be lenient.</p>
-     * @return If the JSON should be read in lenient mode or not.
+     * @return If the JSON property should be read in lenient mode or not.
      */
     public boolean lenient() default false;
 

@@ -10,11 +10,13 @@ import lombok.ToString;
  */
 @ToString
 public class NotAllowedException extends HttpException {
+
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates an instance specifying which is the offending method.
      * @param method The offending method.
+     * @throws IllegalArgumentException If {@code method} is {@code null}.
      */
     public NotAllowedException(/*@NonNull*/ Method method) {
         super(method, 403);

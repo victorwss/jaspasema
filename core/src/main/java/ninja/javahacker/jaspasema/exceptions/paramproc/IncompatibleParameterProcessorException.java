@@ -2,6 +2,7 @@ package ninja.javahacker.jaspasema.exceptions.paramproc;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
+import ninja.javahacker.jaspasema.processor.ParamProcessor;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -12,7 +13,7 @@ public class IncompatibleParameterProcessorException extends MalformedParameterP
     public IncompatibleParameterProcessorException(
             /*@NonNull*/ Parameter parameter,
             /*@NonNull*/ Class<? extends Annotation> annotation,
-            /*@NonNull*/ Class<?> processorClass,
+            /*@NonNull*/ Class<? extends ParamProcessor<?>> processorClass,
             /*@NonNull*/ Throwable cause)
     {
         super(parameter, annotation, processorClass, cause);

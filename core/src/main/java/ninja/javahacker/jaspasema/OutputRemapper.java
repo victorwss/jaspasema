@@ -30,8 +30,25 @@ public @interface OutputRemapper {
 
     public Class<? extends ExceptionRemapper> remapper();
 
+    /**
+     * The class that is responsible for processing the {@link ResultProcessor} annotation.
+     * @author Victor Williams Stafusa da Silva
+     */
     public static class Processor implements ResultProcessor<OutputRemapper, Object> {
 
+        /**
+         * Sole constructor.
+         */
+        public Processor() {
+        }
+
+        /**
+         * {@inheritDoc}
+         * @param <E> {@inheritDoc}
+         * @param meth {@inheritDoc}
+         * @return {@inheritDoc}
+         * @throws BadServiceMappingException {@inheritDoc}
+         */
         @NonNull
         @Override
         public <E> Stub<E> prepare(@NonNull AnnotatedMethod<OutputRemapper, E> meth) throws BadServiceMappingException {
@@ -51,9 +68,17 @@ public @interface OutputRemapper {
         }
     }
 
+    /**
+     * Container annotation for repeated &#64;{@link OutputRemapper}.
+     */
     @Target({ElementType.METHOD, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Container {
+
+        /**
+         * The multiple {@link OutputRemapper} contained.
+         * @return The multiple {@link OutputRemapper} contained.
+         */
         public OutputRemapper[] value();
     }
 }

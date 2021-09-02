@@ -24,8 +24,17 @@ import ninja.javahacker.jaspasema.processor.ReturnedOk;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesJson {
-    public boolean lenient() default false;
+
+    /**
+     * The MIME type of the output that should be produced.
+     * @return The MIME type of the output that should be produced.
+     */
     public String type() default "text/json;charset=utf-8";
+
+    /**
+     * The HTTP status code that should be produced.
+     * @return The HTTP status code that should be produced.
+     */
     public int status() default 200;
 
     /**
@@ -44,6 +53,19 @@ public @interface ProducesJson {
      */
     public static class Processor implements ResultProcessor<ProducesJson, Object> {
 
+        /**
+         * Sole constructor.
+         */
+        public Processor() {
+        }
+
+        /**
+         * {@inheritDoc}
+         * @param <E> {@inheritDoc}
+         * @param meth {@inheritDoc}
+         * @return {@inheritDoc}
+         * @throws BadServiceMappingException {@inheritDoc}
+         */
         @NonNull
         @Override
         public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesJson, E> meth) throws BadServiceMappingException {
@@ -51,7 +73,7 @@ public @interface ProducesJson {
             var annotation = meth.getAnnotation();
             if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesJson.class);
             ResultProcessor.Worker<E> w = (m, ctx, v) -> {
-                ctx.result(toJson(annotation.lenient(), method, v));
+                ctx.result(toJson(method, v));
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());
             };
@@ -60,13 +82,12 @@ public @interface ProducesJson {
 
         @NonNull
         private static <E> String toJson(
-                boolean lenient,
                 @NonNull Method method,
                 @NonNull E someObject)
                 throws MalformedJsonReturnValueException
         {
             try {
-                var x = JsonTypesProcessor.writeJson(lenient, someObject);
+                var x = JsonTypesProcessor.writeJson(someObject);
                 return x == null ? "" : x;
             } catch (JsonProcessingException x) {
                 throw new MalformedJsonReturnValueException(method, someObject, x);

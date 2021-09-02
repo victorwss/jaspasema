@@ -192,6 +192,7 @@ public abstract class JaspasemaException extends Exception {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface TemplateField {
+
         /**
          * The name of the variable in the template message to which the annotated methods binds to.
          * @return The name of the variable in the template message to which the annotated methods binds to.

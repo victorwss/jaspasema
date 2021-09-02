@@ -8,11 +8,13 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
  * @author Victor Williams Stafusa da Silva
  */
 public class ConflictingMappingOnParameterException extends BadServiceMappingException {
+
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates an instance specifying which is the offending parameter.
      * @param parameter The offending parameter.
+     * @throws IllegalArgumentException If {@link parameter} is {@code null}.
      */
     public ConflictingMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);

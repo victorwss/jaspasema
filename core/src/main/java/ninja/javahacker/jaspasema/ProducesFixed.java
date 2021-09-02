@@ -20,9 +20,25 @@ import ninja.javahacker.jaspasema.processor.ReturnedOk;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProducesFixed {
+
+    /**
+     * What should be the produced output.
+     * @return What should be the produced output.
+     */
     public String value() default "";
+
+    /**
+     * The MIME type of the output that should be produced.
+     * @return The MIME type of the output that should be produced.
+     */
     public String type() default "text/html;charset=utf-8";
+
     public String jQueryType() default "html";
+
+    /**
+     * The HTTP status code that should be produced.
+     * @return The HTTP status code that should be produced.
+     */
     public int status() default 200;
 
     /**
@@ -41,6 +57,19 @@ public @interface ProducesFixed {
      */
     public static class Processor implements ResultProcessor<ProducesFixed, Object> {
 
+        /**
+         * Sole constructor.
+         */
+        public Processor() {
+        }
+
+        /**
+         * {@inheritDoc}
+         * @param <E> {@inheritDoc}
+         * @param meth {@inheritDoc}
+         * @return {@inheritDoc}
+         * @throws BadServiceMappingException {@inheritDoc}
+         */
         @NonNull
         @Override
         public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesFixed, E> meth) throws BadServiceMappingException {

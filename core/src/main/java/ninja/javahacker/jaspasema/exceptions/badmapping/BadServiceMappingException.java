@@ -5,9 +5,11 @@ import java.lang.reflect.Parameter;
 import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
 
 /**
+ * Superclass of all exceptions that denote incorrect usage of Jaspasema's annotations.
  * @author Victor Williams Stafusa da Silva
  */
 public abstract class BadServiceMappingException extends JaspasemaException {
+
     private static final long serialVersionUID = 1L;
 
     /**

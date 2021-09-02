@@ -11,8 +11,9 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.util.List;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.ext.ObjectUtils;
 import ninja.javahacker.jaspasema.format.ObjectListParser;
 import ninja.javahacker.jaspasema.format.ParameterParser;
@@ -32,10 +33,18 @@ import ninja.javahacker.reifiedgeneric.Wrappers;
  *     &#64;Get
  *     &#64;Path("/foo")
  *     public String foo(
- *         &#64;QueryPart String bar,                                     // Uses the content of the "bar" query string parameter.
- *         &#64;QueryPart(name = "-foo-xxx") String userAgent,            // Uses the content of the "-foo-xxx" query string parameter.
- *         &#64;QueryPart(dateFormat = "dd/MM/uuuu") LocalDate loginDate) // Sets a date format for the "loginDate" query string parameter.
- *         &#64;QueryPart List&gt;String&lt; goo,                         // Uses the content of the "goo" possibly multiple query string parameters.
+ *
+ *         // Uses the content of the "bar" query string parameter.
+ *         &#64;QueryPart String bar,
+ *
+ *         // Uses the content of the "-foo-xxx" query string parameter.
+ *         &#64;QueryPart(name = "-foo-xxx") String userAgent,
+ *
+ *         // Sets a date format for the "loginDate" query string parameter.
+ *         &#64;QueryPart(dateFormat = "dd/MM/uuuu") LocalDate loginDate)
+ *
+ *         // Uses the content of the possibly multiple "goo" query string parameters.
+ *         &#64;QueryPart List&gt;String&lt; goo,
  *     {
  *         // Do stuff.
  *     }
@@ -118,9 +127,7 @@ public @interface QueryPart {
                 var part = ParameterParser.prepare(param, annotation.dateFormat());
                 return new Stub<>(ctx -> part.make(ctx.queryParam(paramName)), js, t2);
             }
-            throw new TypeRestrictionViolationException(
-                    param,
-                    TypeRestrictionViolationException.AllowedTypes.SIMPLE_AND_LIST);
+            throw new ParameterTypeRestrictionViolationException(param, AllowedTypes.SIMPLE_AND_LIST);
         }
     }
 }

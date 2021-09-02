@@ -2,7 +2,7 @@ package ninja.javahacker.jaspasema.exceptions.messages;
 
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 
 /**
  * Object used to configure and customize exception messages from Jaspasema.
@@ -26,21 +26,7 @@ public interface ExceptionTemplate {
      * @throws IllegalArgumentException If {@code type} is {@code null}.
      */
     @NonNull
-    public String nameFor(@NonNull TypeRestrictionViolationException.AllowedTypes type);
-
-    /**
-     * Gives the string {@code "returning methods"} by default or some other if a non-standard template was used.
-     * @return The string {@code "returning methods"} by default or some other if a non-standard template was used.
-     */
-    @NonNull
-    public String getReturningMethods();
-
-    /**
-     * Gives the string {@code "parameters"} by default or some other if a non-standard template was used.
-     * @return The string {@code "parameters"} by default or some other if a non-standard template was used.
-     */
-    @NonNull
-    public String getParameters();
+    public String nameFor(@NonNull AllowedTypes type);
 
     /**
      * Sets which is the active {@link ExceptionTemplate} instance.

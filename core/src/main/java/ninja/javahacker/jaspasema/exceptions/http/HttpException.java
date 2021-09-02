@@ -16,6 +16,7 @@ import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueE
  */
 @ToString
 public class HttpException extends JaspasemaException {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -27,11 +28,24 @@ public class HttpException extends JaspasemaException {
     @Getter
     private final int statusCode;
 
+    /**
+     * Constructs an instance specifiying a method as the cause of this exception.
+     * @param method The method that is related to this exception.
+     * @param statusCode The HTTP status code for this exception.
+     * @throws IllegalArgumentException If {@code method} is {@code null}.
+     */
     public HttpException(/*@NonNull*/ Method method, int statusCode) {
         super(method);
         this.statusCode = statusCode;
     }
 
+    /**
+     * Constructs an instance specifiying both a method and another exception as the cause of this exception.
+     * @param method The method that is related to this exception.
+     * @param statusCode The HTTP status code for this exception.
+     * @param cause Another exception that is the cause of this exception.
+     * @throws IllegalArgumentException If {@code method} or {@code cause} are {@code null}.
+     */
     public HttpException(/*@NonNull*/ Method method, int statusCode, /*@NonNull*/ Throwable cause) {
         super(method, cause);
         this.statusCode = statusCode;
@@ -40,8 +54,7 @@ public class HttpException extends JaspasemaException {
     @NonNull
     public static HttpException convert(@NonNull Method method, @NonNull Throwable problem) {
         Throwable solving = problem;
-        if (solving instanceof InvocationTargetException) solving = solving.getCause();
-        if (solving instanceof UndeclaredThrowableException) solving = solving.getCause();
+        if (solving instanceof InvocationTargetException || solving instanceof UndeclaredThrowableException) solving = solving.getCause();
         if (solving instanceof MalformedParameterValueException) solving = new BadRequestException(method, solving);
         if (!(solving instanceof HttpException)) solving = new UnexpectedHttpException(method, solving);
         return (HttpException) solving;
@@ -68,21 +81,61 @@ public class HttpException extends JaspasemaException {
                 : new UnexpectedErrorOutput(statusCode, getMessage(), cause.getClass().getName());
     }
 
+    /**
+     * Serialization (for JSON, mainly) of an exception without the actual exception name.
+     * @author Victor Williams Stafusa da Silva
+     */
     @Value
     public static class ErrorOutput {
+
+        /**
+         * The HTTP status code.
+         * -- GETTER --
+         * Retrieves the HTTP status code.
+         * @return The HTTP status code.
+         */
         private final int status;
 
+        /**
+         * The error message.
+         * -- GETTER --
+         * Retrieves the error message.
+         * @return The error message.
+         */
         @NonNull
         private final String message;
     }
 
+    /**
+     * Serialization (for JSON, mainly) of an exception with the actual exception name.
+     * @author Victor Williams Stafusa da Silva
+     */
     @Value
     public static class UnexpectedErrorOutput {
+
+        /**
+         * The HTTP status code.
+         * -- GETTER --
+         * Retrieves the HTTP status code.
+         * @return The HTTP status code.
+         */
         private final int status;
 
+        /**
+         * The error message.
+         * -- GETTER --
+         * Retrieves the error message.
+         * @return The error message.
+         */
         @NonNull
         private final String message;
 
+        /**
+         * The exception name.
+         * -- GETTER --
+         * Retrieves the exception name.
+         * @return The exception name.
+         */
         @NonNull
         private final String exceptionName;
     }

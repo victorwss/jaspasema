@@ -10,12 +10,14 @@ import lombok.ToString;
  */
 @ToString
 public class BadRequestException extends HttpException {
+
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates an instance specifying which is the offending method and what was the raised error.
      * @param method The offending method.
      * @param cause The raised error.
+     * @throws IllegalArgumentException If {@code method} or {@code cause} are {@code null}.
      */
     public BadRequestException(/*@NonNull*/ Method method, /*@NonNull*/ Throwable cause) {
         super(method, 400, cause);

@@ -7,6 +7,8 @@ import ninja.javahacker.jaspasema.exceptions.MalformedProcessorException;
 import ninja.javahacker.jaspasema.processor.ResultProcessor;
 
 /**
+ * Raised when a return type processor can't be instantiated.
+ * @see ResultProcessor
  * @author Victor Williams Stafusa da Silva
  */
 public abstract class MalformedReturnProcessorException extends MalformedProcessorException {
@@ -15,7 +17,7 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Method method,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
-            /*@NonNull*/ Class<?> processorClass,
+            /*@NonNull*/ Class<? extends ResultProcessor<?, ?>> processorClass,
             /*@NonNull*/ Throwable cause)
     {
         super(method, badAnnotation, processorClass, cause);
@@ -24,7 +26,7 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Method method,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
-            /*@NonNull*/ Class<?> processorClass)
+            /*@NonNull*/ Class<? extends ResultProcessor<?, ?>> processorClass)
     {
         super(method, badAnnotation, processorClass);
     }
@@ -32,7 +34,7 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Class<?> declaringClass,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
-            /*@NonNull*/ Class<?> processorClass,
+            /*@NonNull*/ Class<? extends ResultProcessor<?, ?>> processorClass,
             /*@NonNull*/ Throwable cause)
     {
         super(declaringClass, badAnnotation, processorClass, cause);
@@ -41,7 +43,7 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Class<?> declaringClass,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
-            /*@NonNull*/ Class<?> processorClass)
+            /*@NonNull*/ Class<? extends ResultProcessor<?, ?>> processorClass)
     {
         super(declaringClass, badAnnotation, processorClass);
     }

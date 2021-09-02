@@ -21,6 +21,12 @@ public class HttpJsonRemapper implements ExceptionRemapper {
         if (meth.getAnnotation().on() == ReturnedOk.class) throw new ExceptionMappingOnReturnException(meth.getMethod());
     }
 
+    /**
+     * {@inheritDoc}
+     * @param method {@inheritDoc}
+     * @param ctx {@inheritDoc}
+     * @param problem  {@inheritDoc}
+     */
     @NonNull
     @Override
     public void remap(@NonNull Method method, @NonNull Context ctx, @NonNull Object problem) {
@@ -33,7 +39,7 @@ public class HttpJsonRemapper implements ExceptionRemapper {
         var solution = HttpException.convert(method, trouble);
         String json;
         try {
-            json = JsonTypesProcessor.writeJson(false, solution.output());
+            json = JsonTypesProcessor.writeJson(solution.output());
         } catch (JsonProcessingException e) {
             throw new AssertionError(e);
         }

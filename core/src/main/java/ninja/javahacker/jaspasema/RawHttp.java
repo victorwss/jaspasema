@@ -8,8 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
 import ninja.javahacker.jaspasema.processor.ParamProcessor;
 import ninja.javahacker.jaspasema.processor.ParamSource;
@@ -70,12 +71,12 @@ public @interface RawHttp {
 
         @NonNull
         @SuppressWarnings("unchecked")
-        private static <E> Worker<E> simple(@NonNull AnnotatedParameter<RawHttp, E> param) throws TypeRestrictionViolationException {
+        private static <E> Worker<E> simple(@NonNull AnnotatedParameter<RawHttp, E> param) throws ParameterTypeRestrictionViolationException {
             var target = param.getTarget();
             if (target.isSameOf(RQ)) return ctx -> (E) ctx.req;
             if (target.isSameOf(RP)) return ctx -> (E) ctx.res;
             if (target.isSameOf(SS)) return ctx -> (E) ctx.req.getSession(false);
-            throw new TypeRestrictionViolationException(param, TypeRestrictionViolationException.AllowedTypes.HTTP);
+            throw new ParameterTypeRestrictionViolationException(param, AllowedTypes.HTTP);
         }
     }
 }

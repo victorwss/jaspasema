@@ -46,7 +46,8 @@ public class AnnotatedParameter<A extends Annotation, E> {
     }
 
     @NonNull
-    public Class<? extends Annotation> getAnnotationType() {
-        return annotation.annotationType();
+    @SuppressWarnings("unchecked")
+    public Class<A> getAnnotationType() {
+        return (Class<A>) annotation.annotationType();
     }
 }

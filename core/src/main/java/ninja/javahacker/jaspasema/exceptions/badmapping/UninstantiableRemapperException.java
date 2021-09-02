@@ -10,6 +10,7 @@ import ninja.javahacker.jaspasema.ExceptionRemapper;
  */
 @Getter
 public class UninstantiableRemapperException extends BadServiceMappingException {
+
     private static final long serialVersionUID = 1L;
 
     @NonNull

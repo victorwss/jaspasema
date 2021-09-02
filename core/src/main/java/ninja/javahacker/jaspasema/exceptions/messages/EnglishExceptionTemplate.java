@@ -4,6 +4,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.experimental.PackagePrivate;
 import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsReturnException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingAnnotationsThrowsException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ConflictingMappingOnParameterException;
@@ -19,8 +20,8 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.NoHttpMethodAnnotationsE
 import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnParameterException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnReturnTypeException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.RemapperConstructorException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException.AllowedTypes;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ReturnTypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.UninstantiableRemapperException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.UnmatcheableParameterException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.VoidWithValueReturnTypeException;
@@ -53,8 +54,7 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedJsonReturnValueEx
 enum EnglishExceptionTemplate implements ExceptionTemplate {
     INSTANCE;
 
-    private static final Map<Class<? extends JaspasemaException>, String> TEMPLATES = Map.ofEntries(
-            Map.entry(
+    private static final Map<Class<? extends JaspasemaException>, String> TEMPLATES = Map.ofEntries(Map.entry(
                     ConflictingAnnotationsReturnException.class,
                     "Conflicting @ResultSerializer-annotated annotations on method for return type."),
             Map.entry(
@@ -73,9 +73,11 @@ enum EnglishExceptionTemplate implements ExceptionTemplate {
             Map.entry(NoMappingOnParameterException.class, "No mapping on parameter."),
             Map.entry(NoMappingOnReturnTypeException.class, "No mapping on return type."),
             Map.entry(RemapperConstructorException.class, "The remapper constructor of class $R$ throwed an exception."),
+            Map.entry(ParameterTypeRestrictionViolationException.class,
+                    "The @$A$ annotation must be used only on $V$ parameters. The found type was $T$."),
             Map.entry(
-                    TypeRestrictionViolationException.class,
-                    "The @$A$ annotation must be used only on $V$ $U$. The found type was $T$."),
+                    ReturnTypeRestrictionViolationException.class,
+                    "The @$A$ annotation must be used only on $V$ return methods. The found type was $T$."),
             Map.entry(UninstantiableRemapperException.class, "The exception remapper $R$ is not an instantiable class."),
             Map.entry(UnmatcheableParameterException.class, "The parameter value do not matches anything in method's @Path value."),
             Map.entry(VoidWithValueReturnTypeException.class, "Methods returning void should not feature @$A$-annotated annotations."),
@@ -140,17 +142,5 @@ enum EnglishExceptionTemplate implements ExceptionTemplate {
         var s = NAMES.get(type);
         if (s == null) throw new AssertionError();
         return s;
-    }
-
-    @NonNull
-    @Override
-    public String getReturningMethods() {
-        return "returning methods";
-    }
-
-    @NonNull
-    @Override
-    public String getParameters() {
-        return "parameters";
     }
 }

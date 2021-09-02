@@ -10,6 +10,7 @@ import lombok.NonNull;
  */
 @Getter
 public class DontKnowHowToHandleAnnotationException extends BadServiceMappingException {
+
     private static final long serialVersionUID = 1L;
 
     @NonNull

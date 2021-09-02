@@ -3,9 +3,10 @@ package ninja.javahacker.jaspasema.format;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.function.Supplier;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.EmptyDateFormatException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.InvalidDateFormatException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.ParameterValueException;
 import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
@@ -20,10 +21,10 @@ public interface ParameterParser<E> {
 
     @NonNull
     public static <E> ParameterParser<E> prepare(@NonNull AnnotatedParameter<?, E> param, @NonNull String dateFormat)
-            throws TypeRestrictionViolationException, EmptyDateFormatException, InvalidDateFormatException
+            throws ParameterTypeRestrictionViolationException, EmptyDateFormatException, InvalidDateFormatException
     {
-        var w = TypeRestrictionViolationException.getFor(param, TypeRestrictionViolationException.AllowedTypes.SIMPLE);
-        var x = TypeRestrictionViolationException.getFor(param, TypeRestrictionViolationException.AllowedTypes.DATE_TIME);
+        var w = ParameterTypeRestrictionViolationException.getFor(param, AllowedTypes.SIMPLE);
+        var x = ParameterTypeRestrictionViolationException.getFor(param, AllowedTypes.DATE_TIME);
         var p = param.getParameter();
         var annotationClass = param.getAnnotationType();
 

@@ -95,11 +95,6 @@ public class JsonTypesProcessor {
 
     @Nullable
     public <E> String writeJson(@Nullable E value) throws JsonProcessingException {
-        return writeJson(false, value);
-    }
-
-    @Nullable
-    public <E> String writeJson(boolean lenient, @Nullable E value) throws JsonProcessingException {
-        return (lenient ? LENIENT : STRICT).writeValueAsString(value);
+        return STRICT.writeValueAsString(value);
     }
 }

@@ -5,10 +5,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.EmptyDateFormatException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.InvalidDateFormatException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.TypeRestrictionViolationException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ReturnTypeRestrictionViolationException;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
@@ -26,16 +27,16 @@ public interface ReturnValueFormatter<E> {
             @NonNull Method method)
             throws BadServiceMappingException
     {
-        Supplier<TypeRestrictionViolationException> w = () -> new TypeRestrictionViolationException(
+        Supplier<ReturnTypeRestrictionViolationException> w = () -> new ReturnTypeRestrictionViolationException(
                     method,
                     annotationClass,
-                    TypeRestrictionViolationException.AllowedTypes.SIMPLE,
+                    AllowedTypes.SIMPLE,
                     target);
 
-        Supplier<TypeRestrictionViolationException> x = () -> new TypeRestrictionViolationException(
+        Supplier<ReturnTypeRestrictionViolationException> x = () -> new ReturnTypeRestrictionViolationException(
                     method,
                     annotationClass,
-                    TypeRestrictionViolationException.AllowedTypes.DATE_TIME,
+                    AllowedTypes.DATE_TIME,
                     target);
 
         Supplier<EmptyDateFormatException> y = () -> new EmptyDateFormatException(method, annotationClass);

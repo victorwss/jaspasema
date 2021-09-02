@@ -10,6 +10,7 @@ import lombok.NonNull;
  */
 @Getter
 public class VoidWithValueReturnTypeException extends BadServiceMappingException {
+
     private static final long serialVersionUID = 1L;
 
     @NonNull
