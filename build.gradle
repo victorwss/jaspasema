@@ -14,7 +14,7 @@ allprojects {
 }
 
 def versionJavaCompiler = "10"
-def doclint = false
+def doclint = true
 
 def versionApiguardian = "1.1.1"
 def versionCheckstyle = "8.42"
@@ -116,7 +116,7 @@ subprojects {
         options.encoding = "UTF-8"
         options.debug = true
         options.fork = true
-        options.compilerArgs << "-parameters" << "-Xlint:all,-processing,-requires-transitive-automatic,-requires-automatic,-missing-explicit-ctor"
+        options.compilerArgs << "-parameters" << "-Xlint:all,-processing,-requires-transitive-automatic,-requires-automatic,-missing-explicit-ctor" << "-Xmaxwarns" << "1000" << "-Xmaxerrs" << "1000"
     }
 
     compileJava {
@@ -146,7 +146,6 @@ subprojects {
             ant.delombok(verbose: "false", encoding: "UTF-8", to: "build/src-delomboked", from: "src/main/java", modulepath: delombokPath)
         }
     }
-
     tasks.withType(Javadoc) {
         dependsOn(delombok)
         source = ["build/src-delomboked"]
@@ -158,6 +157,13 @@ subprojects {
         options.header = "<b>${project.name}</b>"
         options.addBooleanOption("html5", true)
         options.tags = ["apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:"]
+        if (doclint) {
+            //options.addBooleanOption("Xdoclint:all/protected", true)
+        } else {
+            options.addBooleanOption("Xdoclint:none", true)
+        }
+        options.addStringOption("Xmaxerrs", "1000")
+        options.addStringOption("Xmaxwarns", "1000")
         doFirst {
             options.modulePath += classpath
             classpath = files()
