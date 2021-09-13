@@ -17,6 +17,7 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueExcept
  * @author Victor Williams Stafusa da Silva
  */
 public interface ResultProcessor<A extends Annotation, B> {
+
     @NonNull
     public <E extends B> Stub<E> prepare(@NonNull AnnotatedMethod<A, E> meth) throws BadServiceMappingException;
 

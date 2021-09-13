@@ -67,6 +67,10 @@ public class InvalidDateFormatException extends BadServiceMappingException {
         this.format = format;
     }
 
+    /**
+     * Tells what was the annotation's name that specifies an invalid date/time format.
+     * @return What was the annotation's name that specifies an invalid date/time format.
+     */
     @NonNull
     @TemplateField("A")
     public String getAnnotationName() {

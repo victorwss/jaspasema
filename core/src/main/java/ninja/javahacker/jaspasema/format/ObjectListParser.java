@@ -12,6 +12,7 @@ import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
  */
 @FunctionalInterface
 public interface ObjectListParser<E> {
+
     @NonNull
     public List<E> make(@NonNull List<String> in) throws ParameterValueException;
 

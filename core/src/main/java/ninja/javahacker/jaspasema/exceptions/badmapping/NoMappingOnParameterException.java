@@ -3,6 +3,7 @@ package ninja.javahacker.jaspasema.exceptions.badmapping;
 import java.lang.reflect.Parameter;
 
 /**
+ * Thrown when a a mapping annotaton should be present in a parameter method, but there is no such annotation.
  * @author Victor Williams Stafusa da Silva
  */
 public class NoMappingOnParameterException extends BadServiceMappingException {

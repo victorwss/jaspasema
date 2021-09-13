@@ -12,6 +12,7 @@ public abstract class ParameterValueException extends JaspasemaException {
     /**
      * Creates an instance specifying which is the offending parameter.
      * @param parameter The offending parameter.
+     * @throws IllegalArgumentException If {@code parameter} is {@code null}.
      */
     protected ParameterValueException(/*@NonNull*/ Parameter parameter) {
         super(parameter);
@@ -21,6 +22,7 @@ public abstract class ParameterValueException extends JaspasemaException {
      * Creates an instance with a cause specifying which is the offending parameter.
      * @param parameter The offending parameter.
      * @param cause The cause.
+     * @throws IllegalArgumentException If {@code parameter} or {@code cause} are {@code null}.
      */
     protected ParameterValueException(/*@NonNull*/ Parameter parameter, /*@NonNull*/ Throwable cause) {
         super(parameter, cause);

@@ -203,6 +203,7 @@ public abstract class JaspasemaException extends Exception {
     /**
      * Do not call this method.
      * This was overriden from the {@link Throwable} class in order to be disallowed.
+     * Subclasses that feature a cause must set it through the superclass constructor only.
      * @param cause The cause exception used to set as a cause for this exception. However, since this method is not
      *     supported and should not be used, this parameter is not used.
      * @return Never returns normally.
@@ -213,5 +214,16 @@ public abstract class JaspasemaException extends Exception {
     @Deprecated
     public final JaspasemaException initCause(Throwable cause) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the message of the causing exception or an empty string if there isn't any. 
+     * @return The message of the causing exception or an empty string if there isn't any. 
+     */
+    @NonNull
+    @TemplateField("CAUSE")
+    public String getCauseString() {
+        Throwable cause = getCause();
+        return cause == null ? "" : cause.toString();
     }
 }

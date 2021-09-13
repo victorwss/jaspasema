@@ -19,9 +19,9 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.MultipleHttpMethodAnnota
 import ninja.javahacker.jaspasema.exceptions.badmapping.NoHttpMethodAnnotationsException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnParameterException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.NoMappingOnReturnTypeException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.RemapperConstructorException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ReturnTypeRestrictionViolationException;
-import ninja.javahacker.jaspasema.exceptions.badmapping.ParameterTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.UninstantiableRemapperException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.UnmatcheableParameterException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.VoidWithValueReturnTypeException;
@@ -54,12 +54,15 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedJsonReturnValueEx
 enum EnglishExceptionTemplate implements ExceptionTemplate {
     INSTANCE;
 
-    private static final Map<Class<? extends JaspasemaException>, String> TEMPLATES = Map.ofEntries(Map.entry(
+    private static final Map<Class<? extends JaspasemaException>, String> TEMPLATES = Map.ofEntries(
+            Map.entry(
                     ConflictingAnnotationsReturnException.class,
-                    "Conflicting @ResultSerializer-annotated annotations on method for return type."),
+                    "Conflicting @ResultSerializer-annotated annotations on method for return type."
+            ),
             Map.entry(
                     ConflictingAnnotationsThrowsException.class,
-                    "Conflicting @ResultSerializer-annotated annotations on method for exception $X$."),
+                    "Conflicting @ResultSerializer-annotated annotations on method for exception $X$."
+            ),
             Map.entry(ConflictingMappingOnParameterException.class, "Conflicting mapping on parameter."),
             Map.entry(ConflictingMappingOnReturnTypeException.class, "Conflicting mapping on return type."),
             Map.entry(DontKnowHowToHandleAnnotationException.class, "Don't know how to handle @$A$."),
@@ -73,11 +76,14 @@ enum EnglishExceptionTemplate implements ExceptionTemplate {
             Map.entry(NoMappingOnParameterException.class, "No mapping on parameter."),
             Map.entry(NoMappingOnReturnTypeException.class, "No mapping on return type."),
             Map.entry(RemapperConstructorException.class, "The remapper constructor of class $R$ throwed an exception."),
-            Map.entry(ParameterTypeRestrictionViolationException.class,
-                    "The @$A$ annotation must be used only on $V$ parameters. The found type was $T$."),
+            Map.entry(
+                    ParameterTypeRestrictionViolationException.class,
+                    "The @$A$ annotation must be used only on $V$ parameters. The found type was $T$."
+            ),
             Map.entry(
                     ReturnTypeRestrictionViolationException.class,
-                    "The @$A$ annotation must be used only on $V$ return methods. The found type was $T$."),
+                    "The @$A$ annotation must be used only on $V$ return methods. The found type was $T$."
+            ),
             Map.entry(UninstantiableRemapperException.class, "The exception remapper $R$ is not an instantiable class."),
             Map.entry(UnmatcheableParameterException.class, "The parameter value do not matches anything in method's @Path value."),
             Map.entry(VoidWithValueReturnTypeException.class, "Methods returning void should not feature @$A$-annotated annotations."),
@@ -91,30 +97,37 @@ enum EnglishExceptionTemplate implements ExceptionTemplate {
             Map.entry(UnprocessableRequestException.class, "[422] The request can't be processed. The reason is \"$CAUSE$\"."),
             Map.entry(
                     IncompatibleParameterProcessorException.class,
-                    "The parameter processor $R$ assigned for annotation @$A$ do not understands it."),
+                    "The parameter processor $R$ assigned for annotation @$A$ do not understands it."
+            ),
             Map.entry(
                     ParameterProcessorConstructorException.class,
-                    "The parameter processor constructor of class $R$ for annotation @$A$ throwed an exception."),
+                    "The parameter processor constructor of class $R$ for annotation @$A$ throwed an exception."
+            ),
             Map.entry(
                     UninstantiableParameterProcessorException.class,
-                    "The parameter processor $R$ for annotation @$A$ is not an instantiable class."),
+                    "The parameter processor $R$ for annotation @$A$ is not an instantiable class."
+            ),
             Map.entry(AbsentRequiredParameterException.class, "The required parameter value was absent."),
             Map.entry(MalformedJsonBodyException.class, "The body request data failed to be parseable as JSON."),
             Map.entry(MalformedParameterValueException.class, "The value \"$V$\" is invalid for a @$A$-annotated parameter."),
             Map.entry(BadExitDiscriminatorMethodException.class, "The annotation @$A$ have an ill-formed @ExitDiscriminator method."),
             Map.entry(
                     IncompatibleReturnProcessorException.class,
-                    "The return processor $R$ assigned for annotation @$A$ do not understands it."),
+                    "The return processor $R$ assigned for annotation @$A$ do not understands it."
+            ),
             Map.entry(
                     MultipleReturnProcessorsException.class,
-                    "The annotation @$A$ should not have more than one @ExitDiscriminator method."),
+                    "The annotation @$A$ should not have more than one @ExitDiscriminator method."
+            ),
             Map.entry(
                     ReturnProcessorConstructorException.class,
-                    "The return processor constructor of class $R$ for annotation @$A$ throwed an exception."),
+                    "The return processor constructor of class $R$ for annotation @$A$ throwed an exception."
+            ),
             Map.entry(ReturnProcessorNotFoundException.class, "The annotation @$A$ do not have any @ExitDiscriminator method."),
             Map.entry(
                     UninstantiableReturnProcessorException.class,
-                    "The return processor $R$ for annotation @$A$ is not an instantiable class."),
+                    "The return processor $R$ for annotation @$A$ is not an instantiable class."
+            ),
             Map.entry(MalformedJsonReturnValueException.class, "The returned value couldn't be converted to JSON.")
     );
 

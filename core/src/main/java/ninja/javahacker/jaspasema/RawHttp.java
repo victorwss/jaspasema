@@ -71,7 +71,9 @@ public @interface RawHttp {
 
         @NonNull
         @SuppressWarnings("unchecked")
-        private static <E> Worker<E> simple(@NonNull AnnotatedParameter<RawHttp, E> param) throws ParameterTypeRestrictionViolationException {
+        private static <E> Worker<E> simple(@NonNull AnnotatedParameter<RawHttp, E> param)
+                throws ParameterTypeRestrictionViolationException
+        {
             var target = param.getTarget();
             if (target.isSameOf(RQ)) return ctx -> (E) ctx.req;
             if (target.isSameOf(RP)) return ctx -> (E) ctx.res;

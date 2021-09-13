@@ -95,6 +95,7 @@ public class ParameterTypeRestrictionViolationException extends BadServiceMappin
      * @param param The offending parameter and its annotations.
      * @param allowed The types that are allowed for the offending annotation class.
      * @return A supplier that instantiates a {@code TypeRestrictionViolationException}.
+     * @throws IllegalArgumentException If {@code param} or {@code allowed} are {@code null}.
      */
     public static Supplier<ParameterTypeRestrictionViolationException> getFor(
             @NonNull AnnotatedParameter<?, ?> param,

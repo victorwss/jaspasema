@@ -6,6 +6,8 @@ import lombok.NonNull;
 import ninja.javahacker.jaspasema.ExceptionRemapper;
 
 /**
+ * Thrown when an attempt to constrcut an instance of some {@link ExceptionRemapper} fails because the
+ * {@link ExceptionRemapper}'s class is unistantiable (i.e. it is an abstract class, an interface or has no public no-arg constructor).
  * @author Victor Williams Stafusa da Silva
  */
 @Getter
@@ -13,9 +15,22 @@ public class UninstantiableRemapperException extends BadServiceMappingException 
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The uninstatiable {@link ExceptionRemapper}'s class.
+     * -- GETTER --
+     * Tells which is the uninstatiable {@link ExceptionRemapper}'s class.
+     * @return Which is the uninstatiable {@link ExceptionRemapper}'s class.
+     */
     @NonNull
     private final Class<? extends ExceptionRemapper> remapper;
 
+    /**
+     * Creates an instance specifying which is the offending method.
+     * @param method The offending method.
+     * @param remapper The {@link ExceptionRemapper}'s class.
+     * @param cause The exception raised by the attempt to instantiate the {@link ExceptionRemapper}'s class.
+     * @throws IllegalArgumentException If {@link method}, {@link remapper} or {@link cause} are {@code null}.
+     */
     public UninstantiableRemapperException(
             /*@NonNull*/ Method method,
             @NonNull Class<? extends ExceptionRemapper> remapper,
@@ -25,6 +40,10 @@ public class UninstantiableRemapperException extends BadServiceMappingException 
         this.remapper = remapper;
     }
 
+    /**
+     * Tells which is the name of the uninstatiable {@link ExceptionRemapper}'s class.
+     * @return The name of the uninstatiable {@link ExceptionRemapper}'s class.
+     */
     @NonNull
     @TemplateField("R")
     public String getRempperName() {

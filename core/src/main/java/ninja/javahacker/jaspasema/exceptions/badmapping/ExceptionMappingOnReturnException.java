@@ -11,6 +11,7 @@ public class ExceptionMappingOnReturnException extends BadServiceMappingExceptio
     /**
      * Creates an instance specifying which is the offending method.
      * @param method The offending method.
+     * @throws IllegalArgumentException If {@code method} is {@code null}.
      */
     public ExceptionMappingOnReturnException(/*@NonNull*/ Method method) {
         super(method);

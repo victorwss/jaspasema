@@ -20,6 +20,7 @@ import lombok.experimental.UtilityClass;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 
 /**
+ * Utility class for reading and writing JSON.
  * @author Victor Williams Stafusa da Silva
  */
 @UtilityClass

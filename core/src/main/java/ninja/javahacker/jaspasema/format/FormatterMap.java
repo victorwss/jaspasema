@@ -25,7 +25,7 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 @UtilityClass
 @PackagePrivate
 @SuppressFBWarnings("FII_USE_METHOD_REFERENCE")
-public class FormatterMap {
+class FormatterMap {
 
     public static final Map<ReifiedGeneric<?>, FormatterFunction<?>> FORMAT_MAP = Map.ofEntries(
             Map.entry(ReifiedGeneric.of(boolean.class), of((Boolean b) -> b.toString())),

@@ -11,7 +11,11 @@ import java.time.LocalTime;
 import java.time.Year;
 import java.time.YearMonth;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.EmptyDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.InvalidDateFormatException;
+import ninja.javahacker.jaspasema.exceptions.badmapping.ReturnTypeRestrictionViolationException;
 import ninja.javahacker.jaspasema.format.ReturnValueFormatter;
 import ninja.javahacker.jaspasema.processor.AnnotatedMethod;
 import ninja.javahacker.jaspasema.processor.ResultProcessor;
@@ -83,8 +87,18 @@ public @interface ProducesPlain {
         public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesPlain, E> meth) throws BadServiceMappingException {
             var method = meth.getMethod();
             var annotation = meth.getAnnotation();
+            var format = annotation.format();
+            var target = meth.getTarget();
+            var annotationClass = annotation.annotationType();
             if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesPlain.class);
-            var parser = ReturnValueFormatter.prepare(meth.getTarget(), annotation.annotationType(), annotation.format(), method);
+            var parser = ReturnValueFormatter.prepare(
+                    meth.getTarget(),
+                    annotation.format(),
+                    () -> new ReturnTypeRestrictionViolationException(method, annotationClass, AllowedTypes.DATE_TIME, target),
+                    () -> new ReturnTypeRestrictionViolationException(method, annotationClass, AllowedTypes.SIMPLE, target),
+                    () -> new EmptyDateFormatException(method, annotationClass),
+                    () -> new InvalidDateFormatException(method, annotationClass, format)
+            );
             ResultProcessor.Worker<E> w = (m, ctx, v) -> {
                 ctx.result(parser.make(v));
                 ctx.contentType(annotation.type());

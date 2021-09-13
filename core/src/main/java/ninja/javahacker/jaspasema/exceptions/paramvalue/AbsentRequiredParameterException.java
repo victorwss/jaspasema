@@ -11,6 +11,7 @@ public class AbsentRequiredParameterException extends ParameterValueException {
     /**
      * Creates an instance specifying which is the offending parameter.
      * @param parameter The offending parameter.
+     * @throws IllegalArgumentException If {@code parameter} is {@code null}.
      */
     public AbsentRequiredParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);

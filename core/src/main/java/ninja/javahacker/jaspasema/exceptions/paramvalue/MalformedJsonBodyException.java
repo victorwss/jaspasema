@@ -12,6 +12,7 @@ public class MalformedJsonBodyException extends ParameterValueException {
      * Creates an instance with a cause specifying which is the offending parameter.
      * @param parameter The offending parameter.
      * @param cause The cause.
+     * @throws IllegalArgumentException If {@code parameter} or {@code cause} are {@code null}.
      */
     public MalformedJsonBodyException(
             /*@NonNull*/ Parameter parameter,

@@ -13,5 +13,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface HttpMethod {
+
+    /**
+     * The name of the HTTP verb if it is not the same as the simple name of the annotated annotation.
+     * @return The name of the HTTP verb if it is not the same as the simple name of the annotated annotation.
+     */
     public String value() default "";
 }

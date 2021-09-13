@@ -1,12 +1,12 @@
 package ninja.javahacker.jaspasema.format;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
-import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.EmptyDateFormatException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.InvalidDateFormatException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.ReturnTypeRestrictionViolationException;
@@ -17,32 +17,39 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  */
 @FunctionalInterface
 public interface ReturnValueFormatter<E> {
+
     @Nullable
     public String make(@Nullable E in);
 
+    @SuppressFBWarnings({"LEST_LOST_EXCEPTION_STACK_TRACE", "BED_HIERARCHICAL_EXCEPTION_DECLARATION"})
     public static <E> ReturnValueFormatter<E> prepare(
             @NonNull ReifiedGeneric<E> target,
-            @NonNull Class<? extends Annotation> annotationClass,
             @NonNull String format,
-            @NonNull Method method)
-            throws BadServiceMappingException
+            @NonNull Supplier<ReturnTypeRestrictionViolationException> w,
+            @NonNull Supplier<ReturnTypeRestrictionViolationException> x,
+            @NonNull Supplier<EmptyDateFormatException> y,
+            @NonNull Supplier<InvalidDateFormatException> z)
+            throws ReturnTypeRestrictionViolationException, EmptyDateFormatException, InvalidDateFormatException
     {
-        Supplier<ReturnTypeRestrictionViolationException> w = () -> new ReturnTypeRestrictionViolationException(
-                    method,
-                    annotationClass,
-                    AllowedTypes.SIMPLE,
-                    target);
+        @SuppressWarnings("unchecked")
+        var simpleFormatter = (FormatterFunction<E>) FormatterMap.FORMAT_MAP.get(target);
+        if (simpleFormatter != null) {
+            if (!format.isEmpty()) throw w.get();
+            return simpleFormatter::format;
+        }
 
-        Supplier<ReturnTypeRestrictionViolationException> x = () -> new ReturnTypeRestrictionViolationException(
-                    method,
-                    annotationClass,
-                    AllowedTypes.DATE_TIME,
-                    target);
+        @SuppressWarnings("unchecked")
+        var dateFormatter = (Function<DateTimeFormatter, FormatterFunction<E>>) FormatterMap.FORMATTER_DT_MAP.get(target);
+        if (dateFormatter == null) throw x.get();
 
-        Supplier<EmptyDateFormatException> y = () -> new EmptyDateFormatException(method, annotationClass);
-        Supplier<InvalidDateFormatException> z = () -> new InvalidDateFormatException(method, annotationClass, format);
+        if (format.isEmpty()) throw y.get();
+        DateTimeFormatter dtf;
+        try {
+            dtf = DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT);
+        } catch (IllegalArgumentException e) {
+            throw z.get();
+        }
 
-        var pf = FormatterFunction.formatterFor(format, target, w, x, y, z);
-        return pf::format;
+        return (dateFormatter.apply(dtf))::format;
     }
 }

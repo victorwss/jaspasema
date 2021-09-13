@@ -3,6 +3,7 @@ package ninja.javahacker.jaspasema.exceptions.badmapping;
 import java.lang.reflect.Method;
 
 /**
+ * Thrown when a a mapping annotaton should be present in a method for its retrn type, but there is no such annotation.
  * @author Victor Williams Stafusa da Silva
  */
 public class NoMappingOnReturnTypeException extends BadServiceMappingException {

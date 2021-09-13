@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -51,13 +52,24 @@ public class HttpException extends JaspasemaException {
         this.statusCode = statusCode;
     }
 
+    /**
+     * Produces an instance of {@code HttpException} that better represents the given exception {@code problem},
+     * unwrapping and wrapping intermediate exceptions if needed.
+     * @param method The method which caused the problem.
+     * @param problem The exception to be unwrapped or wrapped if needed in a {@code HttpException}.
+     * @return An instance of {@code HttpException} that better represents the given exception {@code problem},
+     *     unwrapping and wrapping intermediate exceptions if needed.
+     * @throws IllegalArgumentException If {@code method} or {@code problem} are {@code null}.
+     */
     @NonNull
+    @SuppressFBWarnings("ITC_INHERITANCE_TYPE_CHECKING")
     public static HttpException convert(@NonNull Method method, @NonNull Throwable problem) {
-        Throwable solving = problem;
-        if (solving instanceof InvocationTargetException || solving instanceof UndeclaredThrowableException) solving = solving.getCause();
-        if (solving instanceof MalformedParameterValueException) solving = new BadRequestException(method, solving);
-        if (!(solving instanceof HttpException)) solving = new UnexpectedHttpException(method, solving);
-        return (HttpException) solving;
+        if (problem instanceof InvocationTargetException || problem instanceof UndeclaredThrowableException) {
+            return convert(method, problem.getCause());
+        }
+        if (problem instanceof HttpException) return (HttpException) problem;
+        if (problem instanceof MalformedParameterValueException) return new BadRequestException(method, problem);
+        return new UnexpectedHttpException(method, problem);
     }
 
     @NonNull
@@ -66,13 +78,10 @@ public class HttpException extends JaspasemaException {
         return String.valueOf(statusCode);
     }
 
-    @NonNull
-    @TemplateField("CAUSE")
-    public String getCauseString() {
-        Throwable cause = getCause();
-        return cause == null ? "" : cause.toString();
-    }
-
+    /**
+     * Creates an object representing this exception in a format easily serializable to JSON.
+     * @return An object representing this exception in a format easily serializable to JSON.
+     */
     @NonNull
     public Object output() {
         Throwable cause = getCause();
