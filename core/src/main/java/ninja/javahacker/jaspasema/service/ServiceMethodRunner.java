@@ -8,8 +8,6 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -23,7 +21,6 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
  * @author Victor Williams Stafusa da Silva
  */
 @Getter
-@SuppressFBWarnings("RFI_SET_ACCESSIBLE")
 public final class ServiceMethodRunner<T> implements JaspasemaRoute {
 
     private static final String PANIC = ""
@@ -53,6 +50,7 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
     @NonNull
     private final Object instance;
 
+    @SuppressFBWarnings("RFI_SET_ACCESSIBLE")
     public ServiceMethodRunner(
             @NonNull ReifiedGeneric<T> target,
             @NonNull Object instance,
@@ -66,11 +64,7 @@ public final class ServiceMethodRunner<T> implements JaspasemaRoute {
         this.parameterProcessors = parameterProcessors;
         this.returnProcessor = returnProcessor;
 
-        PrivilegedAction<Void> action = () -> {
-            method.setAccessible(true);
-            return null;
-        };
-        AccessController.doPrivileged(action);
+        method.setAccessible(true);
     }
 
     @Override

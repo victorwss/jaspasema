@@ -207,8 +207,8 @@ public abstract class JaspasemaException extends Exception {
      * @param cause The cause exception used to set as a cause for this exception. However, since this method is not
      *     supported and should not be used, this parameter is not used.
      * @return Never returns normally.
-     * @deprecated Do not call this method.
      * @throws UnsupportedOperationException Always.
+     * @deprecated Do not call this method.
      */
     @Override
     @Deprecated
@@ -217,8 +217,8 @@ public abstract class JaspasemaException extends Exception {
     }
 
     /**
-     * Returns the message of the causing exception or an empty string if there isn't any. 
-     * @return The message of the causing exception or an empty string if there isn't any. 
+     * Returns the message of the causing exception or an empty string if there isn't any.
+     * @return The message of the causing exception or an empty string if there isn't any.
      */
     @NonNull
     @TemplateField("CAUSE")
