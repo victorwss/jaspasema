@@ -42,11 +42,13 @@ class FormatterMap {
             Map.entry(ReifiedGeneric.of(Float.class), of((Float b) -> b.toString())),
             Map.entry(ReifiedGeneric.of(double.class), of((Double b) -> b.toString())),
             Map.entry(ReifiedGeneric.of(Double.class), of((Double b) -> b.toString())),
-            Map.entry(ReifiedGeneric.of(String.class), of(String::toString))
+            Map.entry(ReifiedGeneric.of(BigInteger.class), of((BigInteger b) -> b.toString())),
+            Map.entry(ReifiedGeneric.of(BigDecimal.class), of((BigDecimal b) -> b.toPlainString())),
+            Map.entry(ReifiedGeneric.of(String.class), of((String b) -> b))
     );
 
-    public static final Map<ReifiedGeneric<?>, Function<DateTimeFormatter, ? extends FormatterFunction<?>>> FORMATTER_DT_MAP =
-            Map.ofEntries(
+    public static final Map<ReifiedGeneric<?>, Function<DateTimeFormatter, ? extends FormatterFunction<?>>> FORMATTER_DT_MAP
+            = Map.ofEntries(
                     Map.entry(ReifiedGeneric.of(LocalDate.class), dtf -> of((LocalDate v) -> v.format(dtf))),
                     Map.entry(ReifiedGeneric.of(LocalDateTime.class), dtf -> of((LocalDateTime v) -> v.format(dtf))),
                     Map.entry(ReifiedGeneric.of(LocalTime.class), dtf -> of((LocalTime v) -> v.format(dtf))),
@@ -94,9 +96,12 @@ class FormatterMap {
 
     private static boolean booleanParse(@NonNull String s) {
         switch (s) {
-            case "true": return true;
-            case "false": return false;
-            default: throw new IllegalArgumentException(s);
+            case "true":
+                return true;
+            case "false":
+                return false;
+            default:
+                throw new IllegalArgumentException(s);
         }
     }
 
@@ -107,7 +112,9 @@ class FormatterMap {
             @Override
             @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
             public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
-                if ("null".equals(s) || s.isEmpty()) return null;
+                if ("null".equals(s) || s.isEmpty()) {
+                    return null;
+                }
                 try {
                     return func.apply(s);
                 } catch (Exception e) {
@@ -123,7 +130,9 @@ class FormatterMap {
             @Override
             @SuppressFBWarnings("LEST_LOST_EXCEPTION_STACK_TRACE")
             public <X extends Throwable> E parse(@NonNull Function<? super Throwable, X> onError, @NonNull String s) throws X {
-                if ("null".equals(s) || s.isEmpty()) return null;
+                if ("null".equals(s) || s.isEmpty()) {
+                    return null;
+                }
                 try {
                     return func.apply(s, format);
                 } catch (DateTimeException e) {

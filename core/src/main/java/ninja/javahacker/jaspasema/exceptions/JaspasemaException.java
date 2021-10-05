@@ -15,7 +15,7 @@ import lombok.Value;
 import ninja.javahacker.jaspasema.exceptions.messages.ExceptionTemplate;
 
 /**
- * Superclass of all checked exceptions on Jaspasema, which are mostly reflection-based.
+ * Superclass of all checked exceptions on Jaspasema, which are mostly reflection related.
  * @author Victor Williams Stafusa da Silva
  */
 public abstract class JaspasemaException extends Exception {

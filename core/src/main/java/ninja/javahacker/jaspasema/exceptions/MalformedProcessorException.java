@@ -14,12 +14,33 @@ import lombok.NonNull;
 public abstract class MalformedProcessorException extends JaspasemaException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The annotation class that was malconfigued.
+     * -- GETTER --
+     * Retrieves the annotation class that was malconfigued.
+     * @return The annotation class that was malconfigued.
+     */
     @NonNull
     private final Class<? extends Annotation> badAnnotation;
 
+    /**
+     * The processor class that was malformed.
+     * -- GETTER --
+     * Retrieves the processor class that was malformed.
+     * @return The processor class that was malformed.
+     */
     @NonNull
     private final Class<?> processorClass;
 
+    /**
+     * Constructs an instance specifiying both a method parameter and another exception as the cause of this exception.
+     * @param parameter The method parameter that is related to this exception.
+     * @param badAnnotation Which annotation class was malconfigued.
+     * @param processorClass Which processor class was malformed.
+     * @param cause Another exception that is the cause of this exception.
+     * @throws IllegalArgumentException If any of {@code parameter}, {@code badAnnotation}, {@code processorClass} or
+     *     {@code cause} are {@code null}.
+     */
     protected MalformedProcessorException(
             /*@NonNull*/ Parameter parameter,
             @NonNull Class<? extends Annotation> badAnnotation,
@@ -31,6 +52,14 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    /**
+     * Constructs an instance specifiying a method parameter as the cause of this exception.
+     * @param parameter The method parameter that is related to this exception.
+     * @param badAnnotation Which annotation class was malconfigued.
+     * @param processorClass Which processor class was malformed.
+     * @throws IllegalArgumentException If any of {@code parameter}, {@code badAnnotation}, {@code processorClass} are
+     *     {@code null}.
+     */
     protected MalformedProcessorException(
             /*@NonNull*/ Parameter parameter,
             @NonNull Class<? extends Annotation> badAnnotation,
@@ -41,6 +70,15 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    /**
+     * Constructs an instance specifiying both a method and another exception as the cause of this exception.
+     * @param method The method that is related to this exception.
+     * @param badAnnotation Which annotation class was malconfigued.
+     * @param processorClass Which processor class was malformed.
+     * @param cause Another exception that is the cause of this exception.
+     * @throws IllegalArgumentException If any of {@code method}, {@code badAnnotation}, {@code processorClass} or
+     *     {@code cause} are {@code null}.
+     */
     protected MalformedProcessorException(
             /*@NonNull*/ Method method,
             @NonNull Class<? extends Annotation> badAnnotation,
@@ -52,6 +90,14 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    /**
+     * Constructs an instance specifiying a method as the cause of this exception.
+     * @param method The method that is related to this exception.
+     * @param badAnnotation Which annotation class was malconfigued.
+     * @param processorClass Which processor class was malformed.
+     * @throws IllegalArgumentException If any of {@code method}, {@code badAnnotation} or {@code processorClass} are
+     *     {@code null}.
+     */
     protected MalformedProcessorException(
             /*@NonNull*/ Method method,
             @NonNull Class<? extends Annotation> badAnnotation,
@@ -62,6 +108,15 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    /**
+     * Constructs an instance specifiying both a declaring class and another exception as the cause of this exception.
+     * @param declaringClass The declaring class that is related to this exception.
+     * @param badAnnotation Which annotation class was malconfigued.
+     * @param processorClass Which processor class was malformed.
+     * @param cause Another exception that is the cause of this exception.
+     * @throws IllegalArgumentException If any of {@code declaringClass}, {@code badAnnotation}, {@code processorClass}
+     *     or {@code cause} are {@code null}.
+     */
     protected MalformedProcessorException(
             /*@NonNull*/ Class<?> declaringClass,
             @NonNull Class<? extends Annotation> badAnnotation,
@@ -73,6 +128,14 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    /**
+     * Constructs an instance specifiying a declaring class as the cause of this exception.
+     * @param declaringClass The declaring class that is related to this exception.
+     * @param badAnnotation Which annotation class was malconfigued.
+     * @param processorClass Which processor class was malformed.
+     * @throws IllegalArgumentException If any of {@code declaringClass}, {@code badAnnotation} or
+     *     {@code processorClass} are {@code null}.
+     */
     protected MalformedProcessorException(
             /*@NonNull*/ Class<?> declaringClass,
             @NonNull Class<? extends Annotation> badAnnotation,
@@ -83,6 +146,10 @@ public abstract class MalformedProcessorException extends JaspasemaException {
         this.processorClass = processorClass;
     }
 
+    /**
+     * Retrieves the name of the annotation class that was malconfigued.
+     * @return The name of the annotation class that was malconfigued.
+     */
     @NonNull
     @TemplateField("A")
     public String getAnnotationName() {

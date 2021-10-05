@@ -13,6 +13,7 @@ import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
 
 /**
+ * Denotes a fixed output given by the annotated method {@link #value()}.
  * @author Victor Williams Stafusa da Silva
  */
 @Repeatable(value = ProducesFixed.Container.class)
@@ -33,6 +34,10 @@ public @interface ProducesFixed {
      */
     public String type() default "text/html;charset=utf-8";
 
+    /**
+     * The result type that jQuery should expected.
+     * @return The result type that jQuery should expected.
+     */
     public String jQueryType() default "html";
 
     /**

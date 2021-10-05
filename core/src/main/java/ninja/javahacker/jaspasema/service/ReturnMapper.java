@@ -33,6 +33,9 @@ import ninja.javahacker.reifiedgeneric.Token;
 @SuppressFBWarnings("IMC_IMMATURE_CLASS_NO_TOSTRING")
 public class ReturnMapper<E> {
 
+    /**
+     * Default HTML output when an error 200 is produced.
+     */
     public static final String DEFAULT_HTML_200 = ""
             + "<!DOCTYPE html>"
             + "<html>"
@@ -44,6 +47,9 @@ public class ReturnMapper<E> {
             + "  </body>"
             + "</html>";
 
+    /**
+     * Default HTML output when an error 500 is produced.
+     */
     public static final String DEFAULT_HTML_ERROR_500 = ""
             + "<!DOCTYPE html>"
             + "<html>"
@@ -55,6 +61,9 @@ public class ReturnMapper<E> {
             + "  </body>"
             + "</html>";
 
+    /**
+     * Default HTML output when an error 400 is produced.
+     */
     public static final String DEFAULT_HTML_ERROR_400 = ""
             + "<!DOCTYPE html>"
             + "<html>"

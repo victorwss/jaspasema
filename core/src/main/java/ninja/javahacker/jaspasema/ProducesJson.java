@@ -17,6 +17,7 @@ import ninja.javahacker.jaspasema.processor.ResultSerializer;
 import ninja.javahacker.jaspasema.processor.ReturnedOk;
 
 /**
+ * Denotes that the annotated method produces output in the JSON format.
  * @author Victor Williams Stafusa da Silva
  */
 @Repeatable(value = ProducesJson.Container.class)
