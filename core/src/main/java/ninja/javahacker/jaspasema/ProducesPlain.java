@@ -110,7 +110,7 @@ public @interface ProducesPlain {
                     () -> new EmptyDateFormatException(method, annotationClass),
                     () -> new InvalidDateFormatException(method, annotationClass, format)
             );
-            ResultProcessor.Worker<E> w = (m, ctx, v) -> {
+            ResultProcessor.Worker<E> w = (ctx, v) -> {
                 ctx.result(parser.apply(v));
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());

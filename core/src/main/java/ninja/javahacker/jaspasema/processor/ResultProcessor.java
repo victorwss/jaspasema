@@ -16,6 +16,7 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueExcept
 /**
  * @author Victor Williams Stafusa da Silva
  */
+@FunctionalInterface
 public interface ResultProcessor<A extends Annotation, B> {
 
     @NonNull
@@ -24,7 +25,6 @@ public interface ResultProcessor<A extends Annotation, B> {
     @FunctionalInterface
     public interface Worker<E> {
         public void run(
-                @NonNull Method method,
                 @NonNull Context ctx,
                 @Nullable E value)
                 throws MalformedReturnValueException;

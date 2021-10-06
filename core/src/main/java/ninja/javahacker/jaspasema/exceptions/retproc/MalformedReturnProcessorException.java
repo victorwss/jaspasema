@@ -12,8 +12,17 @@ import ninja.javahacker.jaspasema.processor.ResultProcessor;
  * @author Victor Williams Stafusa da Silva
  */
 public abstract class MalformedReturnProcessorException extends MalformedProcessorException {
+
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance.
+     * @param method The method for which the {@link ResultProcessor} couldn't be instantiated.
+     * @param badAnnotation The annotation that is processed by the class specified in the {@code processorClass} parameter.
+     * @param processorClass Which {@link ResultProcessor} class couldn't be instantiated.
+     * @param cause The exception thrown when the {@link ResultProcessor} failed to be instantiated.
+     * @throws IllegalArgumentException If any parameter is {@code null}.
+     */
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Method method,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
@@ -23,6 +32,13 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
         super(method, badAnnotation, processorClass, cause);
     }
 
+    /**
+     * Creates an instance.
+     * @param method The method for which the {@link ResultProcessor} couldn't be instantiated.
+     * @param badAnnotation The annotation that is processed by the class specified in the {@code processorClass} parameter.
+     * @param processorClass Which {@link ResultProcessor} class couldn't be instantiated.
+     * @throws IllegalArgumentException If any parameter is {@code null}.
+     */
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Method method,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
@@ -31,6 +47,14 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
         super(method, badAnnotation, processorClass);
     }
 
+    /**
+     * Creates an instance.
+     * @param declaringClass The class for which the {@link ResultProcessor} couldn't be instantiated.
+     * @param badAnnotation The annotation that is processed by the class specified in the {@code processorClass} parameter.
+     * @param processorClass Which {@link ResultProcessor} class couldn't be instantiated.
+     * @param cause The exception thrown when the {@link ResultProcessor} failed to be instantiated.
+     * @throws IllegalArgumentException If any parameter is {@code null}.
+     */
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Class<?> declaringClass,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,
@@ -40,6 +64,13 @@ public abstract class MalformedReturnProcessorException extends MalformedProcess
         super(declaringClass, badAnnotation, processorClass, cause);
     }
 
+    /**
+     * Creates an instance.
+     * @param declaringClass The class for which the {@link ResultProcessor} couldn't be instantiated.
+     * @param badAnnotation The annotation that is processed by the class specified in the {@code processorClass} parameter.
+     * @param processorClass Which {@link ResultProcessor} class couldn't be instantiated.
+     * @throws IllegalArgumentException If any parameter is {@code null}.
+     */
     protected MalformedReturnProcessorException(
             /*@NonNull*/ Class<?> declaringClass,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,

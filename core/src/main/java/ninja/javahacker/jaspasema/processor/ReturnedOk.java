@@ -9,6 +9,9 @@ public final class ReturnedOk extends Throwable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * This class can't be instantiated.
+     */
     private ReturnedOk() {
         throw new UnsupportedOperationException();
     }

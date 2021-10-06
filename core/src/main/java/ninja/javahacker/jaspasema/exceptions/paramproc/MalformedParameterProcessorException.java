@@ -11,8 +11,17 @@ import ninja.javahacker.jaspasema.processor.ParamProcessor;
  * @author Victor Williams Stafusa da Silva
  */
 public abstract class MalformedParameterProcessorException extends MalformedProcessorException {
+
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance.
+     * @param parameter The method parameter for which the {@link ParamProcessor} couldn't be instantiated.
+     * @param badAnnotation The annotation that is processed by the class specified in the {@code processorClass} parameter.
+     * @param processorClass Which {@link ParamProcessor} class couldn't be instantiated.
+     * @param cause The exception thrown when the {@link ParamProcessor} failed to be instantiated.
+     * @throws IllegalArgumentException If any parameter is {@code null}.
+     */
     protected MalformedParameterProcessorException(
             /*@NonNull*/ Parameter parameter,
             /*@NonNull*/ Class<? extends Annotation> badAnnotation,

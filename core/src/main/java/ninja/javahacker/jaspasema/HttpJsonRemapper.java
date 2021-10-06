@@ -16,16 +16,21 @@ import ninja.javahacker.jaspasema.processor.ReturnedOk;
  */
 public class HttpJsonRemapper implements ExceptionRemapper {
 
+    /**
+     * {@inheritDoc}
+     * @param method {@inheritDoc}
+     * @throws BadServiceMappingException {@inheritDoc}
+     */
     @Override
-    public void validate(@NonNull AnnotatedMethod<OutputRemapper, ?> meth) throws BadServiceMappingException {
-        if (meth.getAnnotation().on() == ReturnedOk.class) throw new ExceptionMappingOnReturnException(meth.getMethod());
+    public void validate(@NonNull AnnotatedMethod<OutputRemapper, ?> method) throws BadServiceMappingException {
+        if (method.getAnnotation().on() == ReturnedOk.class) throw new ExceptionMappingOnReturnException(method.getMethod());
     }
 
     /**
      * {@inheritDoc}
      * @param method {@inheritDoc}
      * @param ctx {@inheritDoc}
-     * @param problem  {@inheritDoc}
+     * @param problem {@inheritDoc}
      */
     @NonNull
     @Override

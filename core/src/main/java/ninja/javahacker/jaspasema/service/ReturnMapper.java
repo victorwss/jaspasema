@@ -294,8 +294,6 @@ public class ReturnMapper<E> {
 
     @SuppressFBWarnings("UP_UNUSED_PARAMETER")
     private static <E> ResultProcessor.Stub<E> reduce(ReifiedGeneric<E> newTarget, ResultProcessor.Stub<Object> oldTarget) {
-        return new ResultProcessor.Stub<>((a, b, c) -> {
-            oldTarget.getWorker().run(a, b, c);
-        }, oldTarget.getExpectedReturnType());
+        return new ResultProcessor.Stub<>(oldTarget.getWorker()::run, oldTarget.getExpectedReturnType());
     }
 }

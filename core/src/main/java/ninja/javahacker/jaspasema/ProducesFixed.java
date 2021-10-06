@@ -79,7 +79,7 @@ public @interface ProducesFixed {
         @Override
         public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesFixed, E> meth) throws BadServiceMappingException {
             var annotation = meth.getAnnotation();
-            ResultProcessor.Worker<E> w = (m, ctx, v) -> {
+            ResultProcessor.Worker<E> w = (ctx, v) -> {
                 ctx.result(annotation.value());
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());

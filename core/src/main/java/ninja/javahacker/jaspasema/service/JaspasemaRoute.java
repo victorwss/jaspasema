@@ -13,5 +13,6 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueExcept
 @FunctionalInterface
 public interface JaspasemaRoute extends Handler {
     @Override
-    public void handle(@NonNull Context ctx) throws InvocationTargetException, ParameterValueException, MalformedReturnValueException;
+    public void handle(@NonNull Context ctx)
+            throws InvocationTargetException, ParameterValueException, MalformedReturnValueException;
 }

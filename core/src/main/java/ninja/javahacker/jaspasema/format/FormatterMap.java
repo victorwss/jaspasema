@@ -8,8 +8,10 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -52,8 +54,10 @@ class FormatterMap {
                     Map.entry(ReifiedGeneric.of(LocalDate.class), dtf -> of((LocalDate v) -> v.format(dtf))),
                     Map.entry(ReifiedGeneric.of(LocalDateTime.class), dtf -> of((LocalDateTime v) -> v.format(dtf))),
                     Map.entry(ReifiedGeneric.of(LocalTime.class), dtf -> of((LocalTime v) -> v.format(dtf))),
+                    Map.entry(ReifiedGeneric.of(OffsetDateTime.class), dtf -> of((OffsetDateTime v) -> v.format(dtf))),
                     Map.entry(ReifiedGeneric.of(Year.class), dtf -> of((Year v) -> v.format(dtf))),
-                    Map.entry(ReifiedGeneric.of(YearMonth.class), dtf -> of((YearMonth v) -> v.format(dtf)))
+                    Map.entry(ReifiedGeneric.of(YearMonth.class), dtf -> of((YearMonth v) -> v.format(dtf))),
+                    Map.entry(ReifiedGeneric.of(ZonedDateTime.class), dtf -> of((ZonedDateTime v) -> v.format(dtf)))
             );
 
     public static final Map<ReifiedGeneric<?>, ParseFunction<?>> PARSE_MAP = Map.ofEntries(

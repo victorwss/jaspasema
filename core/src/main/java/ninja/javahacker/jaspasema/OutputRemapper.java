@@ -64,7 +64,7 @@ public @interface OutputRemapper {
                 throw new RemapperConstructorException(method, remapperClass, e.getCause());
             }
             f.validate(meth);
-            return new Stub<>(f::remap, annotation.jQueryType());
+            return new Stub<>((b, c) -> f.remap(method, b, c), annotation.jQueryType());
         }
     }
 

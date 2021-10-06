@@ -73,7 +73,7 @@ public @interface ProducesJson {
             var method = meth.getMethod();
             var annotation = meth.getAnnotation();
             if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesJson.class);
-            ResultProcessor.Worker<E> w = (m, ctx, v) -> {
+            ResultProcessor.Worker<E> w = (ctx, v) -> {
                 ctx.result(toJson(method, v));
                 ctx.contentType(annotation.type());
                 ctx.status(annotation.status());

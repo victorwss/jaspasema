@@ -22,9 +22,24 @@ import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingExcepti
 @Getter
 public final class ServiceBuilder {
 
+    /**
+     * The object (of a class with a lot of methods to expose as endpoints) to serve as the
+     *     implementation of the service.
+     * -- GETTER --
+     * Retrieves the object (of a class with a lot of methods to expose as endpoints) to serve as the
+     *     implementation of the service.
+     * @return The object (of a class with a lot of methods to expose as endpoints) to serve as the
+     *     implementation of the service.
+     */
     @NonNull
     private final Object instance;
 
+    /**
+     * The name of the exposed service.
+     * -- GETTER --
+     * Retrieves the name of the exposed service.
+     * @return The name of the exposed service.
+     */
     @NonNull
     private final String serviceName;
 
@@ -41,6 +56,14 @@ public final class ServiceBuilder {
         this.methods = methods;
     }
 
+    /**
+     * Creates a service to expose for HTTP verbs.
+     * @param instance An object (of a class with a lot of methods to expose as endpoints) to serve as the
+     *     implementation of the service.
+     * @return A builder object to further configurations of the service.
+     * @throws BadServiceMappingException If there is some problem to describe some method as an HTTP endpoint.
+     * @throws MalformedProcessorException If some method uses some ill-defined processor.
+     */
     public static ServiceBuilder make(@NonNull Object instance) throws BadServiceMappingException, MalformedProcessorException {
         var className = instance.getClass().getSimpleName();
         if (className.isEmpty()) {
