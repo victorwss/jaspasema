@@ -18,22 +18,25 @@ def doclint = true
 
 def versionApiguardian = "1.1.1"
 def versionCheckstyle = "9.0"
-def versionSbContrib = "7.4.7"
 def versionFindSecBugs = "1.11.0"
+def versionHibernate = "5.5.7.Final" //"6.0.0.Alpha9"
 def versionJackson = "2.12.5"
 def versionJaCoCo = "0.8.7"
-def versionJavalin = "3.8.0"
+def versionJavalin = "3.8.0"         //"4.0.1"
 def versionJaxb = "2.4.0-b180830.0359"
-def versionJcip = "1.0"
 def versionJakartaJpa = "2.2.3"      //"3.0.0"
+def versionJcip = "1.0"
 def versionJpaSimpleTransactions = "1.0.0-2021.09.20"
-def versionJunit = "5.8.0"
 def versionJsr305 = "3.0.2"
-def versionLombok = "edge-SNAPSHOT"  // "1.18.22"
+def versionJunit = "5.8.0"
+def versionLombok = "edge-SNAPSHOT"  //"1.18.22"
 def versionMocker = "1.1.0-2021.09.20"
+def versionMySql = "8.0.26"
 def versionPmd = "6.38.0"
 def versionReflections = "0.9.12"
 def versionReifiedGenerics = "1.1.0-2021.09.20"
+def versionSbContrib = "7.4.7"
+def versionServlet = "3.1.0"
 def versionSpotBugs = "4.4.1"
 def versionSlf4j = "1.8.0-beta4"     //"2.0.0-alpha5"
 
@@ -296,19 +299,50 @@ project(":app") {
         inputs.property("moduleName", moduleName)
     }
     dependencies {
-        api project(":core")
+        api(project(":core"))
 
         // Reflections
-        api(group: "org.reflections", name: "reflections", version: versionReflections)
+        implementation(group: "org.reflections", name: "reflections", version: versionReflections)
 
         // JPA
         api(group: "jakarta.persistence", name: "jakarta.persistence-api", version: versionJakartaJpa)
 
-        // JPA Simple Transactions.
+        // JPA Simple Transactions
         api(group: "ninja.javahacker.jpasimpletransactions", name: "core", version: versionJpaSimpleTransactions)
-        //api(group: "ninja.javahacker.jpasimpletransactions", name: "hibernate", version: versionJpaSimpleTransactions)
     }
     compileJava {
         dependsOn(":core:jar")
+    }
+}
+
+project(":sampleproject") {
+    apply(plugin: "application")
+    def moduleName = "ninja.javahacker.jaspasema.sampleproject"
+    description = "Jaspasema Sample Project"
+    mainClassName = "ninja.javahacker.jaspasema.sampleproject.SampleProject"
+    jar {
+        archiveBaseName = "jaspasema-sampleproject"
+        inputs.property("moduleName", moduleName)
+    }
+    dependencies {
+        implementation(project(":app"))
+
+        // MySQL / MariaDB
+        implementation(group: "mysql", name: "mysql-connector-java", version: versionMySql)
+
+        // Hibernate
+        implementation(group: "org.hibernate", name: "hibernate-core", version: versionHibernate) {
+            exclude(group: "javax.persistence", module: "javax.persistence-api")
+        }
+
+        // JPA Simple Transactions
+        api(group: "ninja.javahacker.jpasimpletransactions", name: "core", version: versionJpaSimpleTransactions)
+        api(group: "ninja.javahacker.jpasimpletransactions", name: "hibernate", version: versionJpaSimpleTransactions)
+
+        // Servlet
+        implementation(group: "javax.servlet", name: "javax.servlet-api", version: versionServlet)
+    }
+    compileJava {
+        dependsOn(":app:jar")
     }
 }

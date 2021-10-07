@@ -4,3 +4,5 @@
 /gradle.properties
 /core/build/
 /app/build/
+/sampleproject/build
+/sampleproject/.gradle
