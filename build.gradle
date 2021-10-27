@@ -10,35 +10,35 @@ plugins {
 
 allprojects {
     group = "ninja.javahacker.jaspasema"
-    version = "0.7.0-2021.09.20"
+    version = "0.7.0-2021.10.27"
 }
 
-def versionJavaCompiler = "10"
-def doclint = true
+var versionJavaCompiler = "10"
+var doclint = true
 
-def versionApiguardian = "1.1.1"
-def versionCheckstyle = "9.0"
-def versionFindSecBugs = "1.11.0"
-def versionHibernate = "5.5.7.Final" //"6.0.0.Alpha9"
-def versionJackson = "2.12.5"
-def versionJaCoCo = "0.8.7"
-def versionJavalin = "3.8.0"         //"4.0.1"
-def versionJaxb = "2.4.0-b180830.0359"
-def versionJakartaJpa = "2.2.3"      //"3.0.0"
-def versionJcip = "1.0"
-def versionJpaSimpleTransactions = "1.0.0-2021.09.20"
-def versionJsr305 = "3.0.2"
-def versionJunit = "5.8.0"
-def versionLombok = "edge-SNAPSHOT"  //"1.18.22"
-def versionMocker = "1.1.0-2021.09.20"
-def versionMySql = "8.0.26"
-def versionPmd = "6.38.0"
-def versionReflections = "0.9.12"
-def versionReifiedGenerics = "1.1.0-2021.09.20"
-def versionSbContrib = "7.4.7"
-def versionServlet = "3.1.0"
-def versionSpotBugs = "4.4.1"
-def versionSlf4j = "1.8.0-beta4"     //"2.0.0-alpha5"
+var versionApiguardian = "1.1.1"
+var versionCheckstyle = "9.0.1"
+var versionFindSecBugs = "1.11.0"
+var versionHibernate = "5.5.7.Final" //"6.0.0.Alpha9"
+var versionJackson = "2.12.5"
+var versionJaCoCo = "0.8.7"
+var versionJavalin = "3.8.0"         //"4.0.1"
+var versionJaxb = "2.4.0-b180830.0359"
+var versionJakartaJpa = "2.2.3"      //"3.0.0"
+var versionJcip = "1.0"
+var versionJpaSimpleTransactions = "1.0.0-2021.10.27"
+var versionJsr305 = "3.0.2"
+var versionJunit = "5.8.0"
+var versionLombok = "1.18.22"
+var versionMocker = "1.1.0-2021.10.27"
+var versionMySql = "8.0.26"
+var versionPmd = "6.38.0"
+var versionReflections = "0.9.12"
+var versionReifiedGenerics = "1.1.0-2021.10.27"
+var versionSbContrib = "7.4.7"
+var versionServlet = "3.1.0"
+var versionSpotBugs = "4.4.1"
+var versionSlf4j = "2.0.0-alpha5"
 
 // Do not change anything below here.
 
@@ -55,8 +55,10 @@ allprojects {
         }
         mavenLocal()
         mavenCentral()
-        maven {
-            url("https://projectlombok.org/edge-releases")
+        if (versionLombok.indexOf("edge") >= 0) {
+            maven {
+                url("https://projectlombok.org/edge-releases")
+            }
         }
     }
 }
@@ -120,7 +122,14 @@ subprojects {
         options.encoding = "UTF-8"
         options.debug = true
         options.fork = true
-        options.compilerArgs << "-parameters" << "-Xlint:all,-processing,-requires-transitive-automatic,-requires-automatic,-missing-explicit-ctor" << "-Xmaxwarns" << "1000" << "-Xmaxerrs" << "1000"
+        options.compilerArgs += [
+            "-parameters",
+            "-Xlint:all,-processing,-requires-transitive-automatic,-requires-automatic,-missing-explicit-ctor",
+            "-Xmaxwarns",
+            "1000",
+            "-Xmaxerrs",
+            "1000"
+        ]
     }
 
     compileJava {
@@ -132,10 +141,8 @@ subprojects {
             options.compilerArgs << "-Xdoclint:none"
         }
         doFirst {
-            //println("\nClasspath + Modulepath compileOnlyApi:;${configurations.compileOnlyApi.asPath}".replaceAll(";+", ";").replace(";", "\n   "))
-            //println("\nClasspath + Modulepath implementation:;${configurations.implementation.asPath}".replaceAll(";+", ";").replace(";", "\n   "))
             options.compilerArgs += [
-                "--module-path", "${configurations.compileOnlyApi.asPath};${configurations.implementation.asPath}".replaceAll(";+", ";")
+                "--module-path", classpath.asPath
             ]
             classpath = files()
         }
@@ -144,7 +151,7 @@ subprojects {
     task delombok {
         description = "Delomboks the source code."
         doLast {
-            def delombokPath = "${configurations.compileOnlyApi.asPath};${configurations.implementation.asPath}"
+            var delombokPath = "${configurations.compileOnlyApi.asPath};${configurations.implementation.asPath}"
             ant.mkdir(dir: "build/src-delomboked")
             ant.taskdef(name: "delombok", classname: "lombok.delombok.ant.Tasks\$Delombok", classpath: delombokPath)
             ant.delombok(verbose: "false", encoding: "UTF-8", to: "build/src-delomboked", from: "src/main/java", modulepath: delombokPath)
@@ -283,7 +290,7 @@ task mergedJavadoc(type: Javadoc) {
 }
 
 project(":core") {
-    def moduleName = "ninja.javahacker.jaspasema.core"
+    var moduleName = "ninja.javahacker.jaspasema.core"
     description = "Jaspasema Core"
     jar {
         archiveBaseName = "jaspasema-core"
@@ -292,7 +299,7 @@ project(":core") {
 }
 
 project(":app") {
-    def moduleName = "ninja.javahacker.jaspasema.app"
+    var moduleName = "ninja.javahacker.jaspasema.app"
     description = "Jaspasema App"
     jar {
         archiveBaseName = "jaspasema-app"
@@ -317,7 +324,7 @@ project(":app") {
 
 project(":sampleproject") {
     apply(plugin: "application")
-    def moduleName = "ninja.javahacker.jaspasema.sampleproject"
+    var moduleName = "ninja.javahacker.jaspasema.sampleproject"
     description = "Jaspasema Sample Project"
     mainClassName = "ninja.javahacker.jaspasema.sampleproject.SampleProject"
     jar {
