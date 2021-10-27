@@ -1,9 +1,9 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Represents an attempt to create a resource which already existed (HTTP status code 409).
@@ -32,13 +32,12 @@ public class AlreadyExistsException extends HttpException {
 
     /**
      * Constructs an instance specifiying a method as the cause of this exception.
-     * @param method The method that is related to this exception.
      * @param entityType The type of the entity that was found.
      * @param key The name of the entity that already exists.
-     * @throws IllegalArgumentException If {@code method}, {@code entityType} or {@code key} are {@code null}.
+     * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
      */
-    public AlreadyExistsException(/*@NonNull*/ Method method, @NonNull Class<?> entityType, @NonNull String key) {
-        super(method, 409);
+    public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull String key) {
+        super(409);
         this.entityType = entityType;
         this.key = key;
     }

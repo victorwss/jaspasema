@@ -1,6 +1,5 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import java.lang.reflect.Method;
 import lombok.ToString;
 
 /**
@@ -16,11 +15,10 @@ public class UnprocessableRequestException extends HttpException {
 
     /**
      * Creates an instance specifying which is the offending method and what was the raised error.
-     * @param method The offending method.
      * @param cause The raised error.
-     * @throws IllegalArgumentException If {@link method} or {@link cause} are {@code null}.
+     * @throws IllegalArgumentException If {@code cause} is {@code null}.
      */
-    public UnprocessableRequestException(/*@NonNull*/ Method method, /*@NonNull*/ Throwable cause) {
-        super(method, 422, cause);
+    public UnprocessableRequestException(/*@NonNull*/ Throwable cause) {
+        super(422, cause);
     }
 }

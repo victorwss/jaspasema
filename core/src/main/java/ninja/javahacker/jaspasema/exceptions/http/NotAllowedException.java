@@ -1,6 +1,5 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import java.lang.reflect.Method;
 import lombok.ToString;
 
 /**
@@ -14,11 +13,9 @@ public class NotAllowedException extends HttpException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates an instance specifying which is the offending method.
-     * @param method The offending method.
-     * @throws IllegalArgumentException If {@code method} is {@code null}.
+     * Sole constructor.
      */
-    public NotAllowedException(/*@NonNull*/ Method method) {
-        super(method, 403);
+    public NotAllowedException() {
+        super(403);
     }
 }

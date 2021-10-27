@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Superclass of all exceptions that denote that a Jaspasema annotation processor is broken.

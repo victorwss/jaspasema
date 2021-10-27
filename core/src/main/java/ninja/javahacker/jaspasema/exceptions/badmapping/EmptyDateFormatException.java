@@ -10,6 +10,7 @@ import java.time.Year;
 import java.time.YearMonth;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Thrown when {@link LocalDate}, {@link LocalDateTime}, {@link LocalTime}, {@link Year} or {@link YearMonth}

@@ -1,9 +1,9 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Represents a gone error (HTTP status code 410).
@@ -33,13 +33,12 @@ public class EntityDeletedException extends HttpException {
 
     /**
      * Constructs an instance specifiying a method as the cause of this exception.
-     * @param method The method that is related to this exception.
      * @param entityType The type of the entity that was deleted.
      * @param key The name of the entity that was deleted.
-     * @throws IllegalArgumentException If any of {@code method}, {@code entityType} or {@code key} are {@code null}.
+     * @throws IllegalArgumentException If {@code entityType} or {@code key} are {@code null}.
      */
-    public EntityDeletedException(/*@NonNull*/ Method method, @NonNull Class<?> entityType, @NonNull String key) {
-        super(method, 410);
+    public EntityDeletedException(@NonNull Class<?> entityType, @NonNull String key) {
+        super(410);
         this.entityType = entityType;
         this.key = key;
     }

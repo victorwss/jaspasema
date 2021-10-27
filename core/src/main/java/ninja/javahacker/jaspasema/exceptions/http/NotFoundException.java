@@ -1,9 +1,9 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Represents a resource not found error (HTTP status code 404).
@@ -33,15 +33,14 @@ public class NotFoundException extends HttpException {
 
     /**
      * Constructs an instance specifiying a method as the cause of this exception.
-     * @param method The method that is related to this exception.
      * @param entityType The type of the entity that was expected to be found.
      * @param key The name of the entity that was expected to be found.
-     * @throws IllegalArgumentException If {@code method}, {@code entityType} or {@code key} are {@code null}.
+     * @throws IllegalArgumentException If {@code entityType} or {@code key} are {@code null}.
      */
-    public NotFoundException(/*@NonNull*/ Method method, @NonNull Class<?> entityType, @NonNull String key) {
-        super(method, 404);
+    public NotFoundException(@NonNull Class<?> entityType, @NonNull Object key) {
+        super(404);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**

@@ -1,10 +1,6 @@
 package ninja.javahacker.jaspasema.exceptions;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Optional;
@@ -13,6 +9,7 @@ import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.Value;
 import ninja.javahacker.jaspasema.exceptions.messages.ExceptionTemplate;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Superclass of all checked exceptions on Jaspasema, which are mostly reflection related.
@@ -164,40 +161,8 @@ public abstract class JaspasemaException extends Exception {
                 .or(() -> method.map(Method::toString))
                 .orElseGet(declaringClass::getName);
 
-        var template = ExceptionTemplate.getExceptionTemplate().templateFor(getClass());
-        for (Class<?> k = getClass(); k != Object.class; k = k.getSuperclass()) {
-            for (var m : this.getClass().getMethods()) {
-                var t = m.getAnnotation(TemplateField.class);
-                if (t == null) continue;
-                String replacement;
-                try {
-                    replacement = (String) m.invoke(this);
-                } catch (Throwable e) {
-                    replacement = "<ERROR>";
-                }
-                template = template.replace("$" + t.value() + "$", replacement);
-            }
-        }
+        var template = ExceptionTemplate.getExceptionTemplate().templateFor(this);
         return "[" + prefix + "] " + template;
-    }
-
-    /**
-     * Used to annotate methods in the exception that gives the value for some variable present in its template message.
-     * Most exceptions have a fixed template message. However, it might contains a few variable parts.
-     * <p>For example, a message like {@code "The method foo received the bad parameter bar."} might be used based on a template
-     * message {@code "The method $M$ received the bad parameter $P$."}, where {@code "$M$"} and {@code "$P$"} are variables
-     * which would be filled by calling some getters on the exception. The getters would be those respectively annotated
-     * with {@code TemplateField("M")} and {@code TemplateField("P")}.</p>
-     */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public static @interface TemplateField {
-
-        /**
-         * The name of the variable in the template message to which the annotated methods binds to.
-         * @return The name of the variable in the template message to which the annotated methods binds to.
-         */
-        public String value();
     }
 
     /**

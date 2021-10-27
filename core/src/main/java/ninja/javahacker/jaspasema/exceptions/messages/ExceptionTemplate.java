@@ -1,7 +1,6 @@
 package ninja.javahacker.jaspasema.exceptions.messages;
 
 import lombok.NonNull;
-import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
 import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 
 /**
@@ -12,12 +11,12 @@ public interface ExceptionTemplate {
 
     /**
      * Gets the template message for some exception type.
-     * @param type The exception type for searching the corresponding template.
+     * @param problem The exception type for searching the corresponding template.
      * @return The template message for some exception type, or a blank string if none was found.
      * @throws IllegalArgumentException If {@code type} is {@code null}.
      */
     @NonNull
-    public String templateFor(@NonNull Class<? extends JaspasemaException> type);
+    public String templateFor(@NonNull Throwable problem);
 
     /**
      * Gets the name for an allowed annotation type.

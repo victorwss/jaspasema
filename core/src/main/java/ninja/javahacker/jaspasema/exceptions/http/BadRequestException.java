@@ -1,6 +1,5 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import java.lang.reflect.Method;
 import lombok.ToString;
 
 /**
@@ -15,11 +14,10 @@ public class BadRequestException extends HttpException {
 
     /**
      * Creates an instance specifying which is the offending method and what was the raised error.
-     * @param method The offending method.
      * @param cause The raised error.
-     * @throws IllegalArgumentException If {@code method} or {@code cause} are {@code null}.
+     * @throws IllegalArgumentException If {@code cause} is {@code null}.
      */
-    public BadRequestException(/*@NonNull*/ Method method, /*@NonNull*/ Throwable cause) {
-        super(method, 400, cause);
+    public BadRequestException(/*@NonNull*/ Throwable cause) {
+        super(400, cause);
     }
 }

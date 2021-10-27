@@ -3,6 +3,7 @@ package ninja.javahacker.jaspasema.exceptions.badmapping;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 import ninja.javahacker.jaspasema.processor.ResultSerializer;
 
 /**

@@ -1,13 +1,16 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Synchronized;
 import lombok.ToString;
-import ninja.javahacker.jaspasema.exceptions.JaspasemaException;
+import ninja.javahacker.jaspasema.exceptions.messages.ExceptionTemplate;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueException;
 
 /**
@@ -15,7 +18,7 @@ import ninja.javahacker.jaspasema.exceptions.paramvalue.MalformedParameterValueE
  * @author Victor Williams Stafusa da Silva
  */
 @ToString
-public class HttpException extends JaspasemaException {
+public class HttpException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,26 +31,25 @@ public class HttpException extends JaspasemaException {
     @Getter
     private final int statusCode;
 
+    @Nullable
+    private transient String cachedMessage;
+
     /**
      * Constructs an instance specifiying a method as the cause of this exception.
-     * @param method The method that is related to this exception.
      * @param statusCode The HTTP status code for this exception.
-     * @throws IllegalArgumentException If {@code method} is {@code null}.
      */
-    public HttpException(/*@NonNull*/ Method method, int statusCode) {
-        super(method);
+    public HttpException(int statusCode) {
         this.statusCode = statusCode;
     }
 
     /**
      * Constructs an instance specifiying both a method and another exception as the cause of this exception.
-     * @param method The method that is related to this exception.
      * @param statusCode The HTTP status code for this exception.
      * @param cause Another exception that is the cause of this exception.
-     * @throws IllegalArgumentException If {@code method} or {@code cause} are {@code null}.
+     * @throws IllegalArgumentException If {@code cause} is {@code null}.
      */
-    public HttpException(/*@NonNull*/ Method method, int statusCode, /*@NonNull*/ Throwable cause) {
-        super(method, cause);
+    public HttpException(int statusCode, @NonNull Throwable cause) {
+        super(cause);
         this.statusCode = statusCode;
     }
 
@@ -67,8 +69,8 @@ public class HttpException extends JaspasemaException {
             return convert(method, problem.getCause());
         }
         if (problem instanceof HttpException) return (HttpException) problem;
-        if (problem instanceof MalformedParameterValueException) return new BadRequestException(method, problem);
-        return new UnexpectedHttpException(method, problem);
+        if (problem instanceof MalformedParameterValueException) return new BadRequestException(problem);
+        return new UnexpectedHttpException(problem);
     }
 
     /**
@@ -89,5 +91,47 @@ public class HttpException extends JaspasemaException {
     public Object output() {
         Throwable cause = getCause();
         return new ErrorOutput(statusCode, getMessage(), cause == null ? "" : cause.getClass().getName());
+    }
+
+    /**
+     * Do not call this method.
+     * This was overriden from the {@link Throwable} class in order to be disallowed.
+     * Subclasses that feature a cause must set it through the superclass constructor only.
+     * @param cause The cause exception used to set as a cause for this exception. However, since this method is not
+     *     supported and should not be used, this parameter is not used.
+     * @return Never returns normally.
+     * @throws UnsupportedOperationException Always.
+     * @deprecated Do not call this method.
+     */
+    @Override
+    @Deprecated
+    public final HttpException initCause(Throwable cause) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the message of the causing exception or an empty string if there isn't any.
+     * @return The message of the causing exception or an empty string if there isn't any.
+     */
+    @NonNull
+    @TemplateField("CAUSE")
+    public String getCauseString() {
+        Throwable cause = getCause();
+        return cause == null ? "" : cause.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    @Synchronized
+    public String getMessage() {
+        if (cachedMessage == null) cachedMessage = formatMessage();
+        return cachedMessage;
+    }
+
+    private String formatMessage() {
+        return ExceptionTemplate.getExceptionTemplate().templateFor(this);
     }
 }

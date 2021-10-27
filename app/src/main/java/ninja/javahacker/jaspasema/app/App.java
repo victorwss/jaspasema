@@ -41,6 +41,10 @@ public class App {
 
         this.server = Javalin.create();
         if (!config.getStaticFileLocation().isEmpty()) server.config.addStaticFiles("/" + config.getStaticFileLocation());
+        /*if (!config.getStaticFileLocation().isEmpty()) server._conf.addStaticFiles(sf -> {
+            sf.location = Location.EXTERNAL;
+            sf.directory = "/" + config.getStaticFileLocation();
+        });*/
 
         this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(this::log);
         configurer.configure(server);

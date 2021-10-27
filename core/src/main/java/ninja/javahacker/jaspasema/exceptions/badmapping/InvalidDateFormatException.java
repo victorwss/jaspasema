@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Thrown when some annotation specifies an invalid date/time format.

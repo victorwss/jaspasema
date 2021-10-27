@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.NonNull;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 import ninja.javahacker.jaspasema.processor.AnnotatedParameter;
 import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 

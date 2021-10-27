@@ -63,6 +63,7 @@ public final class ServiceConfigurer {
     public void configure(@NonNull Javalin service) {
         serviceBuilders.forEach(sb -> sb.configure(service));
         service.config.enableCorsForAllOrigins();
+        //service._conf.enableCorsForAllOrigins();
         //configureCors(service);
     }
 

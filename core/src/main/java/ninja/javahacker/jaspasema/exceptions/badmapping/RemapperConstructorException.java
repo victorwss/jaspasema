@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.ExceptionRemapper;
+import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
 
 /**
  * Thrown when an attempt to constrcut an instance of some {@link ExceptionRemapper} fails because the
