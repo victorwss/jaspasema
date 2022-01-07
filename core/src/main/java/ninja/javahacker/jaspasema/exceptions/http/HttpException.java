@@ -1,13 +1,10 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
-import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Synchronized;
 import lombok.ToString;
 import ninja.javahacker.jaspasema.exceptions.messages.ExceptionTemplate;
 import ninja.javahacker.jaspasema.exceptions.messages.TemplateField;
@@ -31,9 +28,6 @@ public class HttpException extends Exception {
     @Getter
     private final int statusCode;
 
-    @Nullable
-    private transient String cachedMessage;
-
     /**
      * Constructs an instance specifiying a method as the cause of this exception.
      * @param statusCode The HTTP status code for this exception.
@@ -54,9 +48,30 @@ public class HttpException extends Exception {
     }
 
     /**
+     * Constructs an instance specifiying a method as the cause of this exception.
+     * @param statusCode The HTTP status code for this exception.
+     * @param message The exception message.
+     */
+    public HttpException(int statusCode, @NonNull String message) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * Constructs an instance specifiying both a method and another exception as the cause of this exception.
+     * @param statusCode The HTTP status code for this exception.
+     * @param cause Another exception that is the cause of this exception.
+     * @param message The exception message.
+     * @throws IllegalArgumentException If {@code cause} is {@code null}.
+     */
+    public HttpException(int statusCode, @NonNull String message, @NonNull Throwable cause) {
+        super(message, cause);
+        this.statusCode = statusCode;
+    }
+
+    /**
      * Produces an instance of {@code HttpException} that better represents the given exception {@code problem},
      * unwrapping and wrapping intermediate exceptions if needed.
-     * @param method The method which caused the problem.
      * @param problem The exception to be unwrapped or wrapped if needed in a {@code HttpException}.
      * @return An instance of {@code HttpException} that better represents the given exception {@code problem},
      *     unwrapping and wrapping intermediate exceptions if needed.
@@ -64,9 +79,9 @@ public class HttpException extends Exception {
      */
     @NonNull
     @SuppressFBWarnings("ITC_INHERITANCE_TYPE_CHECKING")
-    public static HttpException convert(@NonNull Method method, @NonNull Throwable problem) {
+    public static HttpException convert(@NonNull Throwable problem) {
         if (problem instanceof InvocationTargetException || problem instanceof UndeclaredThrowableException) {
-            return convert(method, problem.getCause());
+            return convert(problem.getCause());
         }
         if (problem instanceof HttpException) return (HttpException) problem;
         if (problem instanceof MalformedParameterValueException) return new BadRequestException(problem);
@@ -125,13 +140,9 @@ public class HttpException extends Exception {
      * @return {@inheritDoc}
      */
     @Override
-    @Synchronized
     public String getMessage() {
-        if (cachedMessage == null) cachedMessage = formatMessage();
-        return cachedMessage;
-    }
-
-    private String formatMessage() {
+        String sm = super.getMessage();
+        if (sm != null) return sm;
         return ExceptionTemplate.getExceptionTemplate().templateFor(this);
     }
 }

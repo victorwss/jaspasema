@@ -44,7 +44,7 @@ public final class ErrorOutput implements Serializable {
      * @param status The HTTP status code.
      * @param message The error message.
      * @param exceptionCauseName The cause exception name.
-     * @throws IllegalArgumentException If {@code message} or {@code exceptionName} are {@code null}.
+     * @throws IllegalArgumentException If {@code message} or {@code exceptionCauseName} are {@code null}.
      */
     public ErrorOutput(int status, @NonNull String message, @NonNull String exceptionCauseName) {
         this.status = status;

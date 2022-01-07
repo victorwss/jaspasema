@@ -41,7 +41,7 @@ public class HttpJsonRemapper implements ExceptionRemapper {
         } catch (ClassCastException e) {
             throw new IllegalArgumentException(e);
         }
-        var solution = HttpException.convert(method, trouble);
+        var solution = HttpException.convert(trouble);
         String json;
         try {
             json = JsonTypesProcessor.writeJson(solution.output());

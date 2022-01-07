@@ -14,11 +14,21 @@ public class UnprocessableRequestException extends HttpException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates an instance specifying which is the offending method and what was the raised error.
+     * Creates an instance specifying what was the raised error.
      * @param cause The raised error.
      * @throws IllegalArgumentException If {@code cause} is {@code null}.
      */
     public UnprocessableRequestException(/*@NonNull*/ Throwable cause) {
         super(422, cause);
+    }
+
+    /**
+     * Creates an instance specifying what was the raised error and with a custom message.
+     * @param message The detail message.
+     * @param cause The raised error.
+     * @throws IllegalArgumentException If {@code cause} is {@code null}.
+     */
+    public UnprocessableRequestException(/*@NonNull*/ String message, /*@NonNull*/ Throwable cause) {
+        super(422, message, cause);
     }
 }

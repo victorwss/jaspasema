@@ -31,13 +31,26 @@ public class AlreadyExistsException extends HttpException {
     private final String key;
 
     /**
-     * Constructs an instance specifiying a method as the cause of this exception.
+     * Constructs an instance specifiying which entity caused this exception.
      * @param entityType The type of the entity that was found.
      * @param key The name of the entity that already exists.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
      */
     public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull String key) {
         super(409);
+        this.entityType = entityType;
+        this.key = key;
+    }
+
+    /**
+     * Constructs an instance specifiying which entity caused this exception with a custom message.
+     * @param entityType The type of the entity that was found.
+     * @param key The name of the entity that already exists.
+     * @param message The detail message.
+     * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
+     */
+    public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull String key, /*@NonNull*/ String message) {
+        super(409, message);
         this.entityType = entityType;
         this.key = key;
     }

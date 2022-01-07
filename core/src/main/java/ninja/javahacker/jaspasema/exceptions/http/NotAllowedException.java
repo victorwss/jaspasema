@@ -1,5 +1,6 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
+import lombok.NonNull;
 import lombok.ToString;
 
 /**
@@ -13,9 +14,17 @@ public class NotAllowedException extends HttpException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Sole constructor.
+     * Simple constructor.
      */
     public NotAllowedException() {
         super(403);
+    }
+
+    /**
+     * Constructor featuring a custom message.
+     * @param message The detail message.
+     */
+    public NotAllowedException(@NonNull String message) {
+        super(403, message);
     }
 }

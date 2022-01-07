@@ -10,7 +10,7 @@ plugins {
 
 allprojects {
     group = "ninja.javahacker.jaspasema"
-    version = "0.7.0-2021.10.27"
+    version = "0.7.0-2022.01.07"
 }
 
 var versionJavaCompiler = "10"
