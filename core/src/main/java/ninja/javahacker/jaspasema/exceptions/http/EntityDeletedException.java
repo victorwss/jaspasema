@@ -37,10 +37,10 @@ public class EntityDeletedException extends HttpException {
      * @param key The name of the entity that was deleted.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} are {@code null}.
      */
-    public EntityDeletedException(@NonNull Class<?> entityType, @NonNull String key) {
+    public EntityDeletedException(@NonNull Class<?> entityType, @NonNull Object key) {
         super(410);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**
@@ -50,10 +50,10 @@ public class EntityDeletedException extends HttpException {
      * @param message The detail message.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
      */
-    public EntityDeletedException(@NonNull Class<?> entityType, @NonNull String key, /*@NonNull*/ String message) {
+    public EntityDeletedException(@NonNull Class<?> entityType, @NonNull Object key, /*@NonNull*/ String message) {
         super(410, message);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**

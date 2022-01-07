@@ -37,10 +37,10 @@ public class NotFoundException extends HttpException {
      * @param key The name of the entity that was expected to be found.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} are {@code null}.
      */
-    public NotFoundException(@NonNull Class<?> entityType, @NonNull String key) {
+    public NotFoundException(@NonNull Class<?> entityType, @NonNull Object key) {
         super(404);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**
@@ -50,10 +50,10 @@ public class NotFoundException extends HttpException {
      * @param message The detail message.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
      */
-    public NotFoundException(@NonNull Class<?> entityType, @NonNull String key, /*@NonNull*/ String message) {
+    public NotFoundException(@NonNull Class<?> entityType, @NonNull Object key, /*@NonNull*/ String message) {
         super(404, message);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**

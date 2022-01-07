@@ -36,10 +36,10 @@ public class AlreadyExistsException extends HttpException {
      * @param key The name of the entity that already exists.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
      */
-    public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull String key) {
+    public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull Object key) {
         super(409);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**
@@ -49,10 +49,10 @@ public class AlreadyExistsException extends HttpException {
      * @param message The detail message.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
      */
-    public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull String key, /*@NonNull*/ String message) {
+    public AlreadyExistsException(@NonNull Class<?> entityType, @NonNull Object key, /*@NonNull*/ String message) {
         super(409, message);
         this.entityType = entityType;
-        this.key = key;
+        this.key = String.valueOf(key);
     }
 
     /**
