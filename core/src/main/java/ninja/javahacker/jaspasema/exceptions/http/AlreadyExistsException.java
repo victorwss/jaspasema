@@ -1,5 +1,8 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
@@ -53,6 +56,33 @@ public class AlreadyExistsException extends HttpException {
         super(409, message);
         this.entityType = entityType;
         this.key = String.valueOf(key);
+    }
+
+    /**
+     * Creates a function that receives a {@code int} key and produces an instance of {@code AlreadyExistsException}.
+     * @param entityType The type of the entity that was found.
+     * @return The aforementioned function.
+     */
+    public static IntFunction<AlreadyExistsException> intKey(@NonNull Class<?> entityType) {
+        return k -> new AlreadyExistsException(entityType, k);
+    }
+
+    /**
+     * Creates a function that receives a {@code long} key and produces an instance of {@code AlreadyExistsException}.
+     * @param entityType The type of the entity that was found.
+     * @return The aforementioned function.
+     */
+    public static LongFunction<AlreadyExistsException> longKey(@NonNull Class<?> entityType) {
+        return k -> new AlreadyExistsException(entityType, k);
+    }
+
+    /**
+     * Creates a function that receives an object key and produces an instance of {@code AlreadyExistsException}.
+     * @param entityType The type of the entity that was found.
+     * @return The aforementioned function.
+     */
+    public static Function<String, AlreadyExistsException> key(@NonNull Class<?> entityType) {
+        return k -> new AlreadyExistsException(entityType, k);
     }
 
     /**

@@ -1,5 +1,8 @@
 package ninja.javahacker.jaspasema.exceptions.http;
 
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
@@ -45,7 +48,7 @@ public class EntityDeletedException extends HttpException {
 
     /**
      * Constructs an instance specifiying which entity caused this exception with a custom message.
-     * @param entityType The type of the entity that was found.
+     * @param entityType The type of the entity that was deleted.
      * @param key The name of the entity that already exists.
      * @param message The detail message.
      * @throws IllegalArgumentException If {@code entityType} or {@code key} is {@code null}.
@@ -54,6 +57,33 @@ public class EntityDeletedException extends HttpException {
         super(410, message);
         this.entityType = entityType;
         this.key = String.valueOf(key);
+    }
+
+    /**
+     * Creates a function that receives a {@code int} key and produces an instance of {@code EntityDeletedException}.
+     * @param entityType The type of the entity that was deleted.
+     * @return The aforementioned function.
+     */
+    public static IntFunction<EntityDeletedException> intKey(@NonNull Class<?> entityType) {
+        return k -> new EntityDeletedException(entityType, k);
+    }
+
+    /**
+     * Creates a function that receives a {@code long} key and produces an instance of {@code EntityDeletedException}.
+     * @param entityType The type of the entity that was deleted.
+     * @return The aforementioned function.
+     */
+    public static LongFunction<EntityDeletedException> longKey(@NonNull Class<?> entityType) {
+        return k -> new EntityDeletedException(entityType, k);
+    }
+
+    /**
+     * Creates a function that receives an object key and produces an instance of {@code EntityDeletedException}.
+     * @param entityType The type of the entity that was deleted.
+     * @return The aforementioned function.
+     */
+    public static Function<String, EntityDeletedException> key(@NonNull Class<?> entityType) {
+        return k -> new EntityDeletedException(entityType, k);
     }
 
     /**
