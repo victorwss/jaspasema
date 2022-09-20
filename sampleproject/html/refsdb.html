@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Refs - Sistema de gestão de livros</title>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#tabela-editoras').DataTable( {
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        "url": "http://localhost:8083/scripts/post.php",
+                        "type": "POST"
+                    },
+                    "columns": [
+                        { "data": "first_name" },
+                        { "data": "last_name" },
+                        { "data": "position" },
+                        { "data": "office" },
+                        { "data": "start_date" },
+                        { "data": "salary" }
+                    ]
+                } );
+            } );
+        </script>
+    </head>
+    <body>
+        <div id="editoras">
+            <div class="titulo-area">Editoras</div>
+            <div id="tabela-editoras" class="tabela"></div>
+        </div>
+    </body>
+</html>
