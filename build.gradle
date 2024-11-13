@@ -1,63 +1,87 @@
 plugins {
-    id("com.github.spotbugs") version "4.7.5"
-    id "java-library"
-    id "maven-publish"
-    id "checkstyle"
-    id "signing"
-    id "jacoco"
-    id "pmd"
+    id("com.github.spotbugs") version "6.0.22"
+    id("java-library")
+    id("maven-publish")
+    id("checkstyle")
+    id("signing")
+    id("jacoco")
+    id("pmd")
+    id("project-report")
 }
 
 allprojects {
     group = "ninja.javahacker.jaspasema"
-    version = "0.7.0-2021.09.20"
+    version = "1.1.0-2024.11.10"
 }
 
-def versionJavaCompiler = "10"
+def repoUrl = "file:///${System.getenv('maven.repo.local')}".replace("\\", "/")
+
+def versionJavaCompiler = "17"
 def doclint = true
 
-def versionApiguardian = "1.1.1"
-def versionCheckstyle = "9.0"
-def versionFindSecBugs = "1.11.0"
-def versionHibernate = "5.5.7.Final" //"6.0.0.Alpha9"
-def versionJackson = "2.12.5"
-def versionJaCoCo = "0.8.7"
-def versionJavalin = "3.8.0"         //"4.0.1"
-def versionJaxb = "2.4.0-b180830.0359"
-def versionJakartaJpa = "2.2.3"      //"3.0.0"
-def versionJcip = "1.0"
-def versionJpaSimpleTransactions = "1.0.0-2021.09.20"
-def versionJsr305 = "3.0.2"
-def versionJunit = "5.8.0"
-def versionLombok = "edge-SNAPSHOT"  //"1.18.22"
-def versionMocker = "1.1.0-2021.09.20"
-def versionMySql = "8.0.26"
-def versionPmd = "6.38.0"
-def versionReflections = "0.9.12"
-def versionReifiedGenerics = "1.1.0-2021.09.20"
-def versionSbContrib = "7.4.7"
-def versionServlet = "3.1.0"
-def versionSpotBugs = "4.4.1"
-def versionSlf4j = "1.8.0-beta4"     //"2.0.0-alpha5"
+def versionApiguardian = "1.1.2"
+def versionAsm         = "9.7"
+def versionCheckstyle  = "10.18.2"
+def versionEclipselink = "5.0.0-B03"
+def versionFindSecBugs = "1.14.0-SNAPSHOT"
+def versionJackson     = "2.18.1"
+def versionJaCoCo      = "0.8.12"
+def versionJavalin     = "6.3.0"
+def versionJaxb        = "4.0.5"
+def versionJakartaAnno = "3.0.0"
+def versionJakartaCdi  = "4.1.0"
+def versionJakartaEl   = "6.0.1"
+def versionJakartaInj  = "2.0.1"
+def versionJakartaInt  = "2.2.0"
+def versionJakartaJpa  = "3.2.0"
+def versionJakartaJta  = "2.0.1"
+def versionJcip        = "1.0-1"
+def versionJunit       = "5.11.2"
+def versionJunitPlatf  = "1.11.2"
+def versionLombok      = "1.18.35"
+def versionMySql       = "9.1.0"
+def versionPmd         = "7.6.0"
+def versionReflections = "0.10.2"
+def versionSbContrib   = "7.6.5"
+def versionServlet     = "6.1.0"
+def versionSpotBugs    = "4.8.6"
+def versionSlf4j       = "2.0.16"
 
-// Do not change anything below here.
+def versionMocker                = version
+def versionJpaSimpleTransactions = version
+def versionReifiedGenerics       = version
 
 println("Using Java " + org.gradle.api.JavaVersion.current() + ".")
+println("Local repo: ${repoUrl}")
 
 allprojects {
     configurations {
         scm
+        doc {
+            transitive(false)
+        }
     }
 
     repositories {
         flatDir {
-            dirs("libs")
+            dirs("../libs")
         }
-        mavenLocal()
-        mavenCentral()
         maven {
-            url("https://projectlombok.org/edge-releases")
+            url(repoUrl)
         }
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url("https://maven.cleanroommc.com/")
+        }
+        if ("edge" in versionLombok) {
+            maven {
+                url("https://projectlombok.org/edge-releases")
+            }
+        }
+    }
+
+    task delombok {
     }
 }
 
@@ -69,61 +93,90 @@ subprojects {
     apply(plugin: "signing")
     apply(plugin: "jacoco")
     apply(plugin: "pmd")
+    apply(plugin: "project-report")
 
     dependencies {
 
-        // Jackson
-        api(group: "com.fasterxml.jackson.core", name: "jackson-core", version: versionJackson)
-        api(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: versionJackson)
-        api(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: versionJackson)
-        api(group: "com.fasterxml.jackson.module", name: "jackson-module-parameter-names", version: versionJackson)
-        api(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310", version: versionJackson)
-        api(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8", version: versionJackson)
+        // Jackson.
+        api(group: "com.fasterxml.jackson.core"    , name: "jackson-core"                  , version: versionJackson)
+        api(group: "com.fasterxml.jackson.core"    , name: "jackson-databind"              , version: versionJackson)
+        api(group: "com.fasterxml.jackson.core"    , name: "jackson-annotations"           , version: versionJackson)
+        api(group: "com.fasterxml.jackson.module"  , name: "jackson-module-parameter-names", version: versionJackson)
+        api(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310"       , version: versionJackson)
+        api(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8"         , version: versionJackson)
 
-        // Javalin
+        // Javalin.
         api(group: "io.javalin", name: "javalin", version: versionJavalin)
 
-        // JUnit
-        testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: versionJunit)
-        testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: versionJunit)
-        testRuntimeOnly(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: versionJunit)
-        testCompileOnly(group: "org.apiguardian", name: "apiguardian-api", version: versionApiguardian)
+        // JUnit.
+        testImplementation(group: "org.junit.platform", name: "junit-platform-launcher", version: versionJunitPlatf )
+        testImplementation(group: "org.junit.jupiter" , name: "junit-jupiter-api"      , version: versionJunit      )
+        testImplementation(group: "org.junit.jupiter" , name: "junit-jupiter-params"   , version: versionJunit      )
+        testImplementation(group: "org.junit.jupiter" , name: "junit-jupiter-engine"   , version: versionJunit      )
+        testImplementation(group: "org.apiguardian"   , name: "apiguardian-api"        , version: versionApiguardian)
 
-        // Lombok
-        annotationProcessor(group: "org.projectlombok", name: "lombok", version: versionLombok)
-        compileOnlyApi(group: "org.projectlombok", name: "lombok", version: versionLombok)
+        // Lombok.
+        annotationProcessor    (group: "org.projectlombok", name: "lombok", version: versionLombok)
+        compileOnlyApi         (group: "org.projectlombok", name: "lombok", version: versionLombok)
         testAnnotationProcessor(group: "org.projectlombok", name: "lombok", version: versionLombok)
-        testCompileOnly(group: "org.projectlombok", name: "lombok", version: versionLombok)
+        testCompileOnly        (group: "org.projectlombok", name: "lombok", version: versionLombok)
 
-        // Reified-Generics
+        // Reified-Generics.
         api(group: "ninja.javahacker", name: "reified-generic", version: versionReifiedGenerics)
 
-        // SpotBugs + plugins
-        spotbugs(group: "com.github.spotbugs", name: "spotbugs", version: versionSpotBugs)
-        spotbugs(group: "org.slf4j", name: "slf4j-api", version: versionSlf4j)
-        spotbugs(group: "org.slf4j", name: "slf4j-simple", version: versionSlf4j)
+        // SLF4J.
+        implementation(group: "org.slf4j", name: "slf4j-api"   , version: versionSlf4j)
+        implementation(group: "org.slf4j", name: "slf4j-simple", version: versionSlf4j)
+
+        // SpotBugs + plugins + dependencies.
+        compileOnlyApi (group: "com.github.stephenc.jcip"  , name: "jcip-annotations"    , version: versionJcip       )
+        compileOnlyApi (group: "com.github.spotbugs"       , name: "spotbugs-annotations", version: versionSpotBugs   )
+        spotbugsPlugins(group: "com.h3xstream.findsecbugs" , name: "findsecbugs-plugin"  , version: versionFindSecBugs)
+        spotbugsPlugins(group: "com.mebigfatguy.sb-contrib", name: "sb-contrib"          , version: versionSbContrib  )
+        spotbugs(group: "com.github.spotbugs", name: "spotbugs"    , version: versionSpotBugs)
+        spotbugs(group: "org.slf4j"          , name: "slf4j-api"   , version: versionSlf4j   )
+        spotbugs(group: "org.slf4j"          , name: "slf4j-simple", version: versionSlf4j   )
+        spotbugs(group: "org.ow2.asm"        , name: "asm"         , version: versionAsm     )
         spotbugs(configurations.spotbugsPlugins.dependencies)
-        compileOnlyApi(group: "net.jcip", name: "jcip-annotations", version: versionJcip)
-        compileOnlyApi(group: "com.github.spotbugs", name: "spotbugs-annotations", version: versionSpotBugs)
-        testCompileOnly(group: "net.jcip", name: "jcip-annotations", version: versionJcip)
-        testCompileOnly(group: "com.github.spotbugs", name: "spotbugs-annotations", version: versionSpotBugs)
-        spotbugsPlugins(group: "com.h3xstream.findsecbugs", name: "findsecbugs-plugin", version: versionFindSecBugs)
-        spotbugsPlugins(group: "com.mebigfatguy.sb-contrib", name: "sb-contrib", version: versionSbContrib)
+        spotbugs(configurations.apiElements.dependencies    )
     }
 
-    configurations.compileOnlyApi.setCanBeResolved(true)
-    configurations.implementation.setCanBeResolved(true)
-    configurations.testCompileOnly.setCanBeResolved(true)
-    configurations.testImplementation.setCanBeResolved(true)
+    delombok {
+        description = "Delomboks the source code."
+        doLast {
+            configurations {
+                delombokAll {
+                    extendsFrom(compileClasspath)
+                    canBeResolved = true
+                }
+            }
+            def justDelombok = "${configurations.annotationProcessor.asPath};"
+            def delombokPath = "${configurations.delombokAll.asPath};"
+            ant.mkdir(dir: "build/src-delomboked")
+            ant.taskdef(name: "delombok", classname: "lombok.delombok.ant.Tasks\$Delombok", classpath: justDelombok)
+            ant.delombok(verbose: "false", encoding: "UTF-8", to: "build/src-delomboked", from: "src/main/java", modulepath: delombokPath)
+        }
+    }
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
         options.debug = true
         options.fork = true
-        options.compilerArgs << "-parameters" << "-Xlint:all,-processing,-requires-transitive-automatic,-requires-automatic,-missing-explicit-ctor" << "-Xmaxwarns" << "1000" << "-Xmaxerrs" << "1000"
+        options.compilerArgs << "-parameters"
+        options.compilerArgs << "-Xlint:all,-processing"
+        options.compilerArgs << "-Xmaxwarns" << "1000"
+        options.compilerArgs << "-Xmaxerrs" << "1000"
+        doFirst {
+            options.compilerArgs += [
+                "--module-path", classpath.asPath
+            ]
+            classpath = files()
+        }
     }
 
     compileJava {
+        dependsOn(delombok)
+        source = ["build/src-delomboked"]
         sourceCompatibility = versionJavaCompiler
         targetCompatibility = versionJavaCompiler
         if (doclint) {
@@ -131,26 +184,16 @@ subprojects {
         } else {
             options.compilerArgs << "-Xdoclint:none"
         }
-        doFirst {
-            //println("\nClasspath + Modulepath compileOnlyApi:;${configurations.compileOnlyApi.asPath}".replaceAll(";+", ";").replace(";", "\n   "))
-            //println("\nClasspath + Modulepath implementation:;${configurations.implementation.asPath}".replaceAll(";+", ";").replace(";", "\n   "))
-            options.compilerArgs += [
-                "--module-path", "${configurations.compileOnlyApi.asPath};${configurations.implementation.asPath}".replaceAll(";+", ";")
-            ]
-            classpath = files()
-        }
     }
 
-    task delombok {
-        description = "Delomboks the source code."
-        doLast {
-            def delombokPath = "${configurations.compileOnlyApi.asPath};${configurations.implementation.asPath}"
-            ant.mkdir(dir: "build/src-delomboked")
-            ant.taskdef(name: "delombok", classname: "lombok.delombok.ant.Tasks\$Delombok", classpath: delombokPath)
-            ant.delombok(verbose: "false", encoding: "UTF-8", to: "build/src-delomboked", from: "src/main/java", modulepath: delombokPath)
-        }
+    compileTestJava {
+        dependsOn(compileJava)
+        sourceCompatibility = org.gradle.api.JavaVersion.current()
+        targetCompatibility = org.gradle.api.JavaVersion.current()
+        options.compilerArgs << "-Xdoclint:none"
     }
-    tasks.withType(Javadoc) {
+
+    javadoc {
         dependsOn(delombok)
         source = ["build/src-delomboked"]
         options.encoding = "UTF-8"
@@ -162,7 +205,7 @@ subprojects {
         options.addBooleanOption("html5", true)
         options.tags = ["apiNote:a:API Note:", "implSpec:a:Implementation Requirements:", "implNote:a:Implementation Note:"]
         if (doclint) {
-            //options.addBooleanOption("Xdoclint:all/protected", true)
+            options.addBooleanOption("Xdoclint:all", true)
         } else {
             options.addBooleanOption("Xdoclint:none", true)
         }
@@ -187,7 +230,7 @@ subprojects {
         configProperties = [
             "checkstyle.cache.file": "${buildDir}/checkstyle.cache",
         ]
-        ignoreFailures = true
+        ignoreFailures = false
         showViolations = true
     }
 
@@ -198,8 +241,8 @@ subprojects {
 
     spotbugs {
         toolVersion = versionSpotBugs
-        effort = "max"
-        reportLevel = "low"
+        effort = com.github.spotbugs.snom.Effort.MAX
+        reportLevel = com.github.spotbugs.snom.Confidence.valueOf("LOW")
         omitVisitors = ["WeakExceptionMessaging", "OverlyPermissiveMethod"]
         ignoreFailures = true
     }
@@ -212,23 +255,27 @@ subprojects {
     }
 
     jar {
+        dependsOn(compileJava)
         duplicatesStrategy = "exclude"
     }
 
     task sourcesJar(type: Jar) {
         from(sourceSets.main.allSource)
-        classifier("sources")
+        archiveClassifier = "sources"
     }
 
     task javadocJar(type: Jar) {
-        from(javadoc)
-        classifier("javadoc")
+        dependsOn(javadoc)
+        dependsOn(sourcesJar)
+        archiveClassifier = "javadoc"
     }
 
     test {
         useJUnitPlatform()
         finalizedBy(jacocoTestReport)
-        ignoreFailures = true
+        ignoreFailures = false
+        defaultCharacterEncoding = "UTF-8"
+        testLogging.showStandardStreams = true
     }
 
     jacoco {
@@ -240,6 +287,7 @@ subprojects {
         reports {
             xml.required = false
             csv.required = false
+            html.required = true
         }
     }
 
@@ -260,57 +308,72 @@ subprojects {
             }
         }
         repositories {
-            mavenLocal()
+            maven {
+                url = repoUrl
+            }
         }
     }
 
     spotbugsTest.enabled = false
     pmdTest.enabled = false
+    test.enabled = true
 }
 
-task mergedJavadoc(type: Javadoc) {
+/*task mergedJavadoc(type: Javadoc) {
+    dependsOn(":core:delombok")
+    dependsOn(":app:delombok")
+    dependsOn(":sampleproject:delombok")
+
     description = "Creates Javadoc from all the projects."
     title = "All modules"
     destinationDir = new File(project.buildDir, "merged-javadoc")
 
     // Note: The closures below are executed lazily.
     source {
-       subprojects*.sourceSets*.main*.allSource
+       subprojects*.sourceSets*.main*.delombokAll
     }
     classpath.from {
         subprojects*.configurations*.compile*.copyRecursive({ !(it instanceof ProjectDependency); })*.resolve()
     }
-}
+}*/
 
 project(":core") {
     def moduleName = "ninja.javahacker.jaspasema.core"
     description = "Jaspasema Core"
+
     jar {
         archiveBaseName = "jaspasema-core"
         inputs.property("moduleName", moduleName)
+    }
+
+    compileJava {
+        dependsOn(":core:delombok")
     }
 }
 
 project(":app") {
     def moduleName = "ninja.javahacker.jaspasema.app"
     description = "Jaspasema App"
+
     jar {
         archiveBaseName = "jaspasema-app"
         inputs.property("moduleName", moduleName)
     }
+
     dependencies {
         api(project(":core"))
 
-        // Reflections
+        // Reflections.
         implementation(group: "org.reflections", name: "reflections", version: versionReflections)
 
-        // JPA
+        // JPA.
         api(group: "jakarta.persistence", name: "jakarta.persistence-api", version: versionJakartaJpa)
 
-        // JPA Simple Transactions
+        // JPA Simple Transactions.
         api(group: "ninja.javahacker.jpasimpletransactions", name: "core", version: versionJpaSimpleTransactions)
     }
-    compileJava {
+
+    delombok {
         dependsOn(":core:jar")
     }
 }
@@ -319,30 +382,34 @@ project(":sampleproject") {
     apply(plugin: "application")
     def moduleName = "ninja.javahacker.jaspasema.sampleproject"
     description = "Jaspasema Sample Project"
-    mainClassName = "ninja.javahacker.jaspasema.sampleproject.SampleProject"
+
+    application {
+        mainClass = "ninja.javahacker.jaspasema.sampleproject.SampleProject"
+    }
+
     jar {
         archiveBaseName = "jaspasema-sampleproject"
         inputs.property("moduleName", moduleName)
     }
+
     dependencies {
         implementation(project(":app"))
 
-        // MySQL / MariaDB
-        implementation(group: "mysql", name: "mysql-connector-java", version: versionMySql)
+        // MySQL / MariaDB.
+        api(group: "com.mysql", name: "mysql-connector-j", version: versionMySql)
 
-        // Hibernate
-        implementation(group: "org.hibernate", name: "hibernate-core", version: versionHibernate) {
-            exclude(group: "javax.persistence", module: "javax.persistence-api")
-        }
+        // Eclipselink.
+        implementation(group: "org.eclipse.persistence", name: "org.eclipse.persistence.jpa", version: versionEclipselink)
 
-        // JPA Simple Transactions
-        api(group: "ninja.javahacker.jpasimpletransactions", name: "core", version: versionJpaSimpleTransactions)
-        api(group: "ninja.javahacker.jpasimpletransactions", name: "hibernate", version: versionJpaSimpleTransactions)
+        // JPA Simple Transactions.
+        api(group: "ninja.javahacker.jpasimpletransactions", name: "core"       , version: versionJpaSimpleTransactions)
+        api(group: "ninja.javahacker.jpasimpletransactions", name: "eclipselink", version: versionJpaSimpleTransactions)
 
-        // Servlet
-        implementation(group: "javax.servlet", name: "javax.servlet-api", version: versionServlet)
+        // Servlet.
+        implementation(group: "jakarta.servlet", name: "jakarta.servlet-api", version: versionServlet)
     }
-    compileJava {
+
+    delombok {
         dependsOn(":app:jar")
     }
 }

@@ -32,7 +32,7 @@ public class EntityDeletedException extends HttpException {
     private final String key;
 
     /**
-     * Constructs an instance specifiying a method as the cause of this exception.
+     * Constructs an instance specifying a method as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param entityType The type of the entity that was deleted.
      * @param key The name of the entity that was deleted.

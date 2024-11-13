@@ -53,10 +53,12 @@ public @interface QueryJsons {
      */
     public static class Processor implements ParamProcessor<QueryJsons> {
 
-        private static final String TEMPLATE = ""
-                + "for (let __elem in #JS#) {\n"
-                + "    __targetUrl += '&#PN#=' + encodeURI(JSON.stringify(#JS#[__elem]));\n"
-                + "}";
+        private static final String TEMPLATE =
+                """
+                    for (let __elem in #JS#) {\n
+                        __targetUrl += '&#PN#=' + encodeURI(JSON.stringify(#JS#[__elem]));\n
+                    };
+                """;
 
         /**
          * Sole constructor.

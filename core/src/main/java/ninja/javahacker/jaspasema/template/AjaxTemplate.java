@@ -14,7 +14,7 @@ import ninja.javahacker.jaspasema.service.ServiceMethodBuilder;
  * @author Victor Williams Stafusa da Silva
  */
 @Value
-public class JQueryTemplate implements ApiTemplate {
+public class AjaxTemplate implements ApiTemplate {
 
     private static final String METHOD_TEMPLATE =
             """
@@ -90,7 +90,7 @@ public class JQueryTemplate implements ApiTemplate {
 
         var api = sc.getServiceBuilders()
                 .stream()
-                .map(JQueryTemplate::forService)
+                .map(AjaxTemplate::forService)
                 .collect(Collectors.joining());
 
         return output.replace("#SERVICES#", api);
@@ -99,7 +99,7 @@ public class JQueryTemplate implements ApiTemplate {
     @NonNull
     private static String forService(@NonNull ServiceBuilder sb) {
         var output = SERVICE_TEMPLATE.replace("#SERVICE#", sb.getServiceName());
-        var calls = sb.getMethods().stream().map(JQueryTemplate::forMethod).collect(Collectors.joining());
+        var calls = sb.getMethods().stream().map(AjaxTemplate::forMethod).collect(Collectors.joining());
         return output.replace("#METHODS#", calls);
     }
 

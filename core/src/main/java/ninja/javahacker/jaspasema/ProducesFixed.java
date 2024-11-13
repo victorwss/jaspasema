@@ -60,7 +60,7 @@ public @interface ProducesFixed {
      * The class that is responsible for processing the {@link ProducesFixed} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ResultProcessor<ProducesFixed, Object> {
+    public static final class Processor implements ResultProcessor<ProducesFixed, Object> {
 
         /**
          * Sole constructor.
@@ -71,14 +71,14 @@ public @interface ProducesFixed {
         /**
          * {@inheritDoc}
          * @param <E> {@inheritDoc}
-         * @param meth {@inheritDoc}
+         * @param annotated {@inheritDoc}
          * @return {@inheritDoc}
          * @throws BadServiceMappingException {@inheritDoc}
          */
         @NonNull
         @Override
-        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesFixed, E> meth) throws BadServiceMappingException {
-            var annotation = meth.getAnnotation();
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesFixed, E> annotated) throws BadServiceMappingException {
+            var annotation = annotated.getAnnotation();
             ResultProcessor.Worker<E> w = (ctx, v) -> {
                 ctx.result(annotation.value());
                 ctx.contentType(annotation.type());

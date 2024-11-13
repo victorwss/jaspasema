@@ -20,7 +20,7 @@ import ninja.javahacker.jaspasema.exceptions.retvalue.MalformedReturnValueExcept
 public interface ResultProcessor<A extends Annotation, B> {
 
     @NonNull
-    public <E extends B> Stub<E> prepare(@NonNull AnnotatedMethod<A, E> meth) throws BadServiceMappingException;
+    public <E extends B> Stub<E> prepare(@NonNull AnnotatedMethod<A, E> annotated) throws BadServiceMappingException;
 
     @FunctionalInterface
     public interface Worker<E> {

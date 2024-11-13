@@ -77,7 +77,7 @@ public @interface ProducesPlain {
      * The class that is responsible for processing the {@link ProducesPlain} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ResultProcessor<ProducesPlain, Object> {
+    public static final class Processor implements ResultProcessor<ProducesPlain, Object> {
 
         /**
          * Sole constructor.
@@ -88,22 +88,22 @@ public @interface ProducesPlain {
         /**
          * {@inheritDoc}
          * @param <E> {@inheritDoc}
-         * @param meth {@inheritDoc}
+         * @param annotated {@inheritDoc}
          * @return {@inheritDoc}
          * @throws BadServiceMappingException {@inheritDoc}
          */
         @NonNull
         @Override
-        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesPlain, E> meth) throws BadServiceMappingException {
-            var method = meth.getMethod();
-            var annotation = meth.getAnnotation();
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesPlain, E> annotated) throws BadServiceMappingException {
+            var method = annotated.getMethod();
+            var annotation = annotated.getAnnotation();
             var format = annotation.format();
-            var target = meth.getTarget();
+            var target = annotated.getTarget();
             var annotationClass = annotation.annotationType();
             if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesPlain.class);
 
             var parser = prepareIn(
-                    meth.getTarget(),
+                    annotated.getTarget(),
                     annotation.format(),
                     () -> new ReturnTypeRestrictionViolationException(method, annotationClass, AllowedTypes.DATE_TIME, target),
                     () -> new ReturnTypeRestrictionViolationException(method, annotationClass, AllowedTypes.SIMPLE, target),

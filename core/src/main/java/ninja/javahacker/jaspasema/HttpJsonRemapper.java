@@ -14,7 +14,13 @@ import ninja.javahacker.jaspasema.processor.ReturnedOk;
 /**
  * @author Victor Williams Stafusa da Silva
  */
-public class HttpJsonRemapper implements ExceptionRemapper {
+public final class HttpJsonRemapper implements ExceptionRemapper {
+
+    /**
+     * Sole constructor.
+     */
+    public HttpJsonRemapper() {
+    }
 
     /**
      * {@inheritDoc}

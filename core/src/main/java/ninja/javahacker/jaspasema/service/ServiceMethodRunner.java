@@ -23,17 +23,19 @@ import ninja.javahacker.reifiedgeneric.ReifiedGeneric;
 @Getter
 public final class ServiceMethodRunner<T> implements JaspasemaRoute {
 
-    private static final String PANIC = ""
-            + "<!DOCTYPE html>\n"
-            + "<html>\n"
-            + "  <head>\n"
-            + "    <title>SERIOUS ERROR 500</title>\n"
-            + "  </head>\n"
-            + "  <body>\n"
-            + "    <p>A very serious error happened when trying to handle another error. Sorry.</p>\n"
-            + "    <pre>$ERROR$</pre>\n"
-            + "  </body>\n"
-            + "</html>";
+    private static final String PANIC = 
+            """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>SERIOUS ERROR 500</title>
+              </head>
+              <body>
+                <p>A very serious error happened when trying to handle another error. Sorry.</p>
+                <pre>$ERROR$</pre>
+              </body>
+            </html>
+            """;
 
     @NonNull
     private final ReifiedGeneric<T> target;

@@ -4,7 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.service.JaspasemaRoute;
 import ninja.javahacker.jpasimpletransactions.Database;
@@ -89,7 +89,7 @@ public interface ConfiguredDatabase {
             @NonNull String... packageRoots)
     {
         var allClasses = new HashSet<Class<?>>(64);
-        for (String s : packageRoots) {
+        for (var s : packageRoots) {
             if (s == null) throw new IllegalArgumentException("Can't have a null package root.");
             allClasses.addAll(new Reflections(s).getTypesAnnotatedWith(Entity.class));
         }

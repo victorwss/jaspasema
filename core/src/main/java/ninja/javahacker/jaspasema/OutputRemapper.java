@@ -34,7 +34,7 @@ public @interface OutputRemapper {
      * The class that is responsible for processing the {@link ResultProcessor} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ResultProcessor<OutputRemapper, Object> {
+    public static final class Processor implements ResultProcessor<OutputRemapper, Object> {
 
         /**
          * Sole constructor.
@@ -45,15 +45,15 @@ public @interface OutputRemapper {
         /**
          * {@inheritDoc}
          * @param <E> {@inheritDoc}
-         * @param meth {@inheritDoc}
+         * @param annotated {@inheritDoc}
          * @return {@inheritDoc}
          * @throws BadServiceMappingException {@inheritDoc}
          */
         @NonNull
         @Override
-        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<OutputRemapper, E> meth) throws BadServiceMappingException {
-            var method = meth.getMethod();
-            var annotation = meth.getAnnotation();
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<OutputRemapper, E> annotated) throws BadServiceMappingException {
+            var method = annotated.getMethod();
+            var annotation = annotated.getAnnotation();
             var remapperClass = annotation.remapper();
             ExceptionRemapper f;
             try {
@@ -63,7 +63,7 @@ public @interface OutputRemapper {
             } catch (InvocationTargetException e) {
                 throw new RemapperConstructorException(method, remapperClass, e.getCause());
             }
-            f.validate(meth);
+            f.validate(annotated);
             return new Stub<>((b, c) -> f.remap(method, b, c), annotation.jQueryType());
         }
     }

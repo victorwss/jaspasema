@@ -189,7 +189,7 @@ public class PlainProcessorTest {
     public void testUriParams() throws Throwable {
         FwTester.reflect(fwt -> new Object() {
             @Post
-            @Path("/go/:a/xxx/:c/yyy/zzz/:b/qqqq")
+            @Path("/go/{a}/xxx/{c}/yyy/zzz/{b}/qqqq")
             public void blah(@UriPart int a, @UriPart String b, @UriPart byte c) {
                 Assertions.assertAll(
                         () -> Assertions.assertEquals(123, a),
@@ -332,7 +332,7 @@ public class PlainProcessorTest {
         session.put("sessionB", sessionObjectB);
         FwTester.reflect(fwt -> new Object() {
             @Post
-            @Path("/go/:xxx")
+            @Path("/go/{xxx}")
             public void blah(
                     @SessionParam Object sessionA,
                     @HeaderParam String header1,
@@ -375,7 +375,7 @@ public class PlainProcessorTest {
         var headers = List.of(h1, h2, h3, h4, h5);
         FwTester.reflect(fwt -> new Object() {
             @Post
-            @Path("/go/:u1/:u2")
+            @Path("/go/{u1}/{u2}")
             public void blah(
                     @HeaderParam(dateFormat = "dd/MM/uuuu") LocalDate h1,
                     @HeaderParam(dateFormat = "uuuu-MM-dd") LocalDate h2,

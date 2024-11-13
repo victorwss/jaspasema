@@ -46,6 +46,16 @@ public final class ServiceConfigurer {
         return ServiceConfigurer.make(Arrays.asList(instances));
     }
 
+    /**
+     * Creates an instance of the {@code ServiceConfigurer} containing all the instances of
+     * {@link JaspasemaDiscoverableService} found using the {@link ServiceLoader} mechanism.
+     * @return An instance of the {@code ServiceConfigurer} containing all the instances of
+     *     {@link JaspasemaDiscoverableService} found using the {@link ServiceLoader} mechanism.
+     * @throws BadServiceMappingException Some instance of {@link JaspasemaDiscoverableService} failed
+     *     to be loaded because it is not well-defined.
+     * @throws MalformedProcessorException Some instance of {@link JaspasemaDiscoverableService} failed
+     *     to be loaded because it is uses ill-behaved processors.
+     */
     @NonNull
     public static ServiceConfigurer loadAll()
             throws BadServiceMappingException,
@@ -62,35 +72,35 @@ public final class ServiceConfigurer {
 
     public void configure(@NonNull Javalin service) {
         serviceBuilders.forEach(sb -> sb.configure(service));
-        service.config.enableCorsForAllOrigins();
-        //configureCors(service);
+        //service.config.enableCorsForAllOrigins();
+        configureCors(service);
     }
 
-    /*private static void configureCors(@NonNull Javalin service) {
-        service.options("/*", rqrp -> {
+    @SuppressWarnings("pmd:AvoidLiteralsInIfCondition") // PMD is being overzealous.
+    private static void configureCors(@NonNull Javalin service) {
+        service.options("/*", ctx -> {
 
-            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            String accessControlRequestHeaders = ctx.header("Access-Control-Request-Headers");
             if (accessControlRequestHeaders != null) {
-                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+                ctx.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
             }
 
-            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            String accessControlRequestMethod = ctx.header("Access-Control-Request-Method");
             if (accessControlRequestMethod != null) {
-                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+                ctx.header("Access-Control-Allow-Methods", accessControlRequestMethod);
             }
 
-            return "OK";
+            ctx.result("OK");
         });
 
-        service.before((request, response) -> {
-            String origin = request.headers("Origin");
+        service.before(ctx -> {
+            String origin = ctx.header("Origin");
             if (origin == null || origin.isEmpty()) origin = "*";
             if ("null".equals(origin)) origin = "file://";
-            response.header("Access-Control-Allow-Origin", origin);
-            response.header("Access-Control-Allow-Credentials", "true");
-            response.header("Access-Control-Request-Method", "HEAD, GET, POST, PUT, DELETE, PATCH");
-            response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            //response.header("Access-Control-Allow-Headers", headers);
+            ctx.header("Access-Control-Allow-Origin", origin);
+            ctx.header("Access-Control-Allow-Credentials", "true");
+            ctx.header("Access-Control-Request-Method", "HEAD, GET, POST, PUT, DELETE, PATCH");
+            ctx.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         });
-    }*/
+    }
 }

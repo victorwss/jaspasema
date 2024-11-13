@@ -39,8 +39,9 @@ public class App {
     public App(@NonNull AppConfig config) throws BadServiceMappingException, MalformedProcessorException {
         this.config = config;
 
-        this.server = Javalin.create();
-        if (!config.getStaticFileLocation().isEmpty()) server.config.addStaticFiles("/" + config.getStaticFileLocation());
+        this.server = Javalin.create(jc -> {
+            if (!config.getStaticFileLocation().isEmpty()) jc.staticFiles.add("/" + config.getStaticFileLocation());
+        });
 
         this.configurer = ServiceConfigurer.loadAll().wrap(config.getDb()::transact).wrap(this::log);
         configurer.configure(server);
@@ -58,19 +59,22 @@ public class App {
         });
     }
 
-    private static final String DEFAULT_ERROR_HTML = ""
-            + "<!DOCTYPE html>\n"
-            + "<html>\n"
-            + "  <head>\n"
-            + "  <title>Error</title>\n"
-            + "  <body>\n"
-            + "    <h1>Error</h1>\n"
-            + "    <p>\n"
-            + "      <strong>OPS!</strong>\n"
-            + "    </p>\n"
-            + "    <pre>#ERROR_TYPE#</pre>\n"
-            + "  </body>\n"
-            + "</html>";
+    private static final String DEFAULT_ERROR_HTML =
+            """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Error</title>
+              </head>
+              <body>
+                <h1>Error</h1>
+                <p>
+                  <strong>OPS!</strong>
+                </p>
+                <pre>#ERROR_TYPE#</pre>
+              </body>
+            </html>
+            """;
 
     public void defaultExceptionHandler() {
         defaultExceptionHandler(DEFAULT_ERROR_HTML);

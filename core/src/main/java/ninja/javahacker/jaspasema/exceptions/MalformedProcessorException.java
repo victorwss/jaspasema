@@ -33,7 +33,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
     private final Class<?> processorClass;
 
     /**
-     * Constructs an instance specifiying both a method parameter and another exception as the cause of this exception.
+     * Constructs an instance specifying both a method parameter and another exception as the cause of this exception.
      * @param parameter The method parameter that is related to this exception.
      * @param badAnnotation Which annotation class was malconfigued.
      * @param processorClass Which processor class was malformed.
@@ -53,7 +53,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
     }
 
     /**
-     * Constructs an instance specifiying a method parameter as the cause of this exception.
+     * Constructs an instance specifying a method parameter as the cause of this exception.
      * @param parameter The method parameter that is related to this exception.
      * @param badAnnotation Which annotation class was malconfigued.
      * @param processorClass Which processor class was malformed.
@@ -71,7 +71,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
     }
 
     /**
-     * Constructs an instance specifiying both a method and another exception as the cause of this exception.
+     * Constructs an instance specifying both a method and another exception as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param badAnnotation Which annotation class was malconfigued.
      * @param processorClass Which processor class was malformed.
@@ -91,7 +91,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
     }
 
     /**
-     * Constructs an instance specifiying a method as the cause of this exception.
+     * Constructs an instance specifying a method as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param badAnnotation Which annotation class was malconfigued.
      * @param processorClass Which processor class was malformed.
@@ -109,7 +109,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
     }
 
     /**
-     * Constructs an instance specifiying both a declaring class and another exception as the cause of this exception.
+     * Constructs an instance specifying both a declaring class and another exception as the cause of this exception.
      * @param declaringClass The declaring class that is related to this exception.
      * @param badAnnotation Which annotation class was malconfigued.
      * @param processorClass Which processor class was malformed.
@@ -129,7 +129,7 @@ public abstract class MalformedProcessorException extends JaspasemaException {
     }
 
     /**
-     * Constructs an instance specifiying a declaring class as the cause of this exception.
+     * Constructs an instance specifying a declaring class as the cause of this exception.
      * @param declaringClass The declaring class that is related to this exception.
      * @param badAnnotation Which annotation class was malconfigued.
      * @param processorClass Which processor class was malformed.

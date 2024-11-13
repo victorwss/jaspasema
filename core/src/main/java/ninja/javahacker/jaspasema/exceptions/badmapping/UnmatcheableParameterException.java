@@ -12,7 +12,7 @@ public class UnmatcheableParameterException extends BadServiceMappingException {
     /**
      * Creates an instance specifying which is the offending parameter.
      * @param parameter The offending parameter.
-     * @throws IllegalArgumentException If {@link parameter} is {@code null}.
+     * @throws IllegalArgumentException If {@code parameter} is {@code null}.
      */
     public UnmatcheableParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);

@@ -36,44 +36,50 @@ public class ReturnMapper<E> {
     /**
      * Default HTML output when an error 200 is produced.
      */
-    public static final String DEFAULT_HTML_200 = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "    <title>OK 200</title>"
-            + "  </head>"
-            + "  <body>"
-            + "    <p>Whoa. It works. :)</p>"
-            + "  </body>"
-            + "</html>";
+    public static final String DEFAULT_HTML_200 =
+            """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>OK 200</title>
+              </head>
+              <body>
+                <p>Whoa. It works. :)</p>
+              </body>
+            </html>
+            """;
 
     /**
      * Default HTML output when an error 500 is produced.
      */
-    public static final String DEFAULT_HTML_ERROR_500 = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "    <title>ERROR 500</title>"
-            + "  </head>"
-            + "  <body>"
-            + "    <p>An unexpected error happened. Sorry.</p>"
-            + "  </body>"
-            + "</html>";
+    public static final String DEFAULT_HTML_ERROR_500 =
+            """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>ERROR 500</title>
+              </head>
+              <body>
+                <p>An unexpected error happened. Sorry.</p>
+              </body>
+            </html>
+            """;
 
     /**
      * Default HTML output when an error 400 is produced.
      */
-    public static final String DEFAULT_HTML_ERROR_400 = ""
-            + "<!DOCTYPE html>"
-            + "<html>"
-            + "  <head>"
-            + "    <title>ERROR 400</title>"
-            + "  </head>"
-            + "  <body>"
-            + "    <p>Duh! You sent a bad request.</p>"
-            + "  </body>"
-            + "</html>";
+    public static final String DEFAULT_HTML_ERROR_400 =
+            """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>ERROR 400</title>
+              </head>
+              <body>
+                <p>Duh! You sent a bad request.</p>
+              </body>
+            </html>
+            """;
 
     private static final ReifiedGeneric<Class<? extends Throwable>> TYPE =
             new Token<Class<? extends Throwable>>() {}.getReified();
@@ -84,7 +90,7 @@ public class ReturnMapper<E> {
     @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
     private static void dummy() {}
 
-    private static final Method DUMMY;
+    private static final Method DUMMY_METHOD;
     private static final ReturnMapper<Object> ROOT;
 
     static {
@@ -95,12 +101,12 @@ public class ReturnMapper<E> {
             throw new AssertionError(c);
         };
         try {
-            DUMMY = ReturnMapper.class.getDeclaredMethod("dummy");
-            Annotation[] base = DUMMY.getAnnotations();
+            DUMMY_METHOD = ReturnMapper.class.getDeclaredMethod("dummy");
+            Annotation[] base = DUMMY_METHOD.getAnnotations();
             var t = mapIt(
-                    DUMMY,
+                    DUMMY_METHOD,
                     ReifiedGeneric.of(Object.class),
-                    MalformedReturnProcessorException.onMethod(DUMMY),
+                    MalformedReturnProcessorException.onMethod(DUMMY_METHOD),
                     Optional.empty(),
                     base,
                     xxx1,
@@ -124,7 +130,7 @@ public class ReturnMapper<E> {
             MalformedReturnProcessorException
     {
         return mapIt(
-                DUMMY,
+                DUMMY_METHOD,
                 ReifiedGeneric.of(Object.class),
                 MalformedReturnProcessorException.onClass(targetClass),
                 Optional.of(ROOT),

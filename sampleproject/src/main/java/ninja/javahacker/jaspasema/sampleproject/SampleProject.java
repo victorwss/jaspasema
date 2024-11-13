@@ -16,7 +16,7 @@ import ninja.javahacker.jaspasema.template.AngularTemplate;
 import ninja.javahacker.jpasimpletransactions.Connector;
 import ninja.javahacker.jpasimpletransactions.Database;
 import ninja.javahacker.jpasimpletransactions.config.SchemaGenerationAction;
-import ninja.javahacker.jpasimpletransactions.hibernate.HibernateConnectorFactory;
+import ninja.javahacker.jpasimpletransactions.eclipselink.EclipselinkConnectorFactory;
 
 /**
  * @author Victor Williams Stafusa da Silva
@@ -25,30 +25,29 @@ import ninja.javahacker.jpasimpletransactions.hibernate.HibernateConnectorFactor
 public class SampleProject {
 
     public static void main(String[] args) throws BadServiceMappingException, MalformedProcessorException {
-        new SampleProject("SamplePU", 8083, 8084, 8085);
+        new SampleProject("SamplePU", 8083, 8084);
     }
 
     private final Connector conn;
     private final Javalin server;
-    private final Javalin staticFiles;
     private final Javalin adminServer;
 
-    public SampleProject(@NonNull String pu, int mainPort, int staticFilesPort, int adminPort) throws BadServiceMappingException, MalformedProcessorException {
+    public SampleProject(@NonNull String pu, int mainPort, int adminPort) throws BadServiceMappingException, MalformedProcessorException {
         log.info("Starting application...");
 
-        conn = new HibernateConnectorFactory()
+        conn = new EclipselinkConnectorFactory()
                 .withUrl("jdbc:mysql://localhost:3306/sample?zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;serverTimezone=UTC")
                 .withUser("root")
                 .withPassword("root")
                 .withSchemaGenerationAction(SchemaGenerationAction.NONE)
-                .withShowSql(true)
+                //.withShowSql(true)
                 .withDriver(com.mysql.cj.jdbc.Driver.class)
                 .connect();
                 // <property name="hibernate.hbm2ddl.auto" value="validate" />
 
         Database.setDefaultConnector(conn);
 
-        this.server = Javalin.create().start(mainPort);
+        this.server = Javalin.create(ctx -> ctx.staticFiles.add("/html")).start(mainPort);
 
         var sc = ServiceConfigurer
                 .forServices(new AuthorService(), new PublisherService(), new BookService())
@@ -61,14 +60,11 @@ public class SampleProject {
         server.exception(Exception.class, (t, ctx) -> {
             t.printStackTrace();
             try {
-                t.printStackTrace(ctx.res.getWriter());
+                t.printStackTrace(ctx.res().getWriter());
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
-
-        this.staticFiles = Javalin.create().start(staticFilesPort);
-        staticFiles.config.addStaticFiles("/html");
 
         this.adminServer = Javalin.create().start(adminPort);
         adminServer.get("/shutdown", this::shutdown);
@@ -84,7 +80,6 @@ public class SampleProject {
                 // Ignora.
             }
             server.stop();
-            staticFiles.stop();
             adminServer.stop();
             conn.close();
             log.info("Application finished.");

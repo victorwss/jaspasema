@@ -63,7 +63,7 @@ public @interface PlainBody {
      * The class that is responsible for processing the {@link PlainBody} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<PlainBody> {
+    public static final class Processor implements ParamProcessor<PlainBody> {
 
         /**
          * Sole constructor.

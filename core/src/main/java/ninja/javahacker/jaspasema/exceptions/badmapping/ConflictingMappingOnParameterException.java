@@ -14,7 +14,7 @@ public class ConflictingMappingOnParameterException extends BadServiceMappingExc
     /**
      * Creates an instance specifying which is the offending parameter.
      * @param parameter The offending parameter.
-     * @throws IllegalArgumentException If {@link parameter} is {@code null}.
+     * @throws IllegalArgumentException If {@code parameter} is {@code null}.
      */
     public ConflictingMappingOnParameterException(/*@NonNull*/ Parameter parameter) {
         super(parameter);

@@ -99,14 +99,11 @@ class FormatterMap {
     }
 
     private static boolean booleanParse(@NonNull String s) {
-        switch (s) {
-            case "true":
-                return true;
-            case "false":
-                return false;
-            default:
-                throw new IllegalArgumentException(s);
-        }
+        return switch (s) {
+            case "true" -> true;
+            case "false" -> false;
+            default -> throw new IllegalArgumentException(s);
+        };
     }
 
     @NonNull

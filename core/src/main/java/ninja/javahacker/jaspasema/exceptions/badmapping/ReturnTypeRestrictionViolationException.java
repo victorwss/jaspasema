@@ -49,7 +49,7 @@ public class ReturnTypeRestrictionViolationException extends BadServiceMappingEx
      * @param annotation The offending annotation class.
      * @param allowed The types that are allowed for the offending annotation class.
      * @param target The return type of the offending method.
-     * @throws IllegalArgumentException If {@link method}, {@link annotation}, {@link allowed} or {@link target} are {@code null}.
+     * @throws IllegalArgumentException If {@code method}, {@code annotation}, {@code allowed} or {@code target} are {@code null}.
      */
     public ReturnTypeRestrictionViolationException(
             /*@NonNull*/ Method method,

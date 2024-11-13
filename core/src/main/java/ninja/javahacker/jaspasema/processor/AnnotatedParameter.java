@@ -12,6 +12,8 @@ import ninja.javahacker.reifiedgeneric.Wrappers;
 
 /**
  * Packages information about some parameter, its type and its relevant annotation.
+ * @param <A> The type of the annotation.
+ * @param <E> The type of the parameter.
  * @author Victor Williams Stafusa da Silva
  */
 @Value

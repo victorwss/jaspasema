@@ -32,16 +32,18 @@ public class ShutdownAppConfig {
         this.adminPort = 0;
         this.apps = () -> List.of();
         this.logBye = ctx -> System.out.println("exiting");
-        this.shutdownString = () -> ""
-                + "<!DOCTYPE html>\n"
-                + "<html>\n"
-                + "  <head>\n"
-                + "    <title>Jaspasema</title>\n"
-                + "  </head>\n"
-                + "  <body>\n"
-                + "    <p>Bye.</p>\n"
-                + "  </body>\n"
-                + "</html>";
+        this.shutdownString = () ->
+                """
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>Jaspasema</title>
+                  </head>
+                  <body>
+                    <p>Bye.</p>
+                  </body>
+                </html>
+                """;
     }
 
     public static ShutdownAppConfig start() {

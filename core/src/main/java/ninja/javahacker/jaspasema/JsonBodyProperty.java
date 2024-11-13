@@ -51,7 +51,7 @@ public @interface JsonBodyProperty {
     /**
      * The class that is responsible for processing the {@link JsonBodyProperty} annotation.
      */
-    public static class Processor implements ParamProcessor<JsonBodyProperty> {
+    public static final class Processor implements ParamProcessor<JsonBodyProperty> {
 
         private static final String INSTRUCTION_TEMPLATE = "__data.#VAR# = #VAR#;";
 

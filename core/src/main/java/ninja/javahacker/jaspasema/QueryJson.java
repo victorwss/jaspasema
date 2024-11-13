@@ -61,7 +61,7 @@ public @interface QueryJson {
      * The class that is responsible for processing the {@link QueryJson} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<QueryJson> {
+    public static final class Processor implements ParamProcessor<QueryJson> {
 
         private static final String TEMPLATE = "targetUrl += '&#N#=' + encodeURI(JSON.stringify(#JS#));";
 

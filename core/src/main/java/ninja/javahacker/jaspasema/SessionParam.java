@@ -41,7 +41,7 @@ public @interface SessionParam {
      * The class that is responsible for processing the {@link SessionParam} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<SessionParam> {
+    public static final class Processor implements ParamProcessor<SessionParam> {
 
         /**
          * Sole constructor.

@@ -3,6 +3,8 @@ package ninja.javahacker.test.jaspasema;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -33,7 +35,12 @@ public class ApiTester {
             @NonNull @Singular List<Header> headers)
             throws IOException
     {
-        var url = new URL("http://localhost:" + port + path);
+        URL url;
+        try {
+            url = new URI("http://localhost:" + port + path).toURL();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
         var connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod(method);
         if (!BODYLESS.contains(method)) connection.setDoOutput(true);

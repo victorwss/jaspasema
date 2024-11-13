@@ -68,7 +68,7 @@ public @interface UriPart {
      * The class that is responsible for processing the {@link UriPart} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<UriPart> {
+    public static final class Processor implements ParamProcessor<UriPart> {
 
         private static final String JS_TEMPLATE = "__targetUrl = __targetUrl.replace(':$PARAM$', encodeURI($JS$));";
 
@@ -101,7 +101,7 @@ public @interface UriPart {
 
         @NonNull
         private static boolean containsPart(@NonNull String parts, @NonNull String part) {
-            var z = ":" + part;
+            var z = "{" + part + "}";
             return Stream.of(parts.split("/")).anyMatch(z::equals);
         }
     }

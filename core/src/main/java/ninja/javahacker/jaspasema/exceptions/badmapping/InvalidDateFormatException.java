@@ -34,7 +34,7 @@ public class InvalidDateFormatException extends BadServiceMappingException {
     private final String format;
 
     /**
-     * Constructs an instance specifiying a method as the cause of this exception.
+     * Constructs an instance specifying a method as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param annotation What was the annotation that specifies an invalid date/time format.
      * @param format What was the invalid date/time format.
@@ -51,7 +51,7 @@ public class InvalidDateFormatException extends BadServiceMappingException {
     }
 
     /**
-     * Constructs an instance specifiying a method parameter as the cause of this exception.
+     * Constructs an instance specifying a method parameter as the cause of this exception.
      * @param parameter The method parameter that is related to this exception.
      * @param annotation What was the annotation that specifies an invalid date/time format.
      * @param format What was the invalid date/time format.

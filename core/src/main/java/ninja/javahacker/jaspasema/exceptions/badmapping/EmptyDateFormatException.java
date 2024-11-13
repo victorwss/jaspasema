@@ -31,7 +31,7 @@ public class EmptyDateFormatException extends BadServiceMappingException {
     private final Class<? extends Annotation> annotation;
 
     /**
-     * Constructs an instance specifiying a method as the cause of this exception.
+     * Constructs an instance specifying a method as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param annotation What was the annotation that is missing the date/time format.
      * @throws IllegalArgumentException If {@code method} or {@code annotation} are {@code null}.
@@ -45,7 +45,7 @@ public class EmptyDateFormatException extends BadServiceMappingException {
     }
 
     /**
-     * Constructs an instance specifiying a method parameter as the cause of this exception.
+     * Constructs an instance specifying a method parameter as the cause of this exception.
      * @param parameter The method parameter that is related to this exception.
      * @param annotation What was the annotation that is missing the date/time format.
      * @throws IllegalArgumentException If {@code parameter} or {@code annotation} are {@code null}.

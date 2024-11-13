@@ -52,7 +52,7 @@ public @interface ProducesJson {
      * The class that is responsible for processing the {@link ProducesJson} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ResultProcessor<ProducesJson, Object> {
+    public static final class Processor implements ResultProcessor<ProducesJson, Object> {
 
         /**
          * Sole constructor.
@@ -63,15 +63,15 @@ public @interface ProducesJson {
         /**
          * {@inheritDoc}
          * @param <E> {@inheritDoc}
-         * @param meth {@inheritDoc}
+         * @param annotated {@inheritDoc}
          * @return {@inheritDoc}
          * @throws BadServiceMappingException {@inheritDoc}
          */
         @NonNull
         @Override
-        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesJson, E> meth) throws BadServiceMappingException {
-            var method = meth.getMethod();
-            var annotation = meth.getAnnotation();
+        public <E> Stub<E> prepare(@NonNull AnnotatedMethod<ProducesJson, E> annotated) throws BadServiceMappingException {
+            var method = annotated.getMethod();
+            var annotation = annotated.getAnnotation();
             if (annotation.on() == ReturnedOk.class) ResultProcessor.rejectForVoid(method, ProducesJson.class);
             ResultProcessor.Worker<E> w = (ctx, v) -> {
                 ctx.result(toJson(method, v));

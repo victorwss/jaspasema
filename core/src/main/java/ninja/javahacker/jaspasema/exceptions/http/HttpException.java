@@ -29,7 +29,7 @@ public class HttpException extends JaspasemaException {
     private final int statusCode;
 
     /**
-     * Constructs an instance specifiying a method as the cause of this exception.
+     * Constructs an instance specifying a method as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param statusCode The HTTP status code for this exception.
      * @throws IllegalArgumentException If {@code method} is {@code null}.
@@ -40,7 +40,7 @@ public class HttpException extends JaspasemaException {
     }
 
     /**
-     * Constructs an instance specifiying both a method and another exception as the cause of this exception.
+     * Constructs an instance specifying both a method and another exception as the cause of this exception.
      * @param method The method that is related to this exception.
      * @param statusCode The HTTP status code for this exception.
      * @param cause Another exception that is the cause of this exception.

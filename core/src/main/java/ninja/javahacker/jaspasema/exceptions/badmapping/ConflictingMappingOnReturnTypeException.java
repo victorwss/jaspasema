@@ -14,7 +14,7 @@ public class ConflictingMappingOnReturnTypeException extends BadServiceMappingEx
     /**
      * Creates an instance specifying which is the offending method.
      * @param method The offending method.
-     * @throws IllegalArgumentException If {@link method} is {@code null}.
+     * @throws IllegalArgumentException If {@code method} is {@code null}.
      */
     public ConflictingMappingOnReturnTypeException(/*@NonNull*/ Method method) {
         super(method);

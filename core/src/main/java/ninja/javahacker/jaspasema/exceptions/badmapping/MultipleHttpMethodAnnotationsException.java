@@ -3,6 +3,7 @@ package ninja.javahacker.jaspasema.exceptions.badmapping;
 import java.lang.reflect.Method;
 
 /**
+ * Thrown when multiple HTTP-methods annotations are present in the same method, and only one should.
  * @author Victor Williams Stafusa da Silva
  */
 public class MultipleHttpMethodAnnotationsException extends BadServiceMappingException {
@@ -12,7 +13,7 @@ public class MultipleHttpMethodAnnotationsException extends BadServiceMappingExc
     /**
      * Creates an instance specifying which is the offending method.
      * @param method The offending method.
-     * @throws IllegalArgumentException If {@link method} is {@code null}.
+     * @throws IllegalArgumentException If {@code method} is {@code null}.
      */
     public MultipleHttpMethodAnnotationsException(/*@NonNull*/ Method method) {
         super(method);

@@ -83,7 +83,7 @@ public @interface QueryPart {
      * The class that is responsible for processing the {@link QueryPart} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<QueryPart> {
+    public static final class Processor implements ParamProcessor<QueryPart> {
 
         private static final String SINGULAR_JS_TEMPLATE = ""
                 + "__targetUrl += '&$PARAM$=' + encodeURI($JS$);";

@@ -77,7 +77,7 @@ public @interface HeaderParam {
      * The class that is responsible for processing the {@link HeaderParam} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<HeaderParam> {
+    public static final class Processor implements ParamProcessor<HeaderParam> {
 
         private static final String TEMPLATE = "__customHeaders.push({name: '#N#', value: #JS#});";
 

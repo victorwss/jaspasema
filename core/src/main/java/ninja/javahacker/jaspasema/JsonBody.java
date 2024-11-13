@@ -47,7 +47,7 @@ public @interface JsonBody {
     /**
      * The class that is responsible for processing the {@link JsonBody} annotation.
      */
-    public static class Processor implements ParamProcessor<JsonBody> {
+    public static final class Processor implements ParamProcessor<JsonBody> {
 
         private static final String REQUEST_TYPE = "requestType = 'application/json; charset=utf-8';";
 

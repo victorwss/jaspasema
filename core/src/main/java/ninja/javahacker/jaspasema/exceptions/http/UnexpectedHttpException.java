@@ -17,7 +17,7 @@ public class UnexpectedHttpException extends HttpException {
      * Creates an instance specifying which is the offending method and what was the raised error.
      * @param method The offending method.
      * @param cause The raised error.
-     * @throws IllegalArgumentException If {@link method} or {@link cause} are {@code null}.
+     * @throws IllegalArgumentException If {@code method} or {@code cause} are {@code null}.
      */
     public UnexpectedHttpException(/*@NonNull*/ Method method, /*@NonNull*/ Throwable cause) {
         super(method, 500, cause);

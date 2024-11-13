@@ -16,7 +16,7 @@ import ninja.javahacker.jaspasema.processor.ParamSource;
 
 /**
  * Denotes that the value of a method parameter should be read from a request header as
- * a JSON and the value desserialized as an object from that JSON.
+ * a JSON and the value deserialized as an object from that JSON.
  *
  * <p>For example:</p>
  * <pre>
@@ -73,7 +73,7 @@ public @interface HeaderJsonParam {
      * The class that is responsible for processing the {@link HeaderJsonParam} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<HeaderJsonParam> {
+    public static final class Processor implements ParamProcessor<HeaderJsonParam> {
 
         private static final String TEMPLATE = "__customHeaders.push({name: '#N#', value: #JS#});";
 

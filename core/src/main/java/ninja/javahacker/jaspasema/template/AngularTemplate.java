@@ -16,63 +16,65 @@ import ninja.javahacker.jaspasema.service.ServiceMethodBuilder;
 @Value
 public class AngularTemplate implements ApiTemplate {
 
-    private static final String API_TEMPLATE = ""
-            + "(function() {\n"
-            + "\n"
-            + "    'use strict';\n"
-            + "    var targetUrl = \"#URL#\";\n"
-            + "\n"
-            + "    var jsonCall = function(type, method, urlContinuation, data, customHeaders, requestType, $http) {\n"
-            + "        var headers = {};\n"
-            + "        headers['ContentType'] = requestType;\n"
-            + "        for (var ch in customHeaders) {\n"
-            + "            headers[customHeaders[ch].name] = customHeaders[ch].value;\n"
-            + "        }\n"
-            + "        var config = {\n"
-            + "            method: method,\n"
-            + "            url: targetUrl + urlContinuation,\n"
-            + "            data: data,\n"
-            + "            headers: headers\n"
-            + "        };\n"
-            + "        return $http(config)\n"
-            + "                .then(function(response) {\n"
-            + "                    return Promise.resolve(response.data);\n"
-            + "                }, function(response) {\n"
-            + "                    return Promise.reject({ msg: \"API Error: \" + urlContinuation, status: response.status });\n"
-            + "                });\n"
-            + "    };\n"
-            + "\n"
-            + "#SERVICES#"
-            + "})();";
+    private static final String API_TEMPLATE =
+            """
+            (function() {
+                "use strict";
+                const targetUrl = "#URL#";
 
-    private static final String FACTORY_TEMPLATE = ""
-            + "    angular\n"
-            + "        .module('#MODULE#')\n"
-            + "        .factory('#SERVICE_NAME#Service',#SERVICE_NAME#Service);\n"
-            + "\n"
-            + "    #SERVICE_NAME#Service.$inject = ['$http'];\n"
-            + "\n"
-            + "    function #SERVICE_NAME#Service($http){ \n"
-            + "        var service = {\n"
-            + "#METHODS_LIST#"
-            + "        };\n"
-            + "        return service;\n"
-            + "\n"
-            + "#IMPL_SERVICES#"
-            + "    }\n"
-            + "\n";
+                const jsonCall = function(type, method, urlContinuation, data, customHeaders, requestType, $http) {
+                    const headers = {};
+                    headers["ContentType"] = requestType;
+                    for (const ch in customHeaders) {
+                        headers[customHeaders[ch].name] = customHeaders[ch].value;
+                    }
+                    const config = {
+                        method: method,
+                        url: targetUrl + urlContinuation,
+                        data: data,
+                        headers: headers
+                    };
+                    return $http(config)
+                            .then(function(response) {
+                                return Promise.resolve(response.data);
+                            }, function(response) {
+                                return Promise.reject({ msg: "API Error: " + urlContinuation, status: response.status });
+                            });
+                };
 
-    private static final String METHOD_TEMPLATE = ""
-            + "    function #METHOD#(#DEFINE_PARAMETERS#) {\n"
-            + "        var __data = {};\n"
-            + "        var __requestType = 'text/plain; charset=utf-8';\n"
-            + "        var __customHeaders = [];\n"
-            + "        var __targetUrl = \"#PATH#\";\n"
-            + "#RECEIVE_PARAMETERS#"
-            + "#PRE_SEND_INSTRUCTIONS#"
-            + "        return jsonCall(\"#TYPE#\", \"#HTTP_METHOD#\", __targetUrl, __data, __customHeaders, __requestType, $http);\n"
-            + "    }\n"
-            + "\n";
+                #SERVICES#
+            })();
+            """;
+
+    private static final String FACTORY_TEMPLATE =
+            """
+            angular
+                .module("#MODULE#")
+                .factory("#SERVICE_NAME#Service", #SERVICE_NAME#Service);
+
+            #SERVICE_NAME#Service.$inject = ['$http'];
+
+            function #SERVICE_NAME#Service($http) {
+                const service = {
+                    #METHODS_LIST#
+                };
+                return service;
+            }
+
+            #IMPL_SERVICES#
+            """;
+
+    private static final String METHOD_TEMPLATE =
+            """
+            function #METHOD#(#DEFINE_PARAMETERS#) {
+                const __data = {};
+                const __requestType = 'text/plain; charset=utf-8';
+                const __customHeaders = [];
+                const __targetUrl = "#PATH#";
+                #RECEIVE_PARAMETERS##PRE_SEND_INSTRUCTIONS#
+                return jsonCall("#TYPE#", "#HTTP_METHOD#", __targetUrl, __data, __customHeaders, __requestType, $http);
+            }
+            """;
 
     @NonNull
     private Supplier<String> url;

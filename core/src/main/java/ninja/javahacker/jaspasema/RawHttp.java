@@ -1,12 +1,12 @@
 package ninja.javahacker.jaspasema;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import lombok.NonNull;
 import ninja.javahacker.jaspasema.exceptions.badmapping.AllowedTypes;
 import ninja.javahacker.jaspasema.exceptions.badmapping.BadServiceMappingException;
@@ -44,7 +44,7 @@ public @interface RawHttp {
      * The class that is responsible for processing the {@link RawHttp} annotation.
      * @author Victor Williams Stafusa da Silva
      */
-    public static class Processor implements ParamProcessor<RawHttp> {
+    public static final class Processor implements ParamProcessor<RawHttp> {
 
         private static final ReifiedGeneric<HttpServletRequest> RQ = ReifiedGeneric.of(HttpServletRequest.class);
         private static final ReifiedGeneric<HttpServletResponse> RP = ReifiedGeneric.of(HttpServletResponse.class);
@@ -75,9 +75,9 @@ public @interface RawHttp {
                 throws ParameterTypeRestrictionViolationException
         {
             var target = param.getTarget();
-            if (target.isSameOf(RQ)) return ctx -> (E) ctx.req;
-            if (target.isSameOf(RP)) return ctx -> (E) ctx.res;
-            if (target.isSameOf(SS)) return ctx -> (E) ctx.req.getSession(false);
+            if (target.isSameOf(RQ)) return ctx -> (E) ctx.req();
+            if (target.isSameOf(RP)) return ctx -> (E) ctx.res();
+            if (target.isSameOf(SS)) return ctx -> (E) ctx.req().getSession(false);
             throw new ParameterTypeRestrictionViolationException(param, AllowedTypes.HTTP);
         }
     }
